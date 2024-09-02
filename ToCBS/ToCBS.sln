@@ -29,7 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FfuStream", "FfuStream\FfuS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToCBSFfuNoPool", "ToCBSFfuNoPool\ToCBSFfuNoPool.csproj", "{24BB7DD1-90B8-4048-9D2A-303A77338768}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CbsToReg", "CbsToReg\CbsToReg.csproj", "{8C0A8B8C-F58A-4F08-88CA-47521AE6CA21}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CbsToReg", "CbsToReg\CbsToReg.csproj", "{8C0A8B8C-F58A-4F08-88CA-47521AE6CA21}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

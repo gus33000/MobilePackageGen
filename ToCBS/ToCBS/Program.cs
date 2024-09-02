@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace ToCBS
 {
@@ -18,7 +21,23 @@ namespace ToCBS
                 return;
             }
 
-            CBSBuilder.BuildCBS(args[..^1], args[^1]);
+            Console.WriteLine("Getting Disks...");
+
+            List<Disk> disks = GetDisks(args[..^1]);
+
+            CBSBuilder.BuildCBS(disks, args[^1]);
+        }
+
+        private static List<Disk> GetDisks(string[] paths)
+        {
+            List<Disk> disks = new();
+
+            foreach (string path in paths)
+            {
+                disks.Add(new Disk(path)); // Hardcoded, todo
+            }
+
+            return disks;
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using DiscUtils.Partitions;
-using DiscUtils;
+﻿using DiscUtils;
 using Microsoft.Deployment.Compression.Cab;
 using Microsoft.Deployment.Compression;
 using System;
@@ -7,27 +6,22 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
-using DiscUtils.Streams;
 using ToCBS.Wof;
-using SevenZipExtractor;
-using Archives.DiscUtils;
-using FfuStream;
 
 namespace ToCBS
 {
     internal class CBSBuilder
     {
-        private static List<CabinetFileInfo> GetCabinetFileInfoForCbsPackage(XmlMum.Assembly cbs, IFileSystem fileSystem, List<PartitionInfo> partitions)
+        private static List<CabinetFileInfo> GetCabinetFileInfoForCbsPackage(XmlMum.Assembly cbs, Partition partition, List<Disk> disks)
         {
             List<CabinetFileInfo> fileMappings = new();
+
+            IFileSystem fileSystem = partition.FileSystem;
 
             string packages_path = @"Windows\servicing\Packages";
             string winsxs_manifests_path = @"Windows\WinSxS\Manifests";
 
             string packageName = $"{cbs.AssemblyIdentity.Name}~{cbs.AssemblyIdentity.PublicKeyToken}~{cbs.AssemblyIdentity.ProcessorArchitecture}~{(cbs.AssemblyIdentity.Language == "neutral" ? "" : cbs.AssemblyIdentity.Language)}~{cbs.AssemblyIdentity.Version}";
-
-            string componentStatus = $"Processing {packageName} - Analyzing Package Files";
-            Console.WriteLine(componentStatus);
 
             int i = 0;
 
@@ -124,22 +118,30 @@ namespace ToCBS
                 // If we end in bin, and the package is marked binary partition, this is a partition on one of the device disks, retrieve it
                 if (normalized.EndsWith(".bin") && cbs.Package.BinaryPartition.ToLower() == "true")
                 {
-                    foreach (PartitionInfo element in partitions)
+                    foreach (Disk disk in disks)
                     {
-                        if (element.VolumeType == PhysicalVolumeType.GptPartition)
+                        bool done = false;
+
+                        foreach (Partition diskPartition in disk.Partitions)
                         {
-                            GuidPartitionInfo guidPartitionInfo = (GuidPartitionInfo)element;
-                            if (guidPartitionInfo.Name.Equals(cbs.Package.TargetPartition, StringComparison.InvariantCultureIgnoreCase))
+                            if (diskPartition.Name.Equals(cbs.Package.TargetPartition, StringComparison.InvariantCultureIgnoreCase))
                             {
+                                done = true;
+
                                 cabinetFileInfo = new CabinetFileInfo()
                                 {
                                     FileName = packageFile.Cabpath,
-                                    FileStream = new Substream(element.Open(), long.Parse(packageFile.Size)),
+                                    FileStream = new Substream(diskPartition.Stream, long.Parse(packageFile.Size)),
                                     Attributes = FileAttributes.Normal,
                                     DateTime = DateTime.Now
                                 };
                                 break;
                             }
+                        }
+
+                        if (done)
+                        {
+                            break;
                         }
                     }
                 }
@@ -147,173 +149,48 @@ namespace ToCBS
                 {
                     if (!fileSystem.FileExists(normalized))
                     {
-                        if (normalized.StartsWith("data\\", StringComparison.InvariantCultureIgnoreCase))
+                        string[] partitionNamesWithLinks = new string[] { "data", "efiesp", "osdata", "dpp", "mmos" };
+
+                        foreach (string partitionNameWithLink in partitionNamesWithLinks)
                         {
-                            foreach (PartitionInfo partition in partitions)
+                            if (normalized.StartsWith(partitionNameWithLink + "\\", StringComparison.InvariantCultureIgnoreCase))
                             {
-                                if (partition.VolumeType == PhysicalVolumeType.GptPartition)
+                                foreach (Disk disk in disks)
                                 {
-                                    GuidPartitionInfo guidPartitionInfo = (GuidPartitionInfo)partition;
+                                    bool done = false;
 
-                                    if (guidPartitionInfo.Name.Equals("data", StringComparison.InvariantCultureIgnoreCase))
+                                    foreach (Partition diskPartition in disk.Partitions)
                                     {
-                                        SparseStream partitionStream = partition.Open();
-
-                                        IFileSystem? fileSystemData = TryCreateFileSystem(partitionStream);
-
-                                        if (fileSystemData == null)
+                                        if (diskPartition.Name.Equals(partitionNameWithLink, StringComparison.InvariantCultureIgnoreCase))
                                         {
-                                            partitionStream.Dispose();
+                                            done = true;
+
+                                            IFileSystem? fileSystemData = diskPartition.FileSystem;
+
+                                            if (fileSystemData == null)
+                                            {
+                                                break;
+                                            }
+
+                                            cabinetFileInfo = new CabinetFileInfo()
+                                            {
+                                                FileName = packageFile.Cabpath,
+                                                FileStream = fileSystemData.OpenFileAndDecompressIfNeeded(normalized[5..]),
+                                                Attributes = fileSystemData.GetAttributes(normalized[5..]) & ~FileAttributes.ReparsePoint,
+                                                DateTime = fileSystemData.GetLastWriteTime(normalized[5..])
+                                            };
+
                                             break;
                                         }
+                                    }
 
-                                        cabinetFileInfo = new CabinetFileInfo()
-                                        {
-                                            FileName = packageFile.Cabpath,
-                                            FileStream = fileSystemData.OpenFileAndDecompressIfNeeded(normalized[5..]),
-                                            Attributes = fileSystemData.GetAttributes(normalized[5..]) & ~FileAttributes.ReparsePoint,
-                                            DateTime = fileSystemData.GetLastWriteTime(normalized[5..])
-                                        };
-
+                                    if (done)
+                                    {
                                         break;
                                     }
                                 }
-                            }
-                        }
 
-                        if (normalized.StartsWith("efiesp\\", StringComparison.InvariantCultureIgnoreCase))
-                        {
-                            foreach (PartitionInfo partition in partitions)
-                            {
-                                if (partition.VolumeType == PhysicalVolumeType.GptPartition)
-                                {
-                                    GuidPartitionInfo guidPartitionInfo = (GuidPartitionInfo)partition;
-
-                                    if (guidPartitionInfo.Name.Equals("efiesp", StringComparison.InvariantCultureIgnoreCase))
-                                    {
-                                        SparseStream partitionStream = partition.Open();
-
-                                        IFileSystem? fileSystemData = TryCreateFileSystem(partitionStream);
-
-                                        if (fileSystemData == null)
-                                        {
-                                            partitionStream.Dispose();
-                                            break;
-                                        }
-
-                                        cabinetFileInfo = new CabinetFileInfo()
-                                        {
-                                            FileName = packageFile.Cabpath,
-                                            FileStream = fileSystemData.OpenFileAndDecompressIfNeeded(normalized[5..]),
-                                            Attributes = fileSystemData.GetAttributes(normalized[5..]) & ~FileAttributes.ReparsePoint,
-                                            DateTime = fileSystemData.GetLastWriteTime(normalized[5..])
-                                        };
-
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-
-                        if (normalized.StartsWith("osdata\\", StringComparison.InvariantCultureIgnoreCase))
-                        {
-                            foreach (PartitionInfo partition in partitions)
-                            {
-                                if (partition.VolumeType == PhysicalVolumeType.GptPartition)
-                                {
-                                    GuidPartitionInfo guidPartitionInfo = (GuidPartitionInfo)partition;
-
-                                    if (guidPartitionInfo.Name.Equals("osdata", StringComparison.InvariantCultureIgnoreCase))
-                                    {
-                                        SparseStream partitionStream = partition.Open();
-
-                                        IFileSystem? fileSystemData = TryCreateFileSystem(partitionStream);
-
-                                        if (fileSystemData == null)
-                                        {
-                                            partitionStream.Dispose();
-                                            break;
-                                        }
-
-                                        cabinetFileInfo = new CabinetFileInfo()
-                                        {
-                                            FileName = packageFile.Cabpath,
-                                            FileStream = fileSystemData.OpenFileAndDecompressIfNeeded(normalized[5..]),
-                                            Attributes = fileSystemData.GetAttributes(normalized[5..]) & ~FileAttributes.ReparsePoint,
-                                            DateTime = fileSystemData.GetLastWriteTime(normalized[5..])
-                                        };
-
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-
-                        if (normalized.StartsWith("dpp\\", StringComparison.InvariantCultureIgnoreCase))
-                        {
-                            foreach (PartitionInfo partition in partitions)
-                            {
-                                if (partition.VolumeType == PhysicalVolumeType.GptPartition)
-                                {
-                                    GuidPartitionInfo guidPartitionInfo = (GuidPartitionInfo)partition;
-
-                                    if (guidPartitionInfo.Name.Equals("dpp", StringComparison.InvariantCultureIgnoreCase))
-                                    {
-                                        SparseStream partitionStream = partition.Open();
-
-                                        IFileSystem? fileSystemData = TryCreateFileSystem(partitionStream);
-
-                                        if (fileSystemData == null)
-                                        {
-                                            partitionStream.Dispose();
-                                            break;
-                                        }
-
-                                        cabinetFileInfo = new CabinetFileInfo()
-                                        {
-                                            FileName = packageFile.Cabpath,
-                                            FileStream = fileSystemData.OpenFileAndDecompressIfNeeded(normalized[5..]),
-                                            Attributes = fileSystemData.GetAttributes(normalized[5..]) & ~FileAttributes.ReparsePoint,
-                                            DateTime = fileSystemData.GetLastWriteTime(normalized[5..])
-                                        };
-
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-
-                        if (normalized.StartsWith("mmos\\", StringComparison.InvariantCultureIgnoreCase))
-                        {
-                            foreach (PartitionInfo partition in partitions)
-                            {
-                                if (partition.VolumeType == PhysicalVolumeType.GptPartition)
-                                {
-                                    GuidPartitionInfo guidPartitionInfo = (GuidPartitionInfo)partition;
-
-                                    if (guidPartitionInfo.Name.Equals("mmos", StringComparison.InvariantCultureIgnoreCase))
-                                    {
-                                        SparseStream partitionStream = partition.Open();
-
-                                        IFileSystem? fileSystemData = TryCreateFileSystem(partitionStream);
-
-                                        if (fileSystemData == null)
-                                        {
-                                            partitionStream.Dispose();
-                                            break;
-                                        }
-
-                                        cabinetFileInfo = new CabinetFileInfo()
-                                        {
-                                            FileName = packageFile.Cabpath,
-                                            FileStream = fileSystemData.OpenFileAndDecompressIfNeeded(normalized[5..]),
-                                            Attributes = fileSystemData.GetAttributes(normalized[5..]) & ~FileAttributes.ReparsePoint,
-                                            DateTime = fileSystemData.GetLastWriteTime(normalized[5..])
-                                        };
-
-                                        break;
-                                    }
-                                }
+                                break;
                             }
                         }
                     }
@@ -335,241 +212,149 @@ namespace ToCBS
                 }
                 else
                 {
+                    Console.WriteLine($"Error: File not found! {normalized}");
                     //throw new FileNotFoundException(normalized);
                 }
             }
 
-            Console.WriteLine($"\r{GetDismLikeProgBar(100)}");
-
             return fileMappings;
         }
 
-        public static void BuildCBS(string ffuPath, string destination_path)
+        public static void BuildCBS(List<Disk> disks, string destination_path)
         {
-            Dictionary<string, IList<CabinetFileInfo>> packages = BuildPackageListFromLiveFileSystem(ffuPath);
-            BuildCabinets(packages, destination_path);
+            Console.WriteLine("Getting Update OS Disks...");
+
+            disks.AddRange(Disk.GetUpdateOSDisks(disks));
+
+            Console.WriteLine();
+            Console.WriteLine("Found Disks:");
+            Console.WriteLine();
+
+            foreach (Disk disk in disks)
+            {
+                foreach (Partition partition in disk.Partitions)
+                {
+                    if (partition.FileSystem != null)
+                    {
+                        Console.WriteLine($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} KnownFS");
+                    }
+                }
+            }
+
+            Console.WriteLine();
+
+            foreach (Disk disk in disks)
+            {
+                foreach (Partition partition in disk.Partitions)
+                {
+                    if (partition.FileSystem == null)
+                    {
+                        Console.WriteLine($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} UnknownFS");
+                    }
+                }
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("Building CBS Cabinet Files...");
+            Console.WriteLine();
+
+            BuildCabinets(disks, destination_path);
+
+            Console.WriteLine();
+            Console.WriteLine("Cleaning up...");
+            Console.WriteLine();
 
             TempManager.CleanupTempFiles();
+
             Console.WriteLine("The operation completed successfully.");
         }
 
-        private static List<PartitionInfo> GetPartitions(string ffuPath)
+        private static List<Partition> GetPartitionsWithServicing(List<Disk> disks)
         {
-            List<PartitionInfo> partitions = new();
+            List<Partition> fileSystemsWithServicing = new();
 
-            FileStream ffuStream = File.OpenRead(ffuPath);
-            FfuFile ffuFile = new(ffuStream);
-
-            for (int i = 0; i < ffuFile.StoreCount; i++)
+            foreach (Disk disk in disks)
             {
-                bool hasOsPool = false;
-
-                long diskCapacity = (long)ffuFile.GetMinSectorCount(i) * ffuFile.GetSectorSize(i);
-                VirtualDisk virtualDisk = new DiscUtils.Raw.Disk(ffuFile.OpenStore(i), Ownership.None, Geometry.FromCapacity(diskCapacity, (int)ffuFile.GetSectorSize(i)));
-                //VirtualDisk virtualDisk = new DiscUtils.Raw.Disk(vhdx, FileAccess.Read);
-
-                PartitionTable partitionTable = virtualDisk.Partitions;
-
-                if (partitionTable != null)
+                foreach (Partition partition in disk.Partitions)
                 {
-                    foreach (PartitionInfo sspartition in partitionTable.Partitions)
+                    IFileSystem? fileSystem = partition.FileSystem;
+
+                    if (fileSystem != null)
                     {
-                        partitions.Add(sspartition);
-                        if (sspartition.GuidType == new Guid("E75CAF8F-F680-4CEE-AFA3-B001E56EFC2D"))
+                        try
                         {
-                            hasOsPool = true;
-                        }
-                    }
-                }
-
-                if (hasOsPool)
-                {
-                    throw new Exception("Image contains an OSPool which is unsupported by this program!");
-                }
-            }
-
-            return partitions;
-        }
-
-        private static IFileSystem? TryCreateFileSystem(SparseStream partitionStream)
-        {
-            try
-            {
-                partitionStream.Seek(0, SeekOrigin.Begin);
-                if (DiscUtils.Ntfs.NtfsFileSystem.Detect(partitionStream))
-                {
-                    partitionStream.Seek(0, SeekOrigin.Begin);
-                    return new DiscUtils.Ntfs.NtfsFileSystem(partitionStream);
-                }
-            }
-            catch
-            {
-            }
-
-            try
-            {
-                // DiscUtils fat implementation is a bit broken, on top of not supporting lfn (which we know how to fix)
-                // It also fails to find the last chunk on some known partitions (like PLAT)
-                // As a result, we use a bridge file system making use of 7z, it's slower, but it's the best we can do for now
-
-                partitionStream.Seek(0x36, SeekOrigin.Begin);
-                byte[] buf = new byte[3];
-                partitionStream.Read(buf, 0, 3);
-                if (buf[0] == 0x46 && buf[1] == 0x41 && buf[2] == 0x54)
-                {
-                    partitionStream.Seek(0, SeekOrigin.Begin);
-                    return new ArchiveBridge(partitionStream, SevenZipFormat.Fat);
-                }
-            }
-            catch
-            {
-
-            }
-
-            return null;
-        }
-
-        private static Dictionary<string, IFileSystem> GetFileSystemsWithServicing(List<PartitionInfo> partitions)
-        {
-            Dictionary<string, IFileSystem> fileSystemsWithServicing = new();
-
-            int c = 0;
-            Console.WriteLine("GetFileSystemsWithServicing: Total: " + partitions.Count);
-            foreach (PartitionInfo partitionInfo in partitions)
-            {
-                Console.WriteLine("GetFileSystemsWithServicing: " + c++ + " " + ((GuidPartitionInfo)partitionInfo).Name);
-                SparseStream partitionStream = partitionInfo.Open();
-
-                bool hasOneFileSystemOk = false;
-
-                IFileSystem? fileSystem = TryCreateFileSystem(partitionStream);
-
-                if (fileSystem == null)
-                {
-                    partitionStream.Dispose();
-                    continue;
-                }
-
-                try
-                {
-                    if (fileSystem.DirectoryExists(@"Windows\Servicing\Packages"))
-                    {
-                        Console.WriteLine("GetFileSystemsWithServicing: Adding " + ((GuidPartitionInfo)partitionInfo).Name + " at " + fileSystemsWithServicing.Count);
-                        fileSystemsWithServicing.Add(((GuidPartitionInfo)partitionInfo).Name, fileSystem);
-                        hasOneFileSystemOk = true;
-                    }
-
-                    // Handle UpdateOS as well if found
-                    if (fileSystem.FileExists("PROGRAMS\\UpdateOS\\UpdateOS.wim"))
-                    {
-                        Stream wimStream = fileSystem.OpenFileAndDecompressIfNeeded("PROGRAMS\\UpdateOS\\UpdateOS.wim");
-                        DiscUtils.Wim.WimFile wimFile = new(wimStream);
-
-                        bool hasOneWimFileSystemOk = false;
-
-                        for (int i = 0; i < wimFile.ImageCount; i++)
-                        {
-                            IFileSystem wimFileSystem = wimFile.GetImage(i);
-                            if (wimFileSystem.DirectoryExists(@"Windows\Servicing\Packages"))
+                            if (fileSystem.DirectoryExists(@"Windows\Servicing\Packages"))
                             {
-                                Console.WriteLine("GetFileSystemsWithServicing: Adding " + ((GuidPartitionInfo)partitionInfo).Name + "'s UPDATEOS.wim at " + fileSystemsWithServicing.Count);
-                                fileSystemsWithServicing.Add(((GuidPartitionInfo)partitionInfo).Name + "-UpdateOS", wimFileSystem);
-                                hasOneWimFileSystemOk = true;
-                                hasOneFileSystemOk = true;
+                                fileSystemsWithServicing.Add(partition);
                             }
                         }
-
-                        if (!hasOneWimFileSystemOk)
+                        catch
                         {
-                            wimStream.Dispose();
+
                         }
                     }
-                }
-                catch
-                {
-
-                }
-
-                if (!hasOneFileSystemOk)
-                {
-                    partitionStream.Dispose();
                 }
             }
 
             return fileSystemsWithServicing;
         }
 
-        private static Dictionary<string, IList<CabinetFileInfo>> BuildPackageListFromLiveFileSystem(string ffuPath)
+        private static int GetPackageCount(List<Disk> disks)
         {
-            Dictionary<string, IList<CabinetFileInfo>> packages = new();
+            int count = 0;
 
-            Console.WriteLine("GetPartitions: Start");
-            List<PartitionInfo> partitions = GetPartitions(ffuPath);
-            Console.WriteLine("GetPartitions: End");
-            Console.WriteLine("GetFileSystemsWithServicing: Start");
-            Dictionary<string, IFileSystem> fileSystemsWithServicing = GetFileSystemsWithServicing(partitions);
-            Console.WriteLine("GetFileSystemsWithServicing: End");
+            List<Partition> partitionsWithCbsServicing = GetPartitionsWithServicing(disks);
 
-            foreach (var dictEl in fileSystemsWithServicing)
+            foreach (Partition partition in partitionsWithCbsServicing)
             {
-                IFileSystem fileSystem = dictEl.Value;
-                Console.WriteLine("NEW FILE SYSTEM: " + dictEl.Key);
+                IFileSystem fileSystem = partition.FileSystem;
 
                 IEnumerable<string> manifestFiles = fileSystem.GetFiles(@"Windows\servicing\Packages", "*.mum", SearchOption.TopDirectoryOnly);
 
-                int packagesCount = manifestFiles.Count();
-                for (int i = 0; i < packagesCount; i++)
+                count += manifestFiles.Count();
+            }
+
+            return count;
+        }
+
+        private static void BuildCabinets(List<Disk> disks, string outputPath)
+        {
+            int packagesCount = GetPackageCount(disks);
+
+            List<Partition> partitionsWithCbsServicing = GetPartitionsWithServicing(disks);
+
+            int i = 0;
+
+            foreach (Partition partition in partitionsWithCbsServicing)
+            {
+                IFileSystem fileSystem = partition.FileSystem;
+
+                IEnumerable<string> manifestFiles = fileSystem.GetFiles(@"Windows\servicing\Packages", "*.mum", SearchOption.TopDirectoryOnly);
+
+                foreach (string manifestFile in manifestFiles)
                 {
                     try
                     {
-                        string manifestFile = manifestFiles.ElementAt(i);
-                        Console.WriteLine("Processing: " + manifestFile);
                         Stream stream = fileSystem.OpenFileAndDecompressIfNeeded(manifestFile);
                         XmlSerializer serializer = new(typeof(XmlMum.Assembly));
                         XmlMum.Assembly cbs = (XmlMum.Assembly)serializer.Deserialize(stream);
 
-                        List<CabinetFileInfo> fileMappings = GetCabinetFileInfoForCbsPackage(cbs, fileSystem, partitions);
-
                         string packageName = $"{cbs.AssemblyIdentity.Name.Replace($"_{cbs.AssemblyIdentity.Language}", "", StringComparison.InvariantCultureIgnoreCase)}";
+
                         if (!packageName.Contains("InboxCompDB"))
                         {
                             packageName = $"{packageName}~{cbs.AssemblyIdentity.PublicKeyToken.Replace("628844477771337a", "31bf3856ad364e35", StringComparison.InvariantCultureIgnoreCase)}~{cbs.AssemblyIdentity.ProcessorArchitecture}~{(cbs.AssemblyIdentity.Language == "neutral" ? "" : cbs.AssemblyIdentity.Language)}~";
                         }
 
-                        packages.Add(Path.Combine(dictEl.Key, packageName), fileMappings);
-                        Console.WriteLine("Processing Complete: " + manifestFile);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex);
-                        throw;
-                    }
-                }
-            }
+                        string cabFileName = Path.Combine(partition.Name, packageName);
 
-            return packages;
-        }
+                        string cabFile = Path.Combine(outputPath, $"{cabFileName}.cab");
+                        if (Path.GetDirectoryName(cabFile) is string directory && !Directory.Exists(directory))
+                        {
+                            Directory.CreateDirectory(directory);
+                        }
 
-        private static void BuildCabinets(Dictionary<string, IList<CabinetFileInfo>> packages, string outputPath)
-        {
-            int packagesCount = packages.Count();
-            for (int i = 0; i < packagesCount; i++)
-            {
-                KeyValuePair<string, IList<CabinetFileInfo>> package = packages.ElementAt(i);
-                string packageName = package.Key;
-                IList<CabinetFileInfo> fileMappings = package.Value;
-
-                string cabFile = Path.Combine(outputPath, $"{packageName}.cab");
-                if (Path.GetDirectoryName(cabFile) is string directory && !Directory.Exists(directory))
-                {
-                    Directory.CreateDirectory(directory);
-                }
-
-                if (!File.Exists(cabFile))
-                {
-                    try
-                    {
-                        string componentStatus = $"Processing {i + 1} of {packagesCount} - Creating package {packageName}";
+                        string componentStatus = $"Processing {i + 1} of {packagesCount} - Creating package {cabFileName}";
                         if (componentStatus.Length > Console.BufferWidth - 1)
                         {
                             componentStatus = $"{componentStatus[..(Console.BufferWidth - 4)]}...";
@@ -577,18 +362,29 @@ namespace ToCBS
 
                         Console.WriteLine(componentStatus);
 
-                        int oldPercentage = -1;
-                        CabInfo cab = new(cabFile);
-                        cab.PackFiles(null, fileMappings.Select(x => x.GetFileTuple()).ToArray(), fileMappings.Select(x => x.FileName).ToArray(), CompressionLevel.Min, (object sender, ArchiveProgressEventArgs archiveProgressEventArgs) =>
+                        if (!File.Exists(cabFile))
                         {
-                            int percentage = archiveProgressEventArgs.CurrentFileNumber * 100 / archiveProgressEventArgs.TotalFiles;
-                            if (percentage != oldPercentage)
+                            List<CabinetFileInfo> fileMappings = GetCabinetFileInfoForCbsPackage(cbs, partition, disks);
+
+                            int oldPercentage = -1;
+                            CabInfo cab = new(cabFile);
+                            cab.PackFiles(null, fileMappings.Select(x => x.GetFileTuple()).ToArray(), fileMappings.Select(x => x.FileName).ToArray(), CompressionLevel.Min, (object sender, ArchiveProgressEventArgs archiveProgressEventArgs) =>
                             {
-                                oldPercentage = percentage;
-                                string progressBarString = GetDismLikeProgBar(percentage);
-                                Console.Write($"\r{progressBarString}");
+                                int percentage = archiveProgressEventArgs.CurrentFileNumber * 100 / archiveProgressEventArgs.TotalFiles;
+                                if (percentage != oldPercentage)
+                                {
+                                    oldPercentage = percentage;
+                                    string progressBarString = GetDismLikeProgBar(percentage);
+                                    Console.Write($"\r{progressBarString}");
+                                }
+                            });
+
+
+                            foreach (CabinetFileInfo fileMapping in fileMappings)
+                            {
+                                fileMapping.FileStream.Close();
                             }
-                        });
+                        }
 
                         if (i != packagesCount - 1)
                         {
@@ -600,26 +396,14 @@ namespace ToCBS
                         {
                             Console.WriteLine($"\r{GetDismLikeProgBar(100)}");
                         }
+
+                        i++;
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Error: CAB creation failed! {ex.Message}");
                         //throw;
                     }
-                }
-
-                foreach (CabinetFileInfo fileMapping in fileMappings)
-                {
-                    fileMapping.FileStream.Close();
-                }
-            }
-
-            foreach (KeyValuePair<string, IList<CabinetFileInfo>> package in packages)
-            {
-                IList<CabinetFileInfo> fileMappings = package.Value;
-                foreach (CabinetFileInfo fileMapping in fileMappings)
-                {
-                    fileMapping.FileStream.Close();
                 }
             }
         }

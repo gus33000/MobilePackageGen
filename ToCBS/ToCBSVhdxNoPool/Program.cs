@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -26,7 +27,23 @@ namespace ToCBS
                 vhds = Directory.EnumerateFiles(vhds[0], "*.vhdx", SearchOption.TopDirectoryOnly).ToArray();
             }
 
-            CBSBuilder.BuildCBS(vhds, args[^1]);
+            Console.WriteLine("Getting Disks...");
+
+            List<Disk> disks = GetDisks(vhds);
+
+            CBSBuilder.BuildCBS(disks, args[^1]);
+        }
+
+        private static List<Disk> GetDisks(string[] vhdxs)
+        {
+            List<Disk> disks = new();
+
+            foreach (string vhdx in vhdxs)
+            {
+                disks.Add(new Disk(vhdx, 4096)); // Hardcoded, todo
+            }
+
+            return disks;
         }
     }
 }
