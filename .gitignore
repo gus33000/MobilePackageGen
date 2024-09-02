@@ -395,3 +395,8 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+
+!ToCBS/Archives.DiscUtils/ARM64/*.dll
+!ToCBS/Archives.DiscUtils/x64/*.dll
+!ToCBS/Archives.DiscUtils/x86/*.dll
