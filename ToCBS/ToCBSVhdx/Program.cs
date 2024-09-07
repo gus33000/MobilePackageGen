@@ -40,7 +40,7 @@ namespace ToCBS
 
             foreach (string vhdx in vhdxs)
             {
-                disks.Add(new Disk(vhdx, 4096)); // Hardcoded, todo
+                disks.Add(new Disk(vhdx, 512)); // Hardcoded, todo
             }
 
             return disks;
