@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using ToCBS.Wof;
-using FfuStream;
+using Img2Ffu.Reader;
 
 namespace ToCBS
 {
@@ -95,16 +95,13 @@ namespace ToCBS
         private static List<PartitionInfo> GetPartitions(string ffuPath)
         {
             List<PartitionInfo> partitions = new();
-
-            FileStream ffuStream = File.OpenRead(ffuPath);
-            FfuFile ffuFile = new(ffuStream);
-
-            for (int i = 0; i < ffuFile.StoreCount; i++)
+            for (int i = 0; i < FullFlashUpdateReaderStream.GetStoreCount(ffuPath); i++)
             {
+                using FullFlashUpdateReaderStream store = new(ffuPath, (ulong)i);
                 bool hasOsPool = false;
 
-                long diskCapacity = (long)ffuFile.GetMinSectorCount(i) * ffuFile.GetSectorSize(i);
-                VirtualDisk virtualDisk = new DiscUtils.Raw.Disk(ffuFile.OpenStore(i), Ownership.None, Geometry.FromCapacity(diskCapacity, (int)ffuFile.GetSectorSize(i)));
+                long diskCapacity = (long)store.Length;
+                VirtualDisk virtualDisk = new DiscUtils.Raw.Disk(store, Ownership.None, Geometry.FromCapacity(diskCapacity, (int)store.SectorSize));
 
                 PartitionTable partitionTable = virtualDisk.Partitions;
 
