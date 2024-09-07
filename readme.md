@@ -77,14 +77,25 @@ BACKUP_TZAPPS 22a5b95c-9d0a-4977-b1dc-43122f0d202b a3381699-350c-465e-bd5d-fa3ab
 
 Building CBS Cabinet Files...
 
-Processing 139 of 257 - Creating package MainOS\Microsoft.MobileCore.Prod.MainOS~31bf3856ad364e35~arm~~
-[============================74%============               ]
+Processing 257 of 257 - Creating package MainOS-UpdateOS-0\OEM.HalExtensions.UpdateOS~31bf3856ad364e35~arm~~
+[===========================100%===========================]
+
+Cleaning up...
+
+The operation completed successfully.
 ```
 
 ### Result
 
 ```batch
 C:.
+├───Data
+│       Microsoft.MS_RETAILDEMOCONTENT.Data~31bf3856ad364e35~arm~~.cab
+│       Microsoft.MS_RETAILDEMOCONTENT_EN-US.Data~31bf3856ad364e35~arm~~.cab
+│       Microsoft.MS_RETAILDEMOCONTENT_FR-CA.Data~31bf3856ad364e35~arm~~.cab
+│       MMO.CITYMAN_LTE_ROW_DSDS.Customizations.VariantApps.Data~31bf3856ad364e35~arm~~.cab
+│       MMO.Media_RetailDemo.RM-1116_CA_US_MV~31bf3856ad364e35~arm~~.cab
+│
 ├───EFIESP
 │       Microsoft.EFIESP.Production~31bf3856ad364e35~arm~~.cab
 │       Microsoft.MobileCore.Prod.EFIESP~31bf3856ad364e35~arm~~.cab
@@ -222,6 +233,122 @@ C:.
 │       Microsoft.MainOS.Production_LANG~31bf3856ad364e35~arm~zh-tw~.cab
 │       Microsoft.MainOS.Production_RES_1440x2560~31bf3856ad364e35~arm~~.cab
 │       Microsoft.MainOS.Production~31bf3856ad364e35~arm~~.cab
+│       Microsoft.MobileCore.Prod.MainOS~31bf3856ad364e35~arm~~.cab
+│       Microsoft.MS_16GBFeaturesOnSystem.MainOS~31bf3856ad364e35~arm~~.cab
+│       Microsoft.MS_BOOTSEQUENCE_RETAIL.MainOS~31bf3856ad364e35~arm~~.cab
+│       Microsoft.MS_COMMSENHANCEMENTGLOBAL.MainOS~31bf3856ad364e35~arm~~.cab
+│       Microsoft.MS_COMMSMESSAGINGGLOBAL.MainOS~31bf3856ad364e35~arm~~.cab
+│       Microsoft.MS_DOCKING.MainOS~31bf3856ad364e35~arm~~.cab
+│       Microsoft.MS_FACEBOOK.MainOS~31bf3856ad364e35~arm~~.cab
+│       Microsoft.MS_NAVIGATIONBAR.MainOS~31bf3856ad364e35~arm~~.cab
+│       Microsoft.MS_OPTIMIZED_BOOT.MainOS~31bf3856ad364e35~arm~~.cab
+│       Microsoft.MS_RCS_FEATURE_PACK.MainOS~31bf3856ad364e35~arm~~.cab
+│       Microsoft.MS_RESET_PROTECTION.MainOS~31bf3856ad364e35~arm~~.cab
+│       Microsoft.MS_RETAILDEMOCONTENT.MainOS~31bf3856ad364e35~arm~~.cab
+│       Microsoft.MS_RETAILDEMOCONTENT_EN-US.MainOS~31bf3856ad364e35~arm~~.cab
+│       Microsoft.MS_RETAILDEMOCONTENT_FR-CA.MainOS~31bf3856ad364e35~arm~~.cab
+│       Microsoft.MS_SKYPE.MainOS~31bf3856ad364e35~arm~~.cab
+│       Microsoft.MS_SOCPRODTEST_HSTI.MainOS~31bf3856ad364e35~arm~~.cab
+│       Microsoft.MS_STANDARD_FEATURE_1.MainOS~31bf3856ad364e35~arm~~.cab
+│       Microsoft.PhoneFM~31bf3856ad364e35~arm~~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~af-za~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~am-et~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~ar-sa~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~az-latn-az~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~be-by~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~bg-bg~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~bn-bd~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~ca-es~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~cs-cz~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~da-dk~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~de-de~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~el-gr~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~en-gb~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~en-us~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~es-es~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~es-mx~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~et-ee~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~eu-es~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~fa-ir~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~fi-fi~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~fil-ph~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~fr-ca~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~fr-fr~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~gl-es~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~ha-latn-ng~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~he-il~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~hi-in~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~hr-hr~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~hu-hu~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~id-id~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~is-is~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~it-it~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~ja-jp~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~kk-kz~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~km-kh~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~kn-in~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~ko-kr~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~lo-la~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~lt-lt~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~lv-lv~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~mk-mk~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~ml-in~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~ms-my~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~nb-no~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~nl-nl~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~pl-pl~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~pt-br~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~pt-pt~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~ro-ro~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~ru-ru~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~sk-sk~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~sl-si~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~sq-al~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~sr-latn-rs~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~sv-se~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~sw-ke~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~ta-in~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~te-in~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~th-th~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~tr-tr~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~uk-ua~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~uz-latn-uz~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~vi-vn~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~zh-cn~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_LANG~31bf3856ad364e35~arm~zh-tw~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS_RES_1440x2560~31bf3856ad364e35~arm~~.cab
+│       Microsoft.PRERELEASE_PROTECTED.MainOS~31bf3856ad364e35~arm~~.cab
+│       Microsoft.RELEASE_PRODUCTION.MainOS~31bf3856ad364e35~arm~~.cab
+│       Microsoft.SOC_QC8994.MainOS~31bf3856ad364e35~arm~~.cab
+│       Microsoft.Speech.Data_LANG~31bf3856ad364e35~arm~en-ca~.cab
+│       Microsoft.Speech.Data_LANG~31bf3856ad364e35~arm~en-us~.cab
+│       MMO.BASE.Phone.MainOS~31bf3856ad364e35~arm~~.cab
+│       MMO.BASE.Variant.MainOS~31bf3856ad364e35~arm~~.cab
+│       MMO.CITYMAN_LTE_ROW_DSDS.Customizations.MainOS~31bf3856ad364e35~arm~~.cab
+│       MMO.CITYMAN_LTE_ROW_DSDS.Customizations.StaticApps.MainOS~31bf3856ad364e35~arm~~.cab
+│       MMO.DEVICE_CITYMAN_LTE_ROW_DSDS.Phone.MainOS~31bf3856ad364e35~arm~~.cab
+│       MMO.HYP~31bf3856ad364e35~arm~~.cab
+│       MMO.Loader.SBL1~31bf3856ad364e35~arm~~.cab
+│       MMO.PMIC~31bf3856ad364e35~arm~~.cab
+│       MMO.RPM~31bf3856ad364e35~arm~~.cab
+│       MMO.RuntimeCustomizations.RM-1116_15357_application~31bf3856ad364e35~arm~~.cab
+│       MMO.RuntimeCustomizations.RM-1116_15357_gsdb~31bf3856ad364e35~arm~~.cab
+│       MMO.RuntimeCustomizations.RM-1116_15357_imagetype~31bf3856ad364e35~arm~~.cab
+│       MMO.RuntimeCustomizations.RM-1116_15357_operator~31bf3856ad364e35~arm~~.cab
+│       MMO.RuntimeCustomizations.RM-1116_15357_prodconf~31bf3856ad364e35~arm~~.cab
+│       MMO.RuntimeCustomizations.RM-1116_15357_variant~31bf3856ad364e35~arm~~.cab
+│       MMO.RuntimeCustomizations.VersionInfo~31bf3856ad364e35~arm~~.cab
+│       MMO.SOC_QC8994.Phone.MainOS~31bf3856ad364e35~arm~~.cab
+│       MMO.TZAPPS~31bf3856ad364e35~arm~~.cab
+│       MMO.TZ~31bf3856ad364e35~arm~~.cab
+│       MMO.UEFI~31bf3856ad364e35~arm~~.cab
+│       MMO.WINSECAPP~31bf3856ad364e35~arm~~.cab
+│
+├───MainOS-UpdateOS-0
+│       Microsoft.MobileCore.UpdateOS~31bf3856ad364e35~arm~~.cab
+│       Microsoft.RELEASE_PRODUCTION.UpdateOS~31bf3856ad364e35~arm~~.cab
+│       Microsoft.UpdateOS.Production~31bf3856ad364e35~arm~~.cab
+│       OEM.HalExtensions.UpdateOS~31bf3856ad364e35~arm~~.cab
 │
 └───PLAT
         MMO.BASE.Phone.PLAT~31bf3856ad364e35~arm~~.cab
