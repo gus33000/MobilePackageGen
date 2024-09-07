@@ -11,7 +11,10 @@ namespace ToCBS
 {
     public class Disk
     {
-        public List<Partition> Partitions { get; }
+        public List<Partition> Partitions
+        {
+            get;
+        }
 
         public Disk(string ffuPath, uint SectorSize)
         {
@@ -26,7 +29,7 @@ namespace ToCBS
 
         private static List<Partition> GetPartitionStructures(List<PartitionInfo> partitionInfos, uint SectorSize)
         {
-            List<Partition> partitions = new();
+            List<Partition> partitions = [];
 
             foreach (PartitionInfo partitionInfo in partitionInfos)
             {
@@ -40,7 +43,7 @@ namespace ToCBS
 
         public static List<Disk> GetUpdateOSDisks(List<Disk> disks)
         {
-            List<Disk> updateOSDisks = new();
+            List<Disk> updateOSDisks = [];
 
             foreach (Disk disk in disks)
             {
@@ -67,7 +70,7 @@ namespace ToCBS
                     // Handle UpdateOS as well if found
                     if (fileSystem.FileExists("PROGRAMS\\UpdateOS\\UpdateOS.wim"))
                     {
-                        List<Partition> partitions = new();
+                        List<Partition> partitions = [];
 
                         Stream wimStream = fileSystem.OpenFileAndDecompressIfNeeded("PROGRAMS\\UpdateOS\\UpdateOS.wim");
                         DiscUtils.Wim.WimFile wimFile = new(wimStream);
@@ -94,10 +97,10 @@ namespace ToCBS
 
         private static List<PartitionInfo> GetPartitions(string ffuPath)
         {
-            List<PartitionInfo> partitions = new();
+            List<PartitionInfo> partitions = [];
             for (int i = 0; i < FullFlashUpdateReaderStream.GetStoreCount(ffuPath); i++)
             {
-                using FullFlashUpdateReaderStream store = new(ffuPath, (ulong)i);
+                FullFlashUpdateReaderStream store = new(ffuPath, (ulong)i);
                 bool hasOsPool = false;
 
                 long diskCapacity = (long)store.Length;

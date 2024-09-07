@@ -33,10 +33,10 @@ Version: 1.0.0.0
 
         private static List<Disk> GetDisks(string ffuPath)
         {
-            List<Disk> disks = new()
-            {
+            List<Disk> disks =
+            [
                 new Disk(ffuPath, 4096) // Hardcoded, todo
-            };
+            ];
 
             return disks;
         }
