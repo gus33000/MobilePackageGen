@@ -38,7 +38,7 @@ jobs:
       - name: Build utilities
         shell: pwsh
         run: |
-          msbuild /m /t:restore,tocbs:publish,tocbsffunopool:publish,tocbsvhdx:publish,tocbsvhdxnopool:publish /p:Platform=${{ matrix.architecture }} /p:RuntimeIdentifier=${{ matrix.platform }}-${{ matrix.architecture }} /p:PublishDir=${{ github.workspace }}/artifacts/${{ matrix.platform }}-${{ matrix.architecture }} /p:PublishSingleFile=true /p:PublishTrimmed=false /p:Configuration=Release ToCBS\ToCBS.sln
+          msbuild /m /t:restore,tocbs:publish,tocbsffunopool:publish,tocbsvhdxnopool:publish /p:Platform=${{ matrix.architecture }} /p:RuntimeIdentifier=${{ matrix.platform }}-${{ matrix.architecture }} /p:PublishDir=${{ github.workspace }}/artifacts/${{ matrix.platform }}-${{ matrix.architecture }} /p:PublishSingleFile=true /p:PublishTrimmed=false /p:Configuration=Release ToCBS\ToCBS.sln
 
       - name: Create PDB Output Directory
         shell: pwsh
