@@ -9,15 +9,18 @@ namespace ToCBS
     {
         private static void Main(string[] args)
         {
-            Console.WriteLine("\nImage To Component Based Servicing Cabinets tool\nVersion: 1.0.0.0\n");
+            Console.WriteLine(@"
+Image To Component Based Servicing Cabinets tool
+Version: 1.0.0.0
+");
 
             if (args.Length < 2)
             {
-                Console.WriteLine("Remember to run as TI.");
+                Console.WriteLine("Remember to run the tool as Trusted Installer (TI).");
                 Console.WriteLine("You need to pass 2 parameters:");
-                Console.WriteLine("\t<Path to MainOS/Data/EFIESP> <Output folder CBSs>");
+                Console.WriteLine(@"	<Path to FFU File> <Output folder CBSs>");
                 Console.WriteLine("Example:");
-                Console.WriteLine("\t \"D:\\\" \"C:\\RAMD\\\"");
+                Console.WriteLine(@"	 ""D:\Flash.ffu"" ""C:\OutputCabs\""");
                 return;
             }
 

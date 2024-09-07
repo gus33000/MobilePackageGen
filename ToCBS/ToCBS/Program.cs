@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 
 namespace ToCBS
 {
@@ -9,15 +7,19 @@ namespace ToCBS
     {
         private static void Main(string[] args)
         {
-            Console.WriteLine("\nImage To Component Based Servicing Cabinets tool\nVersion: 1.0.0.0\n");
+            Console.WriteLine(@"
+Image To Component Based Servicing Cabinets tool
+Version: 1.0.0.0
+");
 
             if (args.Length < 2)
             {
-                Console.WriteLine("Remember to run as TI.");
-                Console.WriteLine("You need to pass 2 parameters:");
-                Console.WriteLine("\t<Path to MainOS/Data/EFIESP> <Output folder CBSs>");
-                Console.WriteLine("Example:");
-                Console.WriteLine("\t \"D:\\\" \"C:\\RAMD\\\"");
+                Console.WriteLine("Remember to run the tool as Trusted Installer (TI).");
+                Console.WriteLine("You need to pass at least 2 parameters:");
+                Console.WriteLine(@"	<Path to MainOS/Data/EFIESP> <Output folder CBSs>");
+                Console.WriteLine("Examples:");
+                Console.WriteLine(@"	 ""D:\"" ""C:\OutputCabs\""");
+                Console.WriteLine(@"	 ""D:\"" ""E:\"" ""F:\"" ""C:\OutputCabs\""");
                 return;
             }
 
@@ -30,7 +32,7 @@ namespace ToCBS
 
         private static List<Disk> GetDisks(string[] paths)
         {
-            List<Disk> disks = new();
+            List<Disk> disks = [];
 
             foreach (string path in paths)
             {
