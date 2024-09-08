@@ -10,6 +10,20 @@ namespace CbsToReg
 
         internal static void Main(string[] args)
         {
+            Console.WriteLine(@"
+CBS to REG tool
+Version: 1.0.1.0
+");
+
+            if (args.Length < 1)
+            {
+                Console.WriteLine("You need to pass 1 parameter:");
+                Console.WriteLine(@"	<Path to mum file>");
+                Console.WriteLine("Example:");
+                Console.WriteLine(@"	 ""D:\mymanifest.mum""");
+                return;
+            }
+
             HandleCbsFile(args[0]);
         }
 
@@ -37,7 +51,7 @@ namespace CbsToReg
                 }
 
                 string reg = regExporter.Build(SoftwareKeyName, SystemKeyName);
-                File.WriteAllText(file + ".reg", reg, Encoding.Unicode);
+                File.WriteAllText($"{file}.reg", reg, Encoding.Unicode);
             }
 
             stream.Close();
