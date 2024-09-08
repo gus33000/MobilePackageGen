@@ -397,6 +397,6 @@ FodyWeavers.xsd
 *.sln.iml
 
 
-!ToCBS/Archives.DiscUtils/ARM64/7z.dll
-!ToCBS/Archives.DiscUtils/x64/7z.dll
-!ToCBS/Archives.DiscUtils/x86/7z.dll
+!src/Archives.DiscUtils/ARM64/7z.dll
+!src/Archives.DiscUtils/x64/7z.dll
+!src/Archives.DiscUtils/x86/7z.dll
