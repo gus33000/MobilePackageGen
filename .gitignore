@@ -400,3 +400,5 @@ FodyWeavers.xsd
 !src/Archives.DiscUtils/ARM64/7z.dll
 !src/Archives.DiscUtils/x64/7z.dll
 !src/Archives.DiscUtils/x86/7z.dll
+
+launchSettings.json
