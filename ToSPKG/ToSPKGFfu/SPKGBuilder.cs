@@ -198,7 +198,46 @@ namespace ToSPKG
                             }
                             else if (xmlFile.FileType.Contains("binarypartition", StringComparison.CurrentCultureIgnoreCase)) //MEH
                             {
-                                CreateDirectoryWhileCopying(fileSystem, normalized, Path.Combine(current_folder, xmlFile.CabPath));
+                                Stream FileStream = null;
+
+                                foreach (Disk disk in disks)
+                                {
+                                    bool done = false;
+
+                                    foreach (Partition diskPartition in disk.Partitions)
+                                    {
+                                        if (diskPartition.Name.Equals(xmlDSM.Partition, StringComparison.InvariantCultureIgnoreCase))
+                                        {
+                                            done = true;
+                                            FileStream = new Substream(diskPartition.Stream, long.Parse(xmlFile.FileSize));
+                                            break;
+                                        }
+                                    }
+
+                                    if (done)
+                                    {
+                                        break;
+                                    }
+                                }
+
+                                if (FileStream != null)
+                                {
+                                    string dest = Path.Combine(current_folder, xmlFile.CabPath);
+
+                                    string dirFromDest = Path.GetDirectoryName(dest);
+                                    if (!Directory.Exists(dirFromDest))
+                                    {
+                                        Directory.CreateDirectory(dirFromDest);
+                                    }
+
+                                    using Stream destStream = File.Open(dest, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
+
+                                    FileStream.CopyTo(destStream);
+                                }
+                                else
+                                {
+                                    throw new Exception($"Cannot find Binary Partition named: {xmlDSM.Partition}");
+                                }
                             }
                             else
                             {
