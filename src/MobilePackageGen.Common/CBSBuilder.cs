@@ -208,7 +208,7 @@ namespace MobilePackageGen
                 }
                 else
                 {
-                    Console.WriteLine($"Error: File not found! {normalized}");
+                    Console.WriteLine($"\rError: File not found! {normalized}\n");
                     //throw new FileNotFoundException(normalized);
                 }
             }
