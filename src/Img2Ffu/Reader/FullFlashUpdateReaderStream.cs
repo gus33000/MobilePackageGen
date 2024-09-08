@@ -15,6 +15,8 @@ namespace Img2Ffu.Reader
         private long length;
         private int sectorSize;
         private int minSectorCount;
+        private long blockSize;
+        private Dictionary<long, int> blockTable;
 
         private long currentPosition = 0;
 
@@ -30,7 +32,8 @@ namespace Img2Ffu.Reader
             image = signedImage.Image;
             this.storeIndex = storeIndex;
             store = image.Stores[(int)storeIndex];
-            length = GetStoreLength();
+            blockSize = store.StoreHeader.BlockSize;
+            (length, blockTable) = BuildBlockTable();
 
             try
             {
@@ -121,46 +124,13 @@ namespace Img2Ffu.Reader
 
         public override long Length => length;
 
-        private long GetStoreLength()
-        {
-            long blockMaxStart = 0;
-            long blockMaxEnd = 0;
-
-            foreach (WriteDescriptor writeDescriptor in store.WriteDescriptors)
-            {
-                foreach (Structs.DiskLocation diskLocation in writeDescriptor.DiskLocations)
-                {
-                    switch (diskLocation.DiskAccessMethod)
-                    {
-                        case 0:
-                            {
-                                if (diskLocation.BlockIndex > blockMaxStart)
-                                {
-                                    blockMaxStart = diskLocation.BlockIndex;
-                                }
-                                break;
-                            }
-                        case 2:
-                            {
-                                if (diskLocation.BlockIndex > blockMaxEnd)
-                                {
-                                    blockMaxEnd = diskLocation.BlockIndex;
-                                }
-                                break;
-                            }
-                    }
-                }
-            }
-
-            long totalBlocks = blockMaxStart + blockMaxEnd + 2;
-
-            return totalBlocks * store.StoreHeader.BlockSize;
-        }
-
-        private long GetBlockDataIndex(long realBlockOffset)
+        private (long, Dictionary<long, int>) BuildBlockTable()
         {
             // We do not want to immediately return because FFU files may first blank out sectors and then write post mortem
-            long matchedIndex = -1; // Invalid
+            Dictionary<long, int> blockTable = [];
+
+            long blockMaxStart = 0;
+            long blockMaxEnd = 0;
 
             for (int i = 0; i < store.WriteDescriptors.Count; i++)
             {
@@ -171,19 +141,37 @@ namespace Img2Ffu.Reader
                     {
                         case 0:
                             {
-                                long blockOffset = diskLocation.BlockIndex;
-                                if (blockOffset == realBlockOffset)
+                                if (diskLocation.BlockIndex > blockMaxStart)
                                 {
-                                    matchedIndex = i;
+                                    blockMaxStart = diskLocation.BlockIndex;
+                                }
+
+                                long blockOffset = diskLocation.BlockIndex;
+                                if (blockTable.ContainsKey(blockOffset))
+                                {
+                                    blockTable[blockOffset] = i;
+                                }
+                                else
+                                {
+                                    blockTable.Add(blockOffset, i);
                                 }
                                 break;
                             }
                         case 2:
                             {
-                                long blockOffset = (Length / store.StoreHeader.BlockSize) - 1 - diskLocation.BlockIndex;
-                                if (blockOffset == realBlockOffset)
+                                if (diskLocation.BlockIndex > blockMaxEnd)
                                 {
-                                    matchedIndex = i;
+                                    blockMaxEnd = diskLocation.BlockIndex;
+                                }
+
+                                long blockOffset = (Length / blockSize) - 1 - diskLocation.BlockIndex;
+                                if (blockTable.ContainsKey(blockOffset))
+                                {
+                                    blockTable[blockOffset] = i;
+                                }
+                                else
+                                {
+                                    blockTable.Add(blockOffset, i);
                                 }
                                 break;
                             }
@@ -191,7 +179,19 @@ namespace Img2Ffu.Reader
                 }
             }
 
-            return matchedIndex;
+            long totalBlocks = blockMaxStart + blockMaxEnd + 2;
+
+            return (totalBlocks * blockSize, blockTable);
+        }
+
+        private long GetBlockDataIndex(long realBlockOffset)
+        {
+            if (blockTable.ContainsKey(realBlockOffset))
+            {
+                return blockTable[realBlockOffset];
+            }
+
+            return -1; // Invalid
         }
 
         public override long Position
@@ -260,15 +260,13 @@ namespace Img2Ffu.Reader
             // Read the buffer from the FFU file.
             // First we have to figure out where do we land here.
 
-            long overflowBlockStartByteCount = Position % store.StoreHeader.BlockSize;
-            long overflowBlockEndByteCount = (Position + readBytes) % store.StoreHeader.BlockSize;
+            long overflowBlockStartByteCount = Position % blockSize;
+            long overflowBlockEndByteCount = (Position + readBytes) % blockSize;
 
-            long totalBlockCount = Length / store.StoreHeader.BlockSize;
+            long startBlockIndex = (Position - overflowBlockStartByteCount) / blockSize;
+            long endBlockIndex = (Position + readBytes + (blockSize - overflowBlockEndByteCount)) / blockSize;
 
-            long startBlockIndex = (Position - overflowBlockStartByteCount) / store.StoreHeader.BlockSize;
-            long endBlockIndex = (Position + readBytes + (store.StoreHeader.BlockSize - overflowBlockEndByteCount)) / store.StoreHeader.BlockSize;
-
-            byte[] allReadBlocks = new byte[(endBlockIndex - startBlockIndex + 1) * store.StoreHeader.BlockSize];
+            byte[] allReadBlocks = new byte[(endBlockIndex - startBlockIndex + 1) * blockSize];
 
             for (long currentBlock = startBlockIndex; currentBlock < endBlockIndex; currentBlock++)
             {
@@ -276,7 +274,7 @@ namespace Img2Ffu.Reader
                 if (virtualBlockIndex != -1)
                 {
                     byte[] block = image.GetStoreDataBlock(ffuFileStream, storeIndex, (ulong)virtualBlockIndex);
-                    Array.Copy(block, 0, allReadBlocks, (int)((currentBlock - startBlockIndex) * store.StoreHeader.BlockSize), store.StoreHeader.BlockSize);
+                    Array.Copy(block, 0, allReadBlocks, (int)((currentBlock - startBlockIndex) * blockSize), blockSize);
                 }
             }
 
