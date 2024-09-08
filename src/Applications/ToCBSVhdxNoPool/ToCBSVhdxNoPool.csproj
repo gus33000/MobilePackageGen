@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\ToCBS.Common\ToCBS.Common.csproj" />
     <ProjectReference Include="..\..\Archives.DiscUtils\Archives.DiscUtils.csproj" />
     <ProjectReference Include="..\..\Microsoft.Deployment.Compression.Cab\Microsoft.Deployment.Compression.Cab.csproj" />
     <ProjectReference Include="..\..\WofStream\WofStream.csproj" />

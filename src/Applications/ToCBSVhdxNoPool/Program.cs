@@ -31,14 +31,18 @@ Version: 1.0.0.0
 
             Console.WriteLine("Getting Disks...");
 
-            List<Disk> disks = GetDisks(vhds);
+            List<IDisk> disks = GetDisks(vhds);
+
+            Console.WriteLine("Getting Update OS Disks...");
+
+            disks.AddRange(Disk.GetUpdateOSDisks(disks));
 
             CBSBuilder.BuildCBS(disks, args[^1]);
         }
 
-        private static List<Disk> GetDisks(string[] vhdxs)
+        private static List<IDisk> GetDisks(string[] vhdxs)
         {
-            List<Disk> disks = [];
+            List<IDisk> disks = [];
 
             foreach (string vhdx in vhdxs)
             {

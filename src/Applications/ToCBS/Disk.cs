@@ -3,23 +3,23 @@ using ToCBS.Wof;
 
 namespace ToCBS
 {
-    public class Disk
+    public class Disk : IDisk
     {
-        public List<Partition> Partitions { get; }
+        public IEnumerable<IPartition> Partitions { get; }
 
         public Disk(string path)
         {
             Partitions = GetPartitionStructures(path);
         }
 
-        public Disk(List<Partition> Partitions)
+        public Disk(List<IPartition> Partitions)
         {
             this.Partitions = Partitions;
         }
 
-        private static List<Partition> GetPartitionStructures(string path)
+        private static List<IPartition> GetPartitionStructures(string path)
         {
-            List<Partition> partitions = [];
+            List<IPartition> partitions = [];
 
             Partition partition = new(new RealFileSystemBridge(path), path.Replace(":", "").Replace(Path.DirectorySeparatorChar, '_'), Guid.Empty, Guid.Empty, 0);
             partitions.Add(partition);
@@ -27,15 +27,15 @@ namespace ToCBS
             return partitions;
         }
 
-        public static List<Disk> GetUpdateOSDisks(List<Disk> disks)
+        public static List<IDisk> GetUpdateOSDisks(List<IDisk> disks)
         {
-            List<Disk> updateOSDisks = [];
+            List<IDisk> updateOSDisks = [];
 
-            foreach (Disk disk in disks)
+            foreach (IDisk disk in disks)
             {
-                foreach (Partition partition in disk.Partitions)
+                foreach (IPartition partition in disk.Partitions)
                 {
-                    Disk? updateOSDisk = GetUpdateOSDisk(partition);
+                    IDisk? updateOSDisk = GetUpdateOSDisk(partition);
                     if (updateOSDisk != null)
                     {
                         updateOSDisks.Add(updateOSDisk);
@@ -46,7 +46,7 @@ namespace ToCBS
             return updateOSDisks;
         }
 
-        public static Disk? GetUpdateOSDisk(Partition partition)
+        public static IDisk? GetUpdateOSDisk(IPartition partition)
         {
             if (partition.FileSystem != null)
             {
@@ -56,7 +56,7 @@ namespace ToCBS
                     // Handle UpdateOS as well if found
                     if (fileSystem.FileExists("PROGRAMS\\UpdateOS\\UpdateOS.wim"))
                     {
-                        List<Partition> partitions = [];
+                        List<IPartition> partitions = [];
 
                         Stream wimStream = fileSystem.OpenFileAndDecompressIfNeeded("PROGRAMS\\UpdateOS\\UpdateOS.wim");
                         DiscUtils.Wim.WimFile wimFile = new(wimStream);

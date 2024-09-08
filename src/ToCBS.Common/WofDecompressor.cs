@@ -3,7 +3,7 @@ using DiscUtils;
 
 namespace ToCBS.Wof
 {
-    internal static class WofDecompressor
+    public static class WofDecompressor
     {
         public static Stream OpenFileAndDecompressIfNeeded(this IFileSystem mainfileSystem, string vhdFileName)
         {

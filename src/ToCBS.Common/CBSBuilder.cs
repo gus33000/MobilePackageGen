@@ -6,9 +6,9 @@ using ToCBS.Wof;
 
 namespace ToCBS
 {
-    internal class CBSBuilder
+    public class CBSBuilder
     {
-        private static List<CabinetFileInfo> GetCabinetFileInfoForCbsPackage(XmlMum.Assembly cbs, Partition partition, List<Disk> disks)
+        private static List<CabinetFileInfo> GetCabinetFileInfoForCbsPackage(XmlMum.Assembly cbs, IPartition partition, List<IDisk> disks)
         {
             List<CabinetFileInfo> fileMappings = [];
 
@@ -114,11 +114,11 @@ namespace ToCBS
                 // If we end in bin, and the package is marked binary partition, this is a partition on one of the device disks, retrieve it
                 if (normalized.EndsWith(".bin") && cbs.Package.BinaryPartition.ToLower() == "true")
                 {
-                    foreach (Disk disk in disks)
+                    foreach (IDisk disk in disks)
                     {
                         bool done = false;
 
-                        foreach (Partition diskPartition in disk.Partitions)
+                        foreach (IPartition diskPartition in disk.Partitions)
                         {
                             if (diskPartition.Name.Equals(cbs.Package.TargetPartition, StringComparison.InvariantCultureIgnoreCase))
                             {
@@ -151,11 +151,11 @@ namespace ToCBS
                         {
                             if (normalized.StartsWith(partitionNameWithLink + "\\", StringComparison.InvariantCultureIgnoreCase))
                             {
-                                foreach (Disk disk in disks)
+                                foreach (IDisk disk in disks)
                                 {
                                     bool done = false;
 
-                                    foreach (Partition diskPartition in disk.Partitions)
+                                    foreach (IPartition diskPartition in disk.Partitions)
                                     {
                                         if (diskPartition.Name.Equals(partitionNameWithLink, StringComparison.InvariantCultureIgnoreCase))
                                         {
@@ -216,19 +216,15 @@ namespace ToCBS
             return fileMappings;
         }
 
-        public static void BuildCBS(List<Disk> disks, string destination_path)
+        public static void BuildCBS(List<IDisk> disks, string destination_path)
         {
-            Console.WriteLine("Getting Update OS Disks...");
-
-            disks.AddRange(Disk.GetUpdateOSDisks(disks));
-
             Console.WriteLine();
             Console.WriteLine("Found Disks:");
             Console.WriteLine();
 
-            foreach (Disk disk in disks)
+            foreach (IDisk disk in disks)
             {
-                foreach (Partition partition in disk.Partitions)
+                foreach (IPartition partition in disk.Partitions)
                 {
                     if (partition.FileSystem != null)
                     {
@@ -239,9 +235,9 @@ namespace ToCBS
 
             Console.WriteLine();
 
-            foreach (Disk disk in disks)
+            foreach (IDisk disk in disks)
             {
-                foreach (Partition partition in disk.Partitions)
+                foreach (IPartition partition in disk.Partitions)
                 {
                     if (partition.FileSystem == null)
                     {
@@ -265,13 +261,13 @@ namespace ToCBS
             Console.WriteLine("The operation completed successfully.");
         }
 
-        private static List<Partition> GetPartitionsWithServicing(List<Disk> disks)
+        private static List<IPartition> GetPartitionsWithServicing(List<IDisk> disks)
         {
-            List<Partition> fileSystemsWithServicing = [];
+            List<IPartition> fileSystemsWithServicing = [];
 
-            foreach (Disk disk in disks)
+            foreach (IDisk disk in disks)
             {
-                foreach (Partition partition in disk.Partitions)
+                foreach (IPartition partition in disk.Partitions)
                 {
                     IFileSystem? fileSystem = partition.FileSystem;
 
@@ -295,13 +291,13 @@ namespace ToCBS
             return fileSystemsWithServicing;
         }
 
-        private static int GetPackageCount(List<Disk> disks)
+        private static int GetPackageCount(List<IDisk> disks)
         {
             int count = 0;
 
-            List<Partition> partitionsWithCbsServicing = GetPartitionsWithServicing(disks);
+            List<IPartition> partitionsWithCbsServicing = GetPartitionsWithServicing(disks);
 
-            foreach (Partition partition in partitionsWithCbsServicing)
+            foreach (IPartition partition in partitionsWithCbsServicing)
             {
                 IFileSystem fileSystem = partition.FileSystem;
 
@@ -313,15 +309,15 @@ namespace ToCBS
             return count;
         }
 
-        private static void BuildCabinets(List<Disk> disks, string outputPath)
+        private static void BuildCabinets(List<IDisk> disks, string outputPath)
         {
             int packagesCount = GetPackageCount(disks);
 
-            List<Partition> partitionsWithCbsServicing = GetPartitionsWithServicing(disks);
+            List<IPartition> partitionsWithCbsServicing = GetPartitionsWithServicing(disks);
 
             int i = 0;
 
-            foreach (Partition partition in partitionsWithCbsServicing)
+            foreach (IPartition partition in partitionsWithCbsServicing)
             {
                 IFileSystem fileSystem = partition.FileSystem;
 
