@@ -9,7 +9,7 @@ namespace ToSPKG
         {
             Console.WriteLine(@"
 Image To Software Package Cabinets tool
-Version: 1.0.0.0
+Version: 1.0.1.0
 ");
 
             if (args.Length < 2)
