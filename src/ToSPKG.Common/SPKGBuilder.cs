@@ -55,10 +55,17 @@ namespace ToSPKG
                             {
                                 done = true;
 
+                                // Some older SPKGs from 2012 / 2013 may lack the packageFile.FileSize property entirely
+                                // in their DSM file. In this case, we will use the size of the partition itself.
+                                // It may also be possible to infer the correct size from the catalog
+                                // if the size isnt meant to be the full size of the partition.
+
+                                Stream partitionStream = packageFile.FileSize != null ? new Substream(diskPartition.Stream, long.Parse(packageFile.FileSize)) : diskPartition.Stream;
+
                                 cabinetFileInfo = new CabinetFileInfo()
                                 {
                                     FileName = packageFile.CabPath,
-                                    FileStream = new Substream(diskPartition.Stream, long.Parse(packageFile.FileSize)),
+                                    FileStream = partitionStream,
                                     Attributes = FileAttributes.Normal,
                                     DateTime = DateTime.Now
                                 };
