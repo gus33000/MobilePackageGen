@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ToSPKGFfu": {
+      "commandName": "Project",
+      "commandLineArgs": "\"C:\\Users\\gus33\\Downloads\\RM977_02040.00021.15235.50019_RETAIL_prod_signed_1006_026490_AIO-US.ffu\" .\\OutputCabs"
+    }
+  }
+}
