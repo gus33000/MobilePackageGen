@@ -1,4 +1,5 @@
-﻿using ToCBS.Adapters.Wim;
+﻿using MobilePackageGen;
+using MobilePackageGen.Adapters.Wim;
 
 namespace ToCBS
 {

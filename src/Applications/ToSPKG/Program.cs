@@ -1,4 +1,5 @@
-﻿using ToSPKG.Adapters.RealFileSystem;
+﻿using MobilePackageGen;
+using MobilePackageGen.Adapters.RealFileSystem;
 
 namespace ToSPKG
 {

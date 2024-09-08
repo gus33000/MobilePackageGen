@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ToCBS.Common\ToCBS.Common.csproj" />
+	<ProjectReference Include="..\..\MobilePackageGen.Common\MobilePackageGen.Common.csproj" />
     <ProjectReference Include="..\..\Archives.DiscUtils\Archives.DiscUtils.csproj" />
     <ProjectReference Include="..\..\Img2Ffu\Img2Ffu.csproj" />
     <ProjectReference Include="..\..\Diskstream\Diskstream.csproj" />

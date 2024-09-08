@@ -1,4 +1,5 @@
-﻿using ToSPKG.Adapters.Vhdx;
+﻿using MobilePackageGen;
+using MobilePackageGen.Adapters.Vhdx;
 
 namespace ToSPKG
 {

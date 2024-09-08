@@ -1,5 +1,6 @@
 ﻿using Archives.DiscUtils;
 using DiscUtils;
+using MobilePackageGen;
 using SevenZipExtractor;
 
 namespace ToCBS.Adapters.VhdxSpaces

@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace ToCBS.Wof
+namespace MobilePackageGen.Wof
 {
     internal static class NativeMethods
     {

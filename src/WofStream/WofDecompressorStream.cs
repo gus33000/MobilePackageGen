@@ -1,4 +1,4 @@
-﻿namespace ToCBS.Wof
+﻿namespace MobilePackageGen.Wof
 {
     public partial class WofDecompressorStream : Stream
     {

@@ -1,4 +1,4 @@
-﻿namespace ToCBS.Wof
+﻿namespace MobilePackageGen.Wof
 {
     [Flags]
     public enum COMPRESS_ALGORITHM : uint

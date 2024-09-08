@@ -1,9 +1,10 @@
 ﻿using DiscUtils.Partitions;
 using DiscUtils.Streams;
 using DiscUtils;
-using ToCBS.Wof;
+using MobilePackageGen.Wof;
 using Microsoft.Spaces.Diskstream;
 using System.ComponentModel;
+using MobilePackageGen;
 
 namespace ToCBS.Adapters.VhdxSpaces
 {

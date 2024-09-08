@@ -1,4 +1,5 @@
-﻿using ToCBS.Adapters.FullFlashUpdate;
+﻿using MobilePackageGen;
+using MobilePackageGen.Adapters.FullFlashUpdate;
 
 namespace ToCBS
 {

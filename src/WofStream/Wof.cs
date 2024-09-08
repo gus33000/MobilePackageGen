@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.InteropServices;
 
-namespace ToCBS.Wof
+namespace MobilePackageGen.Wof
 {
     public class Wof
     {

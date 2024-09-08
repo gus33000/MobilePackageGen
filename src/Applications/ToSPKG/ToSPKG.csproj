@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ToSPKG.Common\ToSPKG.Common.csproj" />
+    <ProjectReference Include="..\..\MobilePackageGen.Common\MobilePackageGen.Common.csproj" />
   </ItemGroup>
 
 </Project>

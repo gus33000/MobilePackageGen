@@ -1,4 +1,5 @@
-﻿using ToSPKG.Adapters.Wim;
+﻿using MobilePackageGen;
+using MobilePackageGen.Adapters.Wim;
 
 namespace ToSPKG
 {
