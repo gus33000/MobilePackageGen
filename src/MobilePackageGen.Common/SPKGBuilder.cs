@@ -371,6 +371,8 @@ namespace MobilePackageGen
 
                         Console.WriteLine(componentStatus);
 
+                        string fileStatus = "";
+
                         if (!File.Exists(cabFile))
                         {
                             List<CabinetFileInfo> fileMappings = GetCabinetFileInfoForDsmPackage(dsm, partition, disks);
