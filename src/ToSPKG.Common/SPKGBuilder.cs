@@ -111,10 +111,21 @@ namespace ToSPKG
 
                                             if (needsDecompression)
                                             {
+                                                Stream cabFileStream = null;
+
+                                                try
+                                                {
+                                                    cabFileStream = fileSystemData.OpenFileAndDecompressAsGZip(normalized[5..]);
+                                                }
+                                                catch (InvalidDataException)
+                                                {
+                                                    cabFileStream = fileSystemData.OpenFile(normalized[5..], FileMode.Open, FileAccess.Read);
+                                                }
+
                                                 cabinetFileInfo = new CabinetFileInfo()
                                                 {
                                                     FileName = packageFile.CabPath,
-                                                    FileStream = fileSystemData.OpenFileAndDecompressAsGZip(normalized[5..]),
+                                                    FileStream = cabFileStream,
                                                     Attributes = fileSystemData.GetAttributes(normalized[5..]) & ~FileAttributes.ReparsePoint,
                                                     DateTime = fileSystemData.GetLastWriteTime(normalized[5..])
                                                 };
@@ -161,10 +172,21 @@ namespace ToSPKG
 
                         if (needsDecompression)
                         {
+                            Stream cabFileStream = null;
+
+                            try
+                            {
+                                cabFileStream = fileSystem.OpenFileAndDecompressAsGZip(normalized);
+                            }
+                            catch (InvalidDataException)
+                            {
+                                cabFileStream = fileSystem.OpenFile(normalized, FileMode.Open, FileAccess.Read);
+                            }
+
                             cabinetFileInfo = new CabinetFileInfo()
                             {
                                 FileName = packageFile.CabPath,
-                                FileStream = fileSystem.OpenFileAndDecompressAsGZip(normalized),
+                                FileStream = cabFileStream,
                                 Attributes = fileSystem.GetAttributes(normalized) & ~FileAttributes.ReparsePoint,
                                 DateTime = fileSystem.GetLastWriteTime(normalized)
                             };
@@ -198,7 +220,7 @@ namespace ToSPKG
                 }
                 else
                 {
-                    Console.WriteLine($"Error: File not found! {normalized}");
+                    Console.WriteLine($"\rError: File not found! {normalized}\n");
                     //throw new FileNotFoundException(normalized);
                 }
             }
@@ -316,9 +338,20 @@ namespace ToSPKG
                 {
                     try
                     {
-                        using Stream stream = fileSystem.OpenFileAndDecompressAsGZip(manifestFile);
-                        XmlSerializer serializer = new(typeof(XmlDsm.Package));
-                        XmlDsm.Package dsm = (XmlDsm.Package)serializer.Deserialize(stream);
+                        XmlDsm.Package dsm = null;
+
+                        try
+                        {
+                            using Stream stream = fileSystem.OpenFileAndDecompressAsGZip(manifestFile);
+                            XmlSerializer serializer = new(typeof(XmlDsm.Package));
+                            dsm = (XmlDsm.Package)serializer.Deserialize(stream);
+                        }
+                        catch (InvalidDataException)
+                        {
+                            using Stream stream = fileSystem.OpenFile(manifestFile, FileMode.Open, FileAccess.Read);
+                            XmlSerializer serializer = new(typeof(XmlDsm.Package));
+                            dsm = (XmlDsm.Package)serializer.Deserialize(stream);
+                        }
 
                         string packageName = manifestFile.Split('\\').Last().Replace(".xml", "").Replace(".dsm", "");
 
