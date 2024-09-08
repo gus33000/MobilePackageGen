@@ -353,7 +353,7 @@ namespace MobilePackageGen
                             dsm = (XmlDsm.Package)serializer.Deserialize(stream);
                         }
 
-                        string packageName = manifestFile.Split('\\').Last().Replace(".xml", "").Replace(".dsm", "");
+                        string packageName = $"{dsm.Identity.Owner}.{dsm.Identity.Component}{(dsm.Identity.SubComponent == null ? "" : $".{dsm.Identity.SubComponent}")}{(dsm.Culture == null ? "" : $"_Lang_{dsm.Culture}")}";
 
                         string cabFileName = Path.Combine(partition.Name, packageName);
 
