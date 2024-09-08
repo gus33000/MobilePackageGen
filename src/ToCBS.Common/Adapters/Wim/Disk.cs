@@ -1,7 +1,7 @@
 ﻿using DiscUtils;
 using ToCBS.Wof;
 
-namespace ToCBS
+namespace ToCBS.Adapters.Wim
 {
     public class Disk : IDisk
     {
@@ -10,9 +10,9 @@ namespace ToCBS
             get;
         }
 
-        public Disk(string path)
+        public Disk(string wimPath)
         {
-            Partitions = GetPartitionStructures(path);
+            Partitions = GetPartitionStructures(wimPath);
         }
 
         public Disk(List<IPartition> Partitions)
@@ -24,8 +24,15 @@ namespace ToCBS
         {
             List<IPartition> partitions = [];
 
-            Partition partition = new(new RealFileSystemBridge(path), path.Replace(":", "").Replace(Path.DirectorySeparatorChar, '_'), Guid.Empty, Guid.Empty, 0);
-            partitions.Add(partition);
+            Stream wimStream = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+            DiscUtils.Wim.WimFile wimFile = new(wimStream);
+
+            for (int i = 0; i < wimFile.ImageCount; i++)
+            {
+                IFileSystem wimFileSystem = wimFile.GetImage(i);
+                Partition wimPartition = new(wimStream, wimFileSystem, $"{Path.GetFileNameWithoutExtension(path)}-{i}", Guid.Empty, Guid.Empty, wimStream.Length);
+                partitions.Add(wimPartition);
+            }
 
             return partitions;
         }
@@ -67,11 +74,11 @@ namespace ToCBS
                         for (int i = 0; i < wimFile.ImageCount; i++)
                         {
                             IFileSystem wimFileSystem = wimFile.GetImage(i);
-                            Partition wimPartition = new(wimFileSystem, $"{partition.Name}-UpdateOS-{i}", Guid.Empty, Guid.Empty, wimStream.Length);
+                            Partition wimPartition = new(wimStream, wimFileSystem, $"{partition.Name}-UpdateOS-{i}", Guid.Empty, Guid.Empty, wimStream.Length);
                             partitions.Add(wimPartition);
                         }
 
-                        Disk updateOSDisk = new Disk(partitions);
+                        IDisk updateOSDisk = new Disk(partitions);
                         return updateOSDisk;
                     }
                 }

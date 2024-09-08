@@ -1,10 +1,8 @@
 ﻿using DiscUtils.Partitions;
 using DiscUtils.Streams;
 using DiscUtils;
-using ToCBS.Wof;
-using Img2Ffu.Reader;
 
-namespace ToCBS
+namespace ToSPKG.Adapters.Vhdx
 {
     public class Disk : IDisk
     {
@@ -13,9 +11,9 @@ namespace ToCBS
             get;
         }
 
-        public Disk(string ffuPath, uint SectorSize)
+        public Disk(string vhdx, uint SectorSize)
         {
-            List<PartitionInfo> partitionInfos = GetPartitions(ffuPath);
+            List<PartitionInfo> partitionInfos = GetPartitions(vhdx);
             Partitions = GetPartitionStructures(partitionInfos, SectorSize);
         }
 
@@ -69,7 +67,7 @@ namespace ToCBS
                     {
                         List<IPartition> partitions = [];
 
-                        Stream wimStream = fileSystem.OpenFileAndDecompressIfNeeded("PROGRAMS\\UpdateOS\\UpdateOS.wim");
+                        Stream wimStream = fileSystem.OpenFile("PROGRAMS\\UpdateOS\\UpdateOS.wim", FileMode.Open, FileAccess.Read);
                         DiscUtils.Wim.WimFile wimFile = new(wimStream);
 
                         for (int i = 0; i < wimFile.ImageCount; i++)
@@ -92,35 +90,39 @@ namespace ToCBS
             return null;
         }
 
-        private static List<PartitionInfo> GetPartitions(string ffuPath)
+        private static List<PartitionInfo> GetPartitions(string vhdx)
         {
             List<PartitionInfo> partitions = [];
-            for (int i = 0; i < FullFlashUpdateReaderStream.GetStoreCount(ffuPath); i++)
+
+            bool hasOsPool = false;
+
+            VirtualDisk virtualDisk = null;
+            if (vhdx.EndsWith(".vhd", StringComparison.InvariantCultureIgnoreCase))
             {
-                FullFlashUpdateReaderStream store = new(ffuPath, (ulong)i);
-                bool hasOsPool = false;
+                virtualDisk = new DiscUtils.Vhd.Disk(vhdx, FileAccess.Read);
+            }
+            else
+            {
+                virtualDisk = new DiscUtils.Vhdx.Disk(vhdx, FileAccess.Read);
+            }
 
-                long diskCapacity = (long)store.Length;
-                VirtualDisk virtualDisk = new DiscUtils.Raw.Disk(store, Ownership.None, Geometry.FromCapacity(diskCapacity, (int)store.SectorSize));
+            PartitionTable partitionTable = virtualDisk.Partitions;
 
-                PartitionTable partitionTable = virtualDisk.Partitions;
-
-                if (partitionTable != null)
+            if (partitionTable != null)
+            {
+                foreach (PartitionInfo partitionInfo in partitionTable.Partitions)
                 {
-                    foreach (PartitionInfo partitionInfo in partitionTable.Partitions)
+                    partitions.Add(partitionInfo);
+                    if (partitionInfo.GuidType == new Guid("E75CAF8F-F680-4CEE-AFA3-B001E56EFC2D"))
                     {
-                        partitions.Add(partitionInfo);
-                        if (partitionInfo.GuidType == new Guid("E75CAF8F-F680-4CEE-AFA3-B001E56EFC2D"))
-                        {
-                            hasOsPool = true;
-                        }
+                        hasOsPool = true;
                     }
                 }
+            }
 
-                if (hasOsPool)
-                {
-                    throw new Exception("Image contains an OSPool which is unsupported by this program!");
-                }
+            if (hasOsPool)
+            {
+                throw new Exception("Image contains an OSPool which is unsupported by this program!");
             }
 
             return partitions;

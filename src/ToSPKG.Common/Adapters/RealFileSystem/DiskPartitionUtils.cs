@@ -1,7 +1,7 @@
 ﻿using RawDiskLib;
 using System.Text;
 
-namespace ToSPKG
+namespace ToSPKG.Adapters.RealFileSystem
 {
     internal class DiskPartitionUtils
     {
@@ -80,7 +80,7 @@ namespace ToSPKG
 
             List<PartitionInfo> partitions = [];
 
-            while (!finished && offset < (header.Length - (2 * sectorSize)))
+            while (!finished && offset < header.Length - 2 * sectorSize)
             {
                 byte[] sliced = SliceByteArray(header, 128, offset);
                 offset += 128;

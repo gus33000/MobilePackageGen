@@ -2,8 +2,10 @@
 using DiscUtils.Streams;
 using DiscUtils;
 using ToCBS.Wof;
+using Microsoft.Spaces.Diskstream;
+using System.ComponentModel;
 
-namespace ToCBS
+namespace ToCBS.Adapters.VhdxSpaces
 {
     public class Disk : IDisk
     {
@@ -123,7 +125,31 @@ namespace ToCBS
 
             if (hasOsPool)
             {
-                throw new Exception("Image contains an OSPool which is unsupported by this program!");
+                try
+                {
+                    Microsoft.Spaces.Diskstream.Disk msVirtualDisk = Vhd.Open(vhdx, true, null);
+                    Pool pool = Pool.Open(msVirtualDisk);
+                    foreach (Space space in pool.Spaces)
+                    {
+                        DiscUtils.Raw.Disk duVirtualDisk = new(space, Ownership.None, Geometry.FromCapacity(space.Length, space.BytesPerSector));
+                        PartitionTable msPartitionTable = duVirtualDisk.Partitions;
+
+                        if (msPartitionTable != null)
+                        {
+                            foreach (PartitionInfo sspartition in msPartitionTable.Partitions)
+                            {
+                                partitions.Add(sspartition);
+                            }
+                        }
+                    }
+                }
+                catch (Win32Exception ex)
+                {
+                    if (ex.NativeErrorCode != 1168)
+                    {
+                        throw;
+                    }
+                }
             }
 
             return partitions;

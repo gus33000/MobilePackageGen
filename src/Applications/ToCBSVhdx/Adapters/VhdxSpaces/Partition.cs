@@ -2,7 +2,7 @@
 using DiscUtils;
 using SevenZipExtractor;
 
-namespace ToCBS
+namespace ToCBS.Adapters.VhdxSpaces
 {
     public class Partition : IPartition
     {
@@ -38,7 +38,7 @@ namespace ToCBS
             this.Name = Name;
             this.Type = Type;
             this.ID = ID;
-            this.FileSystem = TryCreateFileSystem(Stream);
+            FileSystem = TryCreateFileSystem(Stream);
         }
 
         public Partition(Stream Stream, IFileSystem FileSystem, string Name, Guid Type, Guid ID, long Size)

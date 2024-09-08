@@ -1,10 +1,13 @@
 ﻿using DiscUtils;
 
-namespace ToSPKG
+namespace ToSPKG.Adapters.RealFileSystem
 {
     public class Disk : IDisk
     {
-        public IEnumerable<IPartition> Partitions { get; }
+        public IEnumerable<IPartition> Partitions
+        {
+            get;
+        }
 
         public Disk(string path)
         {
@@ -67,7 +70,7 @@ namespace ToSPKG
                             partitions.Add(wimPartition);
                         }
 
-                        IDisk updateOSDisk = new Disk(partitions);
+                        Disk updateOSDisk = new Disk(partitions);
                         return updateOSDisk;
                     }
                 }

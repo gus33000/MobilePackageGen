@@ -1,6 +1,6 @@
 ﻿using DiscUtils;
 
-namespace ToSPKG
+namespace ToSPKG.Adapters.Wim
 {
     public class Disk : IDisk
     {

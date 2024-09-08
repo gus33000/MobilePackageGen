@@ -1,4 +1,6 @@
-﻿namespace ToSPKG
+﻿using ToSPKG.Adapters.Vhdx;
+
+namespace ToSPKG
 {
     internal class Program
     {

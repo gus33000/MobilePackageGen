@@ -1,4 +1,6 @@
-﻿namespace ToCBS
+﻿using ToCBS.Adapters.Wim;
+
+namespace ToCBS
 {
     internal class Program
     {

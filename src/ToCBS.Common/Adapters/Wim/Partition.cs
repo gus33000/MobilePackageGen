@@ -2,7 +2,7 @@
 using DiscUtils;
 using SevenZipExtractor;
 
-namespace ToSPKG
+namespace ToCBS.Adapters.Wim
 {
     public class Partition : IPartition
     {
@@ -20,7 +20,7 @@ namespace ToSPKG
             this.Name = Name;
             this.Type = Type;
             this.ID = ID;
-            this.FileSystem = TryCreateFileSystem(Stream);
+            FileSystem = TryCreateFileSystem(Stream);
         }
 
         public Partition(Stream Stream, IFileSystem FileSystem, string Name, Guid Type, Guid ID, long Size)

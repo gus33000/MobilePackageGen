@@ -1,4 +1,6 @@
-﻿namespace ToSPKG
+﻿using ToSPKG.Adapters.RealFileSystem;
+
+namespace ToSPKG
 {
     internal class Program
     {

@@ -1,6 +1,7 @@
 ﻿using DiscUtils;
+using ToCBS.Wof;
 
-namespace ToCBS
+namespace ToCBS.Adapters.RealFileSystem
 {
     public class Disk : IDisk
     {
@@ -9,9 +10,9 @@ namespace ToCBS
             get;
         }
 
-        public Disk(string wimPath)
+        public Disk(string path)
         {
-            Partitions = GetPartitionStructures(wimPath);
+            Partitions = GetPartitionStructures(path);
         }
 
         public Disk(List<IPartition> Partitions)
@@ -23,15 +24,8 @@ namespace ToCBS
         {
             List<IPartition> partitions = [];
 
-            Stream wimStream = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-            DiscUtils.Wim.WimFile wimFile = new(wimStream);
-
-            for (int i = 0; i < wimFile.ImageCount; i++)
-            {
-                IFileSystem wimFileSystem = wimFile.GetImage(i);
-                Partition wimPartition = new(wimStream, wimFileSystem, $"{Path.GetFileNameWithoutExtension(path)}-{i}", Guid.Empty, Guid.Empty, wimStream.Length);
-                partitions.Add(wimPartition);
-            }
+            Partition partition = new(new RealFileSystemBridge(path), path.Replace(":", "").Replace(Path.DirectorySeparatorChar, '_'), Guid.Empty, Guid.Empty, 0);
+            partitions.Add(partition);
 
             return partitions;
         }
@@ -67,17 +61,17 @@ namespace ToCBS
                     {
                         List<IPartition> partitions = [];
 
-                        Stream wimStream = fileSystem.OpenFile("PROGRAMS\\UpdateOS\\UpdateOS.wim", FileMode.Open, FileAccess.Read);
+                        Stream wimStream = fileSystem.OpenFileAndDecompressIfNeeded("PROGRAMS\\UpdateOS\\UpdateOS.wim");
                         DiscUtils.Wim.WimFile wimFile = new(wimStream);
 
                         for (int i = 0; i < wimFile.ImageCount; i++)
                         {
                             IFileSystem wimFileSystem = wimFile.GetImage(i);
-                            Partition wimPartition = new(wimStream, wimFileSystem, $"{partition.Name}-UpdateOS-{i}", Guid.Empty, Guid.Empty, wimStream.Length);
+                            Partition wimPartition = new(wimFileSystem, $"{partition.Name}-UpdateOS-{i}", Guid.Empty, Guid.Empty, wimStream.Length);
                             partitions.Add(wimPartition);
                         }
 
-                        IDisk updateOSDisk = new Disk(partitions);
+                        Disk updateOSDisk = new Disk(partitions);
                         return updateOSDisk;
                     }
                 }

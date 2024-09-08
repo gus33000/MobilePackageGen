@@ -1,4 +1,4 @@
-﻿namespace ToCBS
+﻿namespace ToCBS.Adapters.RealFileSystem
 {
     public struct PartitionInfo
     {

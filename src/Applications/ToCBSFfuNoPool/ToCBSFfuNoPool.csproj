@@ -10,15 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LTRData.DiscUtils.Wim" Version="1.0.46" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\ToCBS.Common\ToCBS.Common.csproj" />
-    <ProjectReference Include="..\..\Archives.DiscUtils\Archives.DiscUtils.csproj" />
-    <ProjectReference Include="..\..\Img2Ffu\Img2Ffu.csproj" />
-    <ProjectReference Include="..\..\Microsoft.Deployment.Compression.Cab\Microsoft.Deployment.Compression.Cab.csproj" />
-    <ProjectReference Include="..\..\WofStream\WofStream.csproj" />
   </ItemGroup>
 
 </Project>

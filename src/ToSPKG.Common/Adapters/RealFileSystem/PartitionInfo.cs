@@ -1,4 +1,4 @@
-﻿namespace ToSPKG
+﻿namespace ToSPKG.Adapters.RealFileSystem
 {
     public struct PartitionInfo
     {

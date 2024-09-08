@@ -3,7 +3,7 @@ using DiscUtils.Streams;
 using DiscUtils;
 using Img2Ffu.Reader;
 
-namespace ToSPKG
+namespace ToSPKG.Adapters.FullFlashUpdate
 {
     public class Disk : IDisk
     {
@@ -78,7 +78,7 @@ namespace ToSPKG
                             partitions.Add(wimPartition);
                         }
 
-                        IDisk updateOSDisk = new Disk(partitions);
+                        Disk updateOSDisk = new Disk(partitions);
                         return updateOSDisk;
                     }
                 }
@@ -99,8 +99,8 @@ namespace ToSPKG
                 FullFlashUpdateReaderStream store = new(ffuPath, (ulong)i);
                 bool hasOsPool = false;
 
-                long diskCapacity = (long)store.Length;
-                VirtualDisk virtualDisk = new DiscUtils.Raw.Disk(store, Ownership.None, Geometry.FromCapacity(diskCapacity, (int)store.SectorSize));
+                long diskCapacity = store.Length;
+                VirtualDisk virtualDisk = new DiscUtils.Raw.Disk(store, Ownership.None, Geometry.FromCapacity(diskCapacity, store.SectorSize));
 
                 PartitionTable partitionTable = virtualDisk.Partitions;
 

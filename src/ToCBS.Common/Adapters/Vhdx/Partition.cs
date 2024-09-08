@@ -2,16 +2,34 @@
 using DiscUtils;
 using SevenZipExtractor;
 
-namespace ToSPKG
+namespace ToCBS.Adapters.Vhdx
 {
     public class Partition : IPartition
     {
-        public string Name { get; }
-        public Guid Type { get; }
-        public Guid ID { get; }
-        public long Size { get; }
-        public IFileSystem? FileSystem { get; }
-        public Stream Stream { get; }
+        public string Name
+        {
+            get;
+        }
+        public Guid Type
+        {
+            get;
+        }
+        public Guid ID
+        {
+            get;
+        }
+        public long Size
+        {
+            get;
+        }
+        public IFileSystem? FileSystem
+        {
+            get;
+        }
+        public Stream Stream
+        {
+            get;
+        }
 
         public Partition(Stream Stream, string Name, Guid Type, Guid ID, long Size)
         {
@@ -20,7 +38,7 @@ namespace ToSPKG
             this.Name = Name;
             this.Type = Type;
             this.ID = ID;
-            this.FileSystem = TryCreateFileSystem(Stream);
+            FileSystem = TryCreateFileSystem(Stream);
         }
 
         public Partition(Stream Stream, IFileSystem FileSystem, string Name, Guid Type, Guid ID, long Size)

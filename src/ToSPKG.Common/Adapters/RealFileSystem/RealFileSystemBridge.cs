@@ -1,7 +1,7 @@
 ﻿using DiscUtils;
 using DiscUtils.Streams;
 
-namespace ToSPKG
+namespace ToSPKG.Adapters.RealFileSystem
 {
     public class RealFileSystemBridge : IFileSystem
     {

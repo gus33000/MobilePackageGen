@@ -1,4 +1,6 @@
-﻿namespace ToCBS
+﻿using ToCBS.Adapters.FullFlashUpdate;
+
+namespace ToCBS
 {
     internal class Program
     {

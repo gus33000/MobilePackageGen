@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="RawDiskLib" Version="0.2.1" />
     <PackageReference Include="LTRData.DiscUtils.Vhd" Version="1.0.46" />
     <PackageReference Include="LTRData.DiscUtils.Vhdx" Version="1.0.46" />
     <PackageReference Include="LTRData.DiscUtils.Wim" Version="1.0.46" />
@@ -17,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\ToCBS.Common\ToCBS.Common.csproj" />
     <ProjectReference Include="..\..\Archives.DiscUtils\Archives.DiscUtils.csproj" />
+    <ProjectReference Include="..\..\Img2Ffu\Img2Ffu.csproj" />
     <ProjectReference Include="..\..\Diskstream\Diskstream.csproj" />
     <ProjectReference Include="..\..\Microsoft.Deployment.Compression.Cab\Microsoft.Deployment.Compression.Cab.csproj" />
     <ProjectReference Include="..\..\WofStream\WofStream.csproj" />

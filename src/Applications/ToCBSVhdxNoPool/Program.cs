@@ -1,4 +1,6 @@
-﻿namespace ToCBS
+﻿using ToCBS.Adapters.Vhdx;
+
+namespace ToCBS
 {
     internal class Program
     {

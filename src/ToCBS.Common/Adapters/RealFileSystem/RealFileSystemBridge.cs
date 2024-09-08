@@ -1,7 +1,7 @@
 ﻿using DiscUtils;
 using DiscUtils.Streams;
 
-namespace ToCBS
+namespace ToCBS.Adapters.RealFileSystem
 {
     public class RealFileSystemBridge : IFileSystem
     {

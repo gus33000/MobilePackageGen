@@ -1,6 +1,6 @@
 ﻿using DiscUtils;
 
-namespace ToCBS
+namespace ToCBS.Adapters.RealFileSystem
 {
     public class Partition : IPartition
     {

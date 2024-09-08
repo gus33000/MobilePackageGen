@@ -1,8 +1,9 @@
 ﻿using DiscUtils.Partitions;
 using DiscUtils.Streams;
 using DiscUtils;
+using ToCBS.Wof;
 
-namespace ToSPKG
+namespace ToCBS.Adapters.Vhdx
 {
     public class Disk : IDisk
     {
@@ -67,7 +68,7 @@ namespace ToSPKG
                     {
                         List<IPartition> partitions = [];
 
-                        Stream wimStream = fileSystem.OpenFile("PROGRAMS\\UpdateOS\\UpdateOS.wim", FileMode.Open, FileAccess.Read);
+                        Stream wimStream = fileSystem.OpenFileAndDecompressIfNeeded("PROGRAMS\\UpdateOS\\UpdateOS.wim");
                         DiscUtils.Wim.WimFile wimFile = new(wimStream);
 
                         for (int i = 0; i < wimFile.ImageCount; i++)
@@ -77,7 +78,7 @@ namespace ToSPKG
                             partitions.Add(wimPartition);
                         }
 
-                        IDisk updateOSDisk = new Disk(partitions);
+                        Disk updateOSDisk = new Disk(partitions);
                         return updateOSDisk;
                     }
                 }

@@ -1,4 +1,6 @@
-﻿namespace ToSPKG
+﻿using ToSPKG.Adapters.Wim;
+
+namespace ToSPKG
 {
     internal class Program
     {
