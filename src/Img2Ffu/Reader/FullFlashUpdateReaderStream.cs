@@ -197,7 +197,21 @@ namespace Img2Ffu.Reader
         public override long Position
         {
             get => currentPosition;
-            set => currentPosition = value;
+            set
+            {
+                if (currentPosition < 0)
+                {
+                    throw new ArgumentOutOfRangeException("value");
+                }
+
+                // Workaround for malformed MBRs
+                /*if (currentPosition > Length)
+                {
+                    throw new EndOfStreamException();
+                }*/
+
+                currentPosition = value;
+            }
         }
 
         public override void Flush()
@@ -207,7 +221,33 @@ namespace Img2Ffu.Reader
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            int readBytes = count;
+            if (buffer == null)
+            {
+                throw new ArgumentNullException("buffer");
+            }
+            
+            if (offset + count > buffer.Length)
+            {
+                throw new ArgumentException("The sum of offset and count is greater than the buffer length.");
+            }
+            
+            if (offset < 0)
+            {
+                throw new ArgumentOutOfRangeException("offset");
+            }
+            
+            if (count < 0)
+            {
+                throw new ArgumentOutOfRangeException("count");
+            }
+
+            // Workaround for malformed MBRs
+            if (Position >= Length)
+            {
+                return count;
+            }
+
+            long readBytes = (long)count;
 
             if (Position + readBytes > Length)
             {
@@ -243,48 +283,33 @@ namespace Img2Ffu.Reader
             Array.Copy(allReadBlocks, overflowBlockStartByteCount, buffer, offset, readBytes);
 
             Position += readBytes;
-            return readBytes;
+
+            if (Position == Length)
+            {
+                // Workaround for malformed MBRs
+                //return 0;
+            }
+            
+            return (int)readBytes;
         }
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            if (offset > Length)
-            {
-                throw new ArgumentOutOfRangeException(nameof(offset));
-            }
-
             switch (origin)
             {
                 case SeekOrigin.Begin:
                     {
-                        if (offset < 0)
-                        {
-                            throw new IOException();
-                        }
-
                         Position = offset;
                         break;
                     }
                 case SeekOrigin.Current:
                     {
-                        int tempPosition = (int)Position + (int)offset;
-                        if (tempPosition < 0)
-                        {
-                            throw new IOException();
-                        }
-
-                        Position = tempPosition;
+                        Position += offset;
                         break;
                     }
                 case SeekOrigin.End:
                     {
-                        int tempPosition = (int)Length + (int)offset;
-                        if (tempPosition < 0)
-                        {
-                            throw new IOException();
-                        }
-
-                        Position = tempPosition;
+                        Position = Length + offset;
                         break;
                     }
                 default:
