@@ -7,7 +7,10 @@ namespace ToCBS
 {
     public class Disk : IDisk
     {
-        public IEnumerable<IPartition> Partitions { get; }
+        public IEnumerable<IPartition> Partitions
+        {
+            get;
+        }
 
         public Disk(string vhdx, uint SectorSize)
         {

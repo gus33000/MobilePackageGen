@@ -4,11 +4,26 @@ namespace ToCBS
 {
     public class Partition : IPartition
     {
-        public string Name { get; }
-        public Guid Type { get; }
-        public Guid ID { get; }
-        public long Size { get; }
-        public IFileSystem? FileSystem { get; }
+        public string Name
+        {
+            get;
+        }
+        public Guid Type
+        {
+            get;
+        }
+        public Guid ID
+        {
+            get;
+        }
+        public long Size
+        {
+            get;
+        }
+        public IFileSystem? FileSystem
+        {
+            get;
+        }
         public Stream Stream => GetPartitionStream(Name, GetPartitions());
 
         public Partition(IFileSystem FileSystem, string Name, Guid Type, Guid ID, long Size)

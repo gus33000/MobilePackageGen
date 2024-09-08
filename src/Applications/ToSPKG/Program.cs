@@ -37,7 +37,7 @@ Version: 1.0.0.0
 
             foreach (string path in paths)
             {
-                disks.Add(new Disk(path)); // Hardcoded, todo
+                disks.Add(new Disk(path));
             }
 
             return disks;
