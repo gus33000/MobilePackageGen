@@ -145,7 +145,7 @@ namespace MobilePackageGen
                 {
                     if (!fileSystem.FileExists(normalized))
                     {
-                        string[] partitionNamesWithLinks = new string[] { "data", "efiesp", "osdata", "dpp", "mmos" };
+                        string[] partitionNamesWithLinks = ["data", "efiesp", "osdata", "dpp", "mmos"];
 
                         foreach (string partitionNameWithLink in partitionNamesWithLinks)
                         {

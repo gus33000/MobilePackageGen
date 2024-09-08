@@ -110,7 +110,7 @@
         }
         public void Extract(Stream stream)
         {
-            this.archive.Extract(new[] { this.index }, 1, 0, new ArchiveStreamCallback(this.index, stream));
+            this.archive.Extract([this.index], 1, 0, new ArchiveStreamCallback(this.index, stream));
         }
     }
 }

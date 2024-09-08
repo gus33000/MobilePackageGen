@@ -214,7 +214,7 @@ namespace Microsoft.Deployment.Compression.Cab
                             {
                                 object nextFolderOption = streamContext.GetOption(
                                     "nextFolder",
-                                    new object[] { file, currentFolderNumber });
+                                    [file, currentFolderNumber]);
                                 nextFolder = Convert.ToBoolean(
                                     nextFolderOption, CultureInfo.InvariantCulture);
                             }

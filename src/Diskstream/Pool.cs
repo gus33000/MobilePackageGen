@@ -54,10 +54,10 @@ namespace Microsoft.Spaces.Diskstream
 
 		public static Pool Open(Disk disk)
 		{
-			return Pool.Open(new Disk[]
-			{
-				disk
-			});
+			return Pool.Open(
+            [
+                disk
+			]);
 		}
 
 		public static Pool Open(Disk[] disks)
