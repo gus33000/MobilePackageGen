@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-
-namespace ToCBS
+﻿namespace ToCBS
 {
     internal class TempManager
     {

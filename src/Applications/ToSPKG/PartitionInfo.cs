@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ToSPKG
+﻿namespace ToSPKG
 {
     public struct PartitionInfo
     {

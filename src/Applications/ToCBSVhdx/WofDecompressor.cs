@@ -1,8 +1,5 @@
 ﻿using DiscUtils.Ntfs;
 using DiscUtils;
-using System;
-using System.IO;
-using System.Linq;
 
 namespace ToCBS.Wof
 {

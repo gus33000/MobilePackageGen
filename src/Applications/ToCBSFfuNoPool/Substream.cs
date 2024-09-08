@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace ToCBS
+﻿namespace ToCBS
 {
     public class Substream : Stream
     {

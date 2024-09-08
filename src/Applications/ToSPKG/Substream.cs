@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace ToSPKG
+﻿namespace ToSPKG
 {
     public class Substream : Stream
     {

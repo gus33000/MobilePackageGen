@@ -1,8 +1,6 @@
 ﻿using Archives.DiscUtils;
 using DiscUtils;
 using SevenZipExtractor;
-using System;
-using System.IO;
 
 namespace ToSPKG
 {

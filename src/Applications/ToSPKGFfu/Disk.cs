@@ -1,9 +1,6 @@
 ﻿using DiscUtils.Partitions;
 using DiscUtils.Streams;
 using DiscUtils;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using Img2Ffu.Reader;
 
 namespace ToSPKG

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace ToSPKG
+﻿namespace ToSPKG
 {
     internal class Program
     {

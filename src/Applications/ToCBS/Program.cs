@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace ToCBS
+﻿namespace ToCBS
 {
     internal class Program
     {

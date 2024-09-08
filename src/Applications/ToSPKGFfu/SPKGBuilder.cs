@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 using Microsoft.Deployment.Compression.Cab;
 using DiscUtils;
 using Microsoft.Deployment.Compression;
@@ -12,7 +8,7 @@ namespace ToSPKG
 {
     public class SPKGBuilder
     {
-        private static List<CabinetFileInfo> GetCabinetFileInfoForCbsPackage(XmlDsm.Package dsm, Partition partition, List<Disk> disks)
+        private static List<CabinetFileInfo> GetCabinetFileInfoForDsmPackage(XmlDsm.Package dsm, Partition partition, List<Disk> disks)
         {
             List<CabinetFileInfo> fileMappings = [];
 
@@ -252,39 +248,6 @@ namespace ToSPKG
             Console.WriteLine("The operation completed successfully.");
         }
 
-        private static void CreateDirectoryWhileCopying(IFileSystem fileSystem, string source, string dest, bool decompress = false)
-        {
-            string dirFromDest = Path.GetDirectoryName(dest);
-            if (!Directory.Exists(dirFromDest))
-            {
-                Directory.CreateDirectory(dirFromDest);
-            }
-
-            try
-            {
-                if (!decompress)
-                {
-                    using Stream stream = fileSystem.OpenFile(source, FileMode.Open, FileAccess.Read);
-                    using Stream destStream = File.Open(dest, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
-
-                    stream.CopyTo(destStream);
-                }
-                else
-                {
-                    using Stream stream = fileSystem.OpenFileAndDecompressAsGZip(source);
-                    using Stream destStream = File.Open(dest, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
-
-                    stream.CopyTo(destStream);
-                }
-            }
-            catch (Exception ex)
-            {
-                //Console.ForegroundColor = ConsoleColor.Red;
-                //Console.WriteLine($"FILED TO COPY {source} --> {ex.Message}");
-                //Console.ResetColor();
-            }
-        }
-
         private static List<Partition> GetPartitionsWithServicing(List<Disk> disks)
         {
             List<Partition> fileSystemsWithServicing = new();
@@ -374,7 +337,7 @@ namespace ToSPKG
 
                         if (!File.Exists(cabFile))
                         {
-                            List<CabinetFileInfo> fileMappings = GetCabinetFileInfoForCbsPackage(dsm, partition, disks);
+                            List<CabinetFileInfo> fileMappings = GetCabinetFileInfoForDsmPackage(dsm, partition, disks);
 
                             int oldPercentage = -1;
                             CabInfo cab = new(cabFile);

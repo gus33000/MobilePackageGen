@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-
-namespace ToSPKG
+﻿namespace ToSPKG
 {
     internal class TempManager
     {

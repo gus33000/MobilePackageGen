@@ -1,5 +1,4 @@
 ﻿using DiscUtils;
-using System.IO;
 using System.IO.Compression;
 
 namespace ToSPKG.GZip

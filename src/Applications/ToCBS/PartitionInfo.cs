@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ToCBS
+﻿namespace ToCBS
 {
     public struct PartitionInfo
     {
