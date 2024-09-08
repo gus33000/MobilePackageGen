@@ -1,10 +1,10 @@
 ﻿namespace ToSPKG
 {
-    internal class TempManager
+    public class TempManager
     {
         private static readonly List<string> tempFiles = [];
 
-        internal static string GetTempFile()
+        public static string GetTempFile()
         {
             string file = Path.GetTempFileName();
             File.Delete(file);
@@ -12,7 +12,7 @@
             return file;
         }
 
-        internal static void CleanupTempFiles()
+        public static void CleanupTempFiles()
         {
             foreach (string file in tempFiles)
             {

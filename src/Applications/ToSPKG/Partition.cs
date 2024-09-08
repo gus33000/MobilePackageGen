@@ -2,7 +2,7 @@
 
 namespace ToSPKG
 {
-    public class Partition
+    public class Partition : IPartition
     {
         public string Name { get; }
         public Guid Type { get; }

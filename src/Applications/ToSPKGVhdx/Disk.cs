@@ -4,9 +4,9 @@ using DiscUtils;
 
 namespace ToSPKG
 {
-    public class Disk
+    public class Disk : IDisk
     {
-        public List<Partition> Partitions { get; }
+        public IEnumerable<IPartition> Partitions { get; }
 
         public Disk(string vhdx, uint SectorSize)
         {
@@ -14,14 +14,14 @@ namespace ToSPKG
             Partitions = GetPartitionStructures(partitionInfos, SectorSize);
         }
 
-        public Disk(List<Partition> Partitions)
+        public Disk(List<IPartition> Partitions)
         {
             this.Partitions = Partitions;
         }
 
-        private static List<Partition> GetPartitionStructures(List<PartitionInfo> partitionInfos, uint SectorSize)
+        private static List<IPartition> GetPartitionStructures(List<PartitionInfo> partitionInfos, uint SectorSize)
         {
-            List<Partition> partitions = [];
+            List<IPartition> partitions = [];
 
             foreach (PartitionInfo partitionInfo in partitionInfos)
             {
@@ -33,15 +33,15 @@ namespace ToSPKG
             return partitions;
         }
 
-        public static List<Disk> GetUpdateOSDisks(List<Disk> disks)
+        public static List<IDisk> GetUpdateOSDisks(List<IDisk> disks)
         {
-            List<Disk> updateOSDisks = [];
+            List<IDisk> updateOSDisks = [];
 
-            foreach (Disk disk in disks)
+            foreach (IDisk disk in disks)
             {
-                foreach (Partition partition in disk.Partitions)
+                foreach (IPartition partition in disk.Partitions)
                 {
-                    Disk? updateOSDisk = GetUpdateOSDisk(partition);
+                    IDisk? updateOSDisk = GetUpdateOSDisk(partition);
                     if (updateOSDisk != null)
                     {
                         updateOSDisks.Add(updateOSDisk);
@@ -52,7 +52,7 @@ namespace ToSPKG
             return updateOSDisks;
         }
 
-        public static Disk? GetUpdateOSDisk(Partition partition)
+        public static IDisk? GetUpdateOSDisk(IPartition partition)
         {
             if (partition.FileSystem != null)
             {
@@ -62,7 +62,7 @@ namespace ToSPKG
                     // Handle UpdateOS as well if found
                     if (fileSystem.FileExists("PROGRAMS\\UpdateOS\\UpdateOS.wim"))
                     {
-                        List<Partition> partitions = [];
+                        List<IPartition> partitions = [];
 
                         Stream wimStream = fileSystem.OpenFile("PROGRAMS\\UpdateOS\\UpdateOS.wim", FileMode.Open, FileAccess.Read);
                         DiscUtils.Wim.WimFile wimFile = new(wimStream);
@@ -74,7 +74,7 @@ namespace ToSPKG
                             partitions.Add(wimPartition);
                         }
 
-                        Disk updateOSDisk = new Disk(partitions);
+                        IDisk updateOSDisk = new Disk(partitions);
                         return updateOSDisk;
                     }
                 }

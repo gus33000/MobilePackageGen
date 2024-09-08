@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Archives.DiscUtils\Archives.DiscUtils.csproj" />
     <ProjectReference Include="..\..\Microsoft.Deployment.Compression.Cab\Microsoft.Deployment.Compression.Cab.csproj" />
+    <ProjectReference Include="..\..\ToSPKG.Common\ToSPKG.Common.csproj" />
   </ItemGroup>
 
 </Project>

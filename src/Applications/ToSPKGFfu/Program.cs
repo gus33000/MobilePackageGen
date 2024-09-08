@@ -24,14 +24,18 @@ Version: 1.0.0.0
 
             Console.WriteLine("Getting Disks...");
 
-            List<Disk> disks = GetDisks(args[0]);
+            List<IDisk> disks = GetDisks(args[0]);
+
+            Console.WriteLine("Getting Update OS Disks...");
+
+            disks.AddRange(Disk.GetUpdateOSDisks(disks));
 
             SPKGBuilder.BuildSPKG(disks, args[1]);
         }
 
-        private static List<Disk> GetDisks(string ffuPath)
+        private static List<IDisk> GetDisks(string ffuPath)
         {
-            List<Disk> disks =
+            List<IDisk> disks =
             [
                 new Disk(ffuPath, SectorSize) // Hardcoded, todo
             ];

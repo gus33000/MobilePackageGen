@@ -22,14 +22,18 @@ Version: 1.0.0.0
 
             Console.WriteLine("Getting Disks...");
 
-            List<Disk> disks = GetDisks(args[..^1]);
+            List<IDisk> disks = GetDisks(args[..^1]);
+
+            Console.WriteLine("Getting Update OS Disks...");
+
+            disks.AddRange(Disk.GetUpdateOSDisks(disks));
 
             SPKGBuilder.BuildSPKG(disks, args[^1]);
         }
 
-        private static List<Disk> GetDisks(string[] paths)
+        private static List<IDisk> GetDisks(string[] paths)
         {
-            List<Disk> disks = [];
+            List<IDisk> disks = [];
 
             foreach (string path in paths)
             {
