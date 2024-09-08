@@ -24,7 +24,7 @@ namespace MobilePackageGen.Adapters.RealFileSystem
         {
             List<IPartition> partitions = [];
 
-            Partition partition = new(new RealFileSystemBridge(path), path.Replace(":", "").Replace(Path.DirectorySeparatorChar, '_'), Guid.Empty, Guid.Empty, 0);
+            DeferredStreamPartition partition = new(new RealFileSystemBridge(path), path.Replace(":", "").Replace(Path.DirectorySeparatorChar, '_'), Guid.Empty, Guid.Empty);
             partitions.Add(partition);
 
             return partitions;
@@ -67,7 +67,7 @@ namespace MobilePackageGen.Adapters.RealFileSystem
                         for (int i = 0; i < wimFile.ImageCount; i++)
                         {
                             IFileSystem wimFileSystem = wimFile.GetImage(i);
-                            Partition wimPartition = new(wimFileSystem, $"{partition.Name}-UpdateOS-{i}", Guid.Empty, Guid.Empty, wimStream.Length);
+                            IPartition wimPartition = new FileSystemPartition(wimStream, wimFileSystem, $"{partition.Name}-UpdateOS-{i}", Guid.Empty, Guid.Empty);
                             partitions.Add(wimPartition);
                         }
 

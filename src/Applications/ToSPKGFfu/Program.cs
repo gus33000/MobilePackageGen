@@ -5,9 +5,6 @@ namespace ToSPKG
 {
     internal class Program
     {
-        // Hardcoded, todo
-        public const uint SectorSize = 512;
-
         private static void Main(string[] args)
         {
             Console.WriteLine(@"
@@ -40,7 +37,7 @@ Version: 1.0.0.0
         {
             List<IDisk> disks =
             [
-                new Disk(ffuPath, SectorSize) // Hardcoded, todo
+                new Disk(ffuPath)
             ];
 
             return disks;

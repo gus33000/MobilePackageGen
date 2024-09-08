@@ -1,51 +1,55 @@
 ﻿using Archives.DiscUtils;
 using DiscUtils;
-using MobilePackageGen;
 using SevenZipExtractor;
 
-namespace ToCBS.Adapters.VhdxSpaces
+namespace MobilePackageGen.Adapters
 {
-    public class Partition : IPartition
+    public class FileSystemPartition : IPartition
     {
         public string Name
         {
             get;
         }
+
         public Guid Type
         {
             get;
         }
+
         public Guid ID
         {
             get;
         }
+
         public long Size
         {
             get;
         }
+
         public IFileSystem? FileSystem
         {
             get;
         }
+
         public Stream Stream
         {
             get;
         }
 
-        public Partition(Stream Stream, string Name, Guid Type, Guid ID, long Size)
+        public FileSystemPartition(Stream Stream, string Name, Guid Type, Guid ID)
         {
             this.Stream = Stream;
-            this.Size = Stream.Length;
+            Size = Stream.Length;
             this.Name = Name;
             this.Type = Type;
             this.ID = ID;
             FileSystem = TryCreateFileSystem(Stream);
         }
 
-        public Partition(Stream Stream, IFileSystem FileSystem, string Name, Guid Type, Guid ID, long Size)
+        public FileSystemPartition(Stream Stream, IFileSystem FileSystem, string Name, Guid Type, Guid ID)
         {
             this.Stream = Stream;
-            this.Size = Stream.Length;
+            Size = Stream.Length;
             this.Name = Name;
             this.Type = Type;
             this.ID = ID;

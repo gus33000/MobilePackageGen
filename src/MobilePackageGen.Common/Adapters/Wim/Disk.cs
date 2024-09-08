@@ -30,7 +30,7 @@ namespace MobilePackageGen.Adapters.Wim
             for (int i = 0; i < wimFile.ImageCount; i++)
             {
                 IFileSystem wimFileSystem = wimFile.GetImage(i);
-                Partition wimPartition = new(wimStream, wimFileSystem, $"{Path.GetFileNameWithoutExtension(path)}-{i}", Guid.Empty, Guid.Empty, wimStream.Length);
+                IPartition wimPartition = new FileSystemPartition(wimStream, wimFileSystem, $"{Path.GetFileNameWithoutExtension(path)}-{i}", Guid.Empty, Guid.Empty);
                 partitions.Add(wimPartition);
             }
 
@@ -74,7 +74,7 @@ namespace MobilePackageGen.Adapters.Wim
                         for (int i = 0; i < wimFile.ImageCount; i++)
                         {
                             IFileSystem wimFileSystem = wimFile.GetImage(i);
-                            Partition wimPartition = new(wimStream, wimFileSystem, $"{partition.Name}-UpdateOS-{i}", Guid.Empty, Guid.Empty, wimStream.Length);
+                            IPartition wimPartition = new FileSystemPartition(wimStream, wimFileSystem, $"{partition.Name}-UpdateOS-{i}", Guid.Empty, Guid.Empty);
                             partitions.Add(wimPartition);
                         }
 

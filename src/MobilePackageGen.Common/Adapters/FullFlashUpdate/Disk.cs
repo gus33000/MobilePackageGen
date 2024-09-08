@@ -13,10 +13,10 @@ namespace MobilePackageGen.Adapters.FullFlashUpdate
             get;
         }
 
-        public Disk(string ffuPath, uint SectorSize)
+        public Disk(string ffuPath)
         {
             List<PartitionInfo> partitionInfos = GetPartitions(ffuPath);
-            Partitions = GetPartitionStructures(partitionInfos, SectorSize);
+            Partitions = GetPartitionStructures(partitionInfos);
         }
 
         public Disk(List<IPartition> Partitions)
@@ -24,14 +24,14 @@ namespace MobilePackageGen.Adapters.FullFlashUpdate
             this.Partitions = Partitions;
         }
 
-        private static List<IPartition> GetPartitionStructures(List<PartitionInfo> partitionInfos, uint SectorSize)
+        private static List<IPartition> GetPartitionStructures(List<PartitionInfo> partitionInfos)
         {
             List<IPartition> partitions = [];
 
             foreach (PartitionInfo partitionInfo in partitionInfos)
             {
                 SparseStream partitionStream = partitionInfo.Open();
-                Partition partition = new(partitionStream, ((GuidPartitionInfo)partitionInfo).Name, ((GuidPartitionInfo)partitionInfo).GuidType, ((GuidPartitionInfo)partitionInfo).Identity, ((GuidPartitionInfo)partitionInfo).SectorCount * SectorSize);
+                IPartition partition = new FileSystemPartition(partitionStream, ((GuidPartitionInfo)partitionInfo).Name, ((GuidPartitionInfo)partitionInfo).GuidType, ((GuidPartitionInfo)partitionInfo).Identity);
                 partitions.Add(partition);
             }
 
@@ -75,7 +75,7 @@ namespace MobilePackageGen.Adapters.FullFlashUpdate
                         for (int i = 0; i < wimFile.ImageCount; i++)
                         {
                             IFileSystem wimFileSystem = wimFile.GetImage(i);
-                            Partition wimPartition = new(wimStream, wimFileSystem, $"{partition.Name}-UpdateOS-{i}", Guid.Empty, Guid.Empty, wimStream.Length);
+                            IPartition wimPartition = new FileSystemPartition(wimStream, wimFileSystem, $"{partition.Name}-UpdateOS-{i}", Guid.Empty, Guid.Empty);
                             partitions.Add(wimPartition);
                         }
 

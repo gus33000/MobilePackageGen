@@ -2,33 +2,38 @@
 
 namespace MobilePackageGen.Adapters.RealFileSystem
 {
-    public class Partition : IPartition
+    public class DeferredStreamPartition : IPartition
     {
         public string Name
         {
             get;
         }
+
         public Guid Type
         {
             get;
         }
+
         public Guid ID
         {
             get;
         }
+
         public long Size
         {
             get;
         }
+
         public IFileSystem? FileSystem
         {
             get;
         }
+
         public Stream Stream => GetPartitionStream(Name, GetPartitions());
 
-        public Partition(IFileSystem FileSystem, string Name, Guid Type, Guid ID, long Size)
+        public DeferredStreamPartition(IFileSystem FileSystem, string Name, Guid Type, Guid ID)
         {
-            this.Size = Stream.Length;
+            Size = Stream.Length;
             this.Name = Name;
             this.Type = Type;
             this.ID = ID;
@@ -40,7 +45,7 @@ namespace MobilePackageGen.Adapters.RealFileSystem
             return DiskPartitionUtils.GetDiskDetail();
         }
 
-        private static Stream GetPartitionStream(string PartitionName, List<PartitionInfo> partitions)
+        private static FileStream GetPartitionStream(string PartitionName, List<PartitionInfo> partitions)
         {
             string file = TempManager.GetTempFile();
             DiskPartitionUtils.ExtractFromDiskAndCopy(partitions, PartitionName, file);

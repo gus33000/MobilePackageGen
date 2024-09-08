@@ -5,9 +5,6 @@ namespace ToCBS
 {
     internal class Program
     {
-        // Hardcoded, todo
-        public const uint SectorSize = 512;
-
         private static void Main(string[] args)
         {
             Console.WriteLine(@"
@@ -49,7 +46,7 @@ Version: 1.0.0.0
 
             foreach (string vhdx in vhdxs)
             {
-                disks.Add(new Disk(vhdx, SectorSize)); // Hardcoded, todo
+                disks.Add(new Disk(vhdx));
             }
 
             return disks;

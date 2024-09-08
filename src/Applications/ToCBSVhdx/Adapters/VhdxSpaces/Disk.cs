@@ -5,6 +5,7 @@ using MobilePackageGen.Wof;
 using Microsoft.Spaces.Diskstream;
 using System.ComponentModel;
 using MobilePackageGen;
+using MobilePackageGen.Adapters;
 
 namespace ToCBS.Adapters.VhdxSpaces
 {
@@ -15,10 +16,10 @@ namespace ToCBS.Adapters.VhdxSpaces
             get;
         }
 
-        public Disk(string vhdx, uint SectorSize)
+        public Disk(string vhdx)
         {
             List<PartitionInfo> partitionInfos = GetPartitions(vhdx);
-            Partitions = GetPartitionStructures(partitionInfos, SectorSize);
+            Partitions = GetPartitionStructures(partitionInfos);
         }
 
         public Disk(List<IPartition> Partitions)
@@ -26,14 +27,14 @@ namespace ToCBS.Adapters.VhdxSpaces
             this.Partitions = Partitions;
         }
 
-        private static List<IPartition> GetPartitionStructures(List<PartitionInfo> partitionInfos, uint SectorSize)
+        private static List<IPartition> GetPartitionStructures(List<PartitionInfo> partitionInfos)
         {
             List<IPartition> partitions = [];
 
             foreach (PartitionInfo partitionInfo in partitionInfos)
             {
                 SparseStream partitionStream = partitionInfo.Open();
-                Partition partition = new(partitionStream, ((GuidPartitionInfo)partitionInfo).Name, ((GuidPartitionInfo)partitionInfo).GuidType, ((GuidPartitionInfo)partitionInfo).Identity, ((GuidPartitionInfo)partitionInfo).SectorCount * SectorSize);
+                IPartition partition = new FileSystemPartition(partitionStream, ((GuidPartitionInfo)partitionInfo).Name, ((GuidPartitionInfo)partitionInfo).GuidType, ((GuidPartitionInfo)partitionInfo).Identity);
                 partitions.Add(partition);
             }
 
@@ -77,7 +78,7 @@ namespace ToCBS.Adapters.VhdxSpaces
                         for (int i = 0; i < wimFile.ImageCount; i++)
                         {
                             IFileSystem wimFileSystem = wimFile.GetImage(i);
-                            Partition wimPartition = new(wimStream, wimFileSystem, $"{partition.Name}-UpdateOS-{i}", Guid.Empty, Guid.Empty, wimStream.Length);
+                            IPartition wimPartition = new FileSystemPartition(wimStream, wimFileSystem, $"{partition.Name}-UpdateOS-{i}", Guid.Empty, Guid.Empty);
                             partitions.Add(wimPartition);
                         }
 
