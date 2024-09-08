@@ -1,5 +1,4 @@
 ﻿using DiscUtils;
-using MobilePackageGen.Wof;
 
 namespace MobilePackageGen.Adapters.Wim
 {
@@ -68,7 +67,7 @@ namespace MobilePackageGen.Adapters.Wim
                     {
                         List<IPartition> partitions = [];
 
-                        Stream wimStream = fileSystem.OpenFileAndDecompressIfNeeded("PROGRAMS\\UpdateOS\\UpdateOS.wim");
+                        Stream wimStream = fileSystem.OpenFile("PROGRAMS\\UpdateOS\\UpdateOS.wim", FileMode.Open, FileAccess.Read);
                         DiscUtils.Wim.WimFile wimFile = new(wimStream);
 
                         for (int i = 0; i < wimFile.ImageCount; i++)

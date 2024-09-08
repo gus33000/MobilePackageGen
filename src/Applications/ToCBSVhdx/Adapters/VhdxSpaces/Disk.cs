@@ -1,7 +1,6 @@
 ﻿using DiscUtils.Partitions;
 using DiscUtils.Streams;
 using DiscUtils;
-using MobilePackageGen.Wof;
 using Microsoft.Spaces.Diskstream;
 using System.ComponentModel;
 using MobilePackageGen;
@@ -72,7 +71,7 @@ namespace ToCBS.Adapters.VhdxSpaces
                     {
                         List<IPartition> partitions = [];
 
-                        Stream wimStream = fileSystem.OpenFileAndDecompressIfNeeded("PROGRAMS\\UpdateOS\\UpdateOS.wim");
+                        Stream wimStream = fileSystem.OpenFile("PROGRAMS\\UpdateOS\\UpdateOS.wim", FileMode.Open, FileAccess.Read);
                         DiscUtils.Wim.WimFile wimFile = new(wimStream);
 
                         for (int i = 0; i < wimFile.ImageCount; i++)

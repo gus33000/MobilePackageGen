@@ -2,7 +2,6 @@
 using Microsoft.Deployment.Compression.Cab;
 using Microsoft.Deployment.Compression;
 using System.Xml.Serialization;
-using MobilePackageGen.Wof;
 
 namespace MobilePackageGen
 {
@@ -25,7 +24,7 @@ namespace MobilePackageGen
 
             foreach (XmlMum.File packageFile in cbs.Package.CustomInformation.File)
             {
-                int percentage = i++ * 100 / cbs.Package.CustomInformation.File.Count;
+                int percentage = i++ * 50 / cbs.Package.CustomInformation.File.Count;
                 if (percentage != oldPercentage)
                 {
                     oldPercentage = percentage;
@@ -171,7 +170,7 @@ namespace MobilePackageGen
                                             cabinetFileInfo = new CabinetFileInfo()
                                             {
                                                 FileName = packageFile.Cabpath,
-                                                FileStream = fileSystemData.OpenFileAndDecompressIfNeeded(normalized[5..]),
+                                                FileStream = fileSystemData.OpenFile(normalized[5..], FileMode.Open, FileAccess.Read),
                                                 Attributes = fileSystemData.GetAttributes(normalized[5..]) & ~FileAttributes.ReparsePoint,
                                                 DateTime = fileSystemData.GetLastWriteTime(normalized[5..])
                                             };
@@ -195,7 +194,7 @@ namespace MobilePackageGen
                         cabinetFileInfo = new CabinetFileInfo()
                         {
                             FileName = packageFile.Cabpath,
-                            FileStream = fileSystem.OpenFileAndDecompressIfNeeded(normalized),
+                            FileStream = fileSystem.OpenFile(normalized, FileMode.Open, FileAccess.Read),
                             Attributes = fileSystem.GetAttributes(normalized) & ~FileAttributes.ReparsePoint,
                             DateTime = fileSystem.GetLastWriteTime(normalized)
                         };
@@ -327,7 +326,7 @@ namespace MobilePackageGen
                 {
                     try
                     {
-                        Stream stream = fileSystem.OpenFileAndDecompressIfNeeded(manifestFile);
+                        Stream stream = fileSystem.OpenFile(manifestFile, FileMode.Open, FileAccess.Read);
                         XmlSerializer serializer = new(typeof(XmlMum.Assembly));
                         XmlMum.Assembly cbs = (XmlMum.Assembly)serializer.Deserialize(stream);
 
@@ -346,31 +345,65 @@ namespace MobilePackageGen
                             Directory.CreateDirectory(directory);
                         }
 
-                        string componentStatus = $"Processing {i + 1} of {packagesCount} - Creating package {cabFileName}";
+                        string componentStatus = $"Creating package {i + 1} of {packagesCount} - {cabFileName}";
                         if (componentStatus.Length > Console.BufferWidth - 1)
                         {
                             componentStatus = $"{componentStatus[..(Console.BufferWidth - 4)]}...";
                         }
 
                         Console.WriteLine(componentStatus);
+                        string progressBarString = GetDismLikeProgBar(0);
+                        Console.Write($"\r{progressBarString}");
+
+                        string fileStatus = "";
 
                         if (!File.Exists(cabFile))
                         {
                             List<CabinetFileInfo> fileMappings = GetCabinetFileInfoForCbsPackage(cbs, partition, disks);
 
                             int oldPercentage = -1;
+                            int oldFilePercentage = -1;
+                            string oldFileName = "";
+
                             CabInfo cab = new(cabFile);
                             cab.PackFiles(null, fileMappings.Select(x => x.GetFileTuple()).ToArray(), fileMappings.Select(x => x.FileName).ToArray(), CompressionLevel.Min, (object sender, ArchiveProgressEventArgs archiveProgressEventArgs) =>
                             {
-                                int percentage = archiveProgressEventArgs.CurrentFileNumber * 100 / archiveProgressEventArgs.TotalFiles;
+                                int percentage = archiveProgressEventArgs.CurrentFileNumber * 50 / archiveProgressEventArgs.TotalFiles;
                                 if (percentage != oldPercentage)
                                 {
                                     oldPercentage = percentage;
-                                    string progressBarString = GetDismLikeProgBar(percentage);
+                                    string progressBarString = GetDismLikeProgBar(50 + percentage);
                                     Console.Write($"\r{progressBarString}");
                                 }
-                            });
 
+                                if (archiveProgressEventArgs.CurrentFileName != oldFileName)
+                                {
+                                    Console.Write($"\n{new string(' ', fileStatus.Length)}\n{GetDismLikeProgBar(0)}");
+                                    Console.SetCursorPosition(0, Console.CursorTop - 2);
+
+                                    oldFileName = archiveProgressEventArgs.CurrentFileName;
+                                    oldFilePercentage = -1;
+
+                                    fileStatus = $"Adding file {archiveProgressEventArgs.CurrentFileNumber + 1} of {archiveProgressEventArgs.TotalFiles} - {archiveProgressEventArgs.CurrentFileName}";
+                                    if (fileStatus.Length > Console.BufferWidth - 1)
+                                    {
+                                        fileStatus = $"{fileStatus[..(Console.BufferWidth - 4)]}...";
+                                    }
+
+                                    Console.Write($"\n{fileStatus}\n{GetDismLikeProgBar(0)}");
+                                    Console.SetCursorPosition(0, Console.CursorTop - 2);
+                                }
+
+                                int filePercentage = (int)Math.Floor((double)archiveProgressEventArgs.CurrentFileBytesProcessed * 100 / archiveProgressEventArgs.CurrentFileTotalBytes);
+                                if (filePercentage != oldFilePercentage)
+                                {
+                                    oldFilePercentage = filePercentage;
+                                    string progressBarString = GetDismLikeProgBar(filePercentage);
+                                    Console.Write($"\n\n{progressBarString}");
+
+                                    Console.SetCursorPosition(0, Console.CursorTop - 2);
+                                }
+                            });
 
                             foreach (CabinetFileInfo fileMapping in fileMappings)
                             {
@@ -382,11 +415,30 @@ namespace MobilePackageGen
                         {
                             Console.SetCursorPosition(0, Console.CursorTop - 1);
                             Console.WriteLine($"{new string(' ', componentStatus.Length)}\n{GetDismLikeProgBar(100)}");
-                            Console.SetCursorPosition(0, Console.CursorTop - 2);
+
+                            if (string.IsNullOrEmpty(fileStatus))
+                            {
+                                Console.WriteLine($"{new string(' ', fileStatus.Length)}\n{new string(' ', 60)}");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"{new string(' ', fileStatus.Length)}\n{GetDismLikeProgBar(100)}");
+                            }
+
+                            Console.SetCursorPosition(0, Console.CursorTop - 4);
                         }
                         else
                         {
                             Console.WriteLine($"\r{GetDismLikeProgBar(100)}");
+
+                            if (string.IsNullOrEmpty(fileStatus))
+                            {
+                                Console.WriteLine($"\n{new string(' ', 60)}");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"\n{GetDismLikeProgBar(100)}");
+                            }
                         }
 
                         i++;

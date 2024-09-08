@@ -21,7 +21,6 @@
     <ProjectReference Include="..\..\Img2Ffu\Img2Ffu.csproj" />
     <ProjectReference Include="..\..\Diskstream\Diskstream.csproj" />
     <ProjectReference Include="..\..\Microsoft.Deployment.Compression.Cab\Microsoft.Deployment.Compression.Cab.csproj" />
-    <ProjectReference Include="..\..\WofStream\WofStream.csproj" />
   </ItemGroup>
 
 </Project>
