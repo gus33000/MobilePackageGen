@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-using System.Diagnostics;
 using System.Xml.Serialization;
 using Microsoft.Deployment.Compression.Cab;
 using DiscUtils;
@@ -13,6 +12,197 @@ namespace ToSPKG
 {
     public class SPKGBuilder
     {
+        private static List<CabinetFileInfo> GetCabinetFileInfoForCbsPackage(XmlDsm.Package dsm, Partition partition, List<Disk> disks)
+        {
+            List<CabinetFileInfo> fileMappings = [];
+
+            IFileSystem fileSystem = partition.FileSystem;
+
+            string packageName = $"{dsm.Identity.Owner}.{dsm.Identity.Component}{(dsm.Identity.SubComponent == null ? "" : $".{dsm.Identity.SubComponent}")}{(dsm.Culture == null ? "" : $"_Lang_{dsm.Culture}")}";
+
+            int i = 0;
+
+            int oldPercentage = -1;
+
+            foreach (XmlDsm.FileEntry packageFile in dsm.Files.FileEntry)
+            {
+                int percentage = i++ * 100 / dsm.Files.FileEntry.Count;
+                if (percentage != oldPercentage)
+                {
+                    oldPercentage = percentage;
+                    string progressBarString = GetDismLikeProgBar(percentage);
+                    Console.Write($"\r{progressBarString}");
+                }
+
+                string fileName = packageFile.DevicePath;
+
+                string normalized = fileName;
+
+                // Prevent getting files from root of this program
+                if (normalized.StartsWith("\\"))
+                {
+                    normalized = normalized[1..];
+                }
+
+                CabinetFileInfo cabinetFileInfo = null;
+
+                // If we end in bin, and the package is marked binary partition, this is a partition on one of the device disks, retrieve it
+                if (normalized.EndsWith(".bin") && packageFile.FileType.Contains("BinaryPartition", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    foreach (Disk disk in disks)
+                    {
+                        bool done = false;
+
+                        foreach (Partition diskPartition in disk.Partitions)
+                        {
+                            if (diskPartition.Name.Equals(dsm.Partition, StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                done = true;
+
+                                cabinetFileInfo = new CabinetFileInfo()
+                                {
+                                    FileName = packageFile.CabPath,
+                                    FileStream = new Substream(diskPartition.Stream, long.Parse(packageFile.FileSize)),
+                                    Attributes = FileAttributes.Normal,
+                                    DateTime = DateTime.Now
+                                };
+                                break;
+                            }
+                        }
+
+                        if (done)
+                        {
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    if (!fileSystem.FileExists(normalized))
+                    {
+                        string[] partitionNamesWithLinks = ["data", "efiesp", "osdata", "dpp", "mmos"];
+
+                        foreach (string partitionNameWithLink in partitionNamesWithLinks)
+                        {
+                            if (normalized.StartsWith(partitionNameWithLink + "\\", StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                foreach (Disk disk in disks)
+                                {
+                                    bool done = false;
+
+                                    foreach (Partition diskPartition in disk.Partitions)
+                                    {
+                                        if (diskPartition.Name.Equals(partitionNameWithLink, StringComparison.InvariantCultureIgnoreCase))
+                                        {
+                                            done = true;
+
+                                            IFileSystem? fileSystemData = diskPartition.FileSystem;
+
+                                            if (fileSystemData == null)
+                                            {
+                                                break;
+                                            }
+
+                                            bool needsDecompression = packageFile.FileType.Contains("registry", StringComparison.CurrentCultureIgnoreCase) || packageFile.FileType.Contains("policy", StringComparison.CurrentCultureIgnoreCase) || packageFile.FileType.Contains("manifest", StringComparison.CurrentCultureIgnoreCase);
+                                            bool doesNotNeedDecompression = packageFile.FileType.Contains("catalog", StringComparison.CurrentCultureIgnoreCase) || packageFile.FileType.Contains("regular", StringComparison.CurrentCultureIgnoreCase);
+
+                                            if (needsDecompression)
+                                            {
+                                                cabinetFileInfo = new CabinetFileInfo()
+                                                {
+                                                    FileName = packageFile.CabPath,
+                                                    FileStream = fileSystemData.OpenFileAndDecompressAsGZip(normalized[5..]),
+                                                    Attributes = fileSystemData.GetAttributes(normalized[5..]) & ~FileAttributes.ReparsePoint,
+                                                    DateTime = fileSystemData.GetLastWriteTime(normalized[5..])
+                                                };
+                                            }
+                                            else if (doesNotNeedDecompression)
+                                            {
+                                                cabinetFileInfo = new CabinetFileInfo()
+                                                {
+                                                    FileName = packageFile.CabPath,
+                                                    FileStream = fileSystemData.OpenFile(normalized[5..], FileMode.Open, FileAccess.Read),
+                                                    Attributes = fileSystemData.GetAttributes(normalized[5..]) & ~FileAttributes.ReparsePoint,
+                                                    DateTime = fileSystemData.GetLastWriteTime(normalized[5..])
+                                                };
+                                            }
+                                            else
+                                            {
+                                                cabinetFileInfo = new CabinetFileInfo()
+                                                {
+                                                    FileName = packageFile.CabPath,
+                                                    FileStream = fileSystemData.OpenFile(normalized[5..], FileMode.Open, FileAccess.Read),
+                                                    Attributes = fileSystemData.GetAttributes(normalized[5..]) & ~FileAttributes.ReparsePoint,
+                                                    DateTime = fileSystemData.GetLastWriteTime(normalized[5..])
+                                                };
+                                            }
+
+                                            break;
+                                        }
+                                    }
+
+                                    if (done)
+                                    {
+                                        break;
+                                    }
+                                }
+
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        bool needsDecompression = packageFile.FileType.Contains("registry", StringComparison.CurrentCultureIgnoreCase) || packageFile.FileType.Contains("policy", StringComparison.CurrentCultureIgnoreCase) || packageFile.FileType.Contains("manifest", StringComparison.CurrentCultureIgnoreCase);
+                        bool doesNotNeedDecompression = packageFile.FileType.Contains("catalog", StringComparison.CurrentCultureIgnoreCase) || packageFile.FileType.Contains("regular", StringComparison.CurrentCultureIgnoreCase);
+
+                        if (needsDecompression)
+                        {
+                            cabinetFileInfo = new CabinetFileInfo()
+                            {
+                                FileName = packageFile.CabPath,
+                                FileStream = fileSystem.OpenFileAndDecompressAsGZip(normalized),
+                                Attributes = fileSystem.GetAttributes(normalized) & ~FileAttributes.ReparsePoint,
+                                DateTime = fileSystem.GetLastWriteTime(normalized)
+                            };
+                        }
+                        else if (doesNotNeedDecompression)
+                        {
+                            cabinetFileInfo = new CabinetFileInfo()
+                            {
+                                FileName = packageFile.CabPath,
+                                FileStream = fileSystem.OpenFile(normalized, FileMode.Open, FileAccess.Read),
+                                Attributes = fileSystem.GetAttributes(normalized) & ~FileAttributes.ReparsePoint,
+                                DateTime = fileSystem.GetLastWriteTime(normalized)
+                            };
+                        }
+                        else
+                        {
+                            cabinetFileInfo = new CabinetFileInfo()
+                            {
+                                FileName = packageFile.CabPath,
+                                FileStream = fileSystem.OpenFile(normalized, FileMode.Open, FileAccess.Read),
+                                Attributes = fileSystem.GetAttributes(normalized) & ~FileAttributes.ReparsePoint,
+                                DateTime = fileSystem.GetLastWriteTime(normalized)
+                            };
+                        }
+                    }
+                }
+
+                if (cabinetFileInfo != null)
+                {
+                    fileMappings.Add(cabinetFileInfo);
+                }
+                else
+                {
+                    Console.WriteLine($"Error: File not found! {normalized}");
+                    //throw new FileNotFoundException(normalized);
+                }
+            }
+
+            return fileMappings;
+        }
+
         public static void BuildSPKG(List<Disk> disks, string destination_path)
         {
             Console.WriteLine("Getting Update OS Disks...");
@@ -154,101 +344,17 @@ namespace ToSPKG
             {
                 IFileSystem fileSystem = partition.FileSystem;
 
-                IEnumerable<string> XMLs = fileSystem.GetFiles(@"Windows\Packages\DsmFiles", "*.xml", SearchOption.TopDirectoryOnly);
+                IEnumerable<string> manifestFiles = fileSystem.GetFiles(@"Windows\Packages\DsmFiles", "*.xml", SearchOption.TopDirectoryOnly);
 
-                foreach (string xml in XMLs)
+                foreach (string manifestFile in manifestFiles)
                 {
-                    using Stream stream = fileSystem.OpenFileAndDecompressAsGZip(xml);
-                    XmlSerializer serializer = new(typeof(XmlDsm.Package));
-                    XmlDsm.Package xmlDSM = (XmlDsm.Package)serializer.Deserialize(stream);
-
-                    string current_folder = Path.Combine(outputPath, partition.Name, xml.Split('\\').Last().Replace(".xml", "").Replace(".dsm", ""));
-
-                    if (!Directory.Exists(current_folder))
-                    {
-                        Directory.CreateDirectory(current_folder);
-                    }
-
-                    if (xmlDSM.Files?.FileEntry?.Count > 0)
-                    {
-                        //Console.ForegroundColor = ConsoleColor.Green;
-                        //Console.WriteLine($"\nPROCESSING: {xml.Split('\\').Last().Replace(".xml", "").Replace(".dsm", "")}");
-                        //Console.ResetColor();
-
-                        xmlDSM.Files.FileEntry.ForEach(xmlFile =>
-                        {
-                            string normalized = xmlFile.DevicePath;
-
-                            if (xmlFile.DevicePath.StartsWith('\\'))
-                            {
-                                normalized = xmlFile.DevicePath.Substring(1);
-                            }
-
-                            //Console.ForegroundColor = ConsoleColor.Cyan;
-                            //Console.WriteLine($"Copying: {normalized}");
-                            //Console.ResetColor();
-
-                            if (xmlFile.FileType.Contains("registry", StringComparison.CurrentCultureIgnoreCase) || xmlFile.FileType.Contains("policy", StringComparison.CurrentCultureIgnoreCase) || xmlFile.FileType.Contains("manifest", StringComparison.CurrentCultureIgnoreCase))
-                            {
-                                CreateDirectoryWhileCopying(fileSystem, normalized, Path.Combine(current_folder, xmlFile.CabPath), true);
-                            }
-                            else if (xmlFile.FileType.Contains("catalog", StringComparison.CurrentCultureIgnoreCase) || xmlFile.FileType.Contains("regular", StringComparison.CurrentCultureIgnoreCase))
-                            {
-                                CreateDirectoryWhileCopying(fileSystem, normalized, Path.Combine(current_folder, xmlFile.CabPath));
-                            }
-                            else if (xmlFile.FileType.Contains("binarypartition", StringComparison.CurrentCultureIgnoreCase)) //MEH
-                            {
-                                Stream FileStream = null;
-
-                                foreach (Disk disk in disks)
-                                {
-                                    bool done = false;
-
-                                    foreach (Partition diskPartition in disk.Partitions)
-                                    {
-                                        if (diskPartition.Name.Equals(xmlDSM.Partition, StringComparison.InvariantCultureIgnoreCase))
-                                        {
-                                            done = true;
-                                            FileStream = new Substream(diskPartition.Stream, long.Parse(xmlFile.FileSize));
-                                            break;
-                                        }
-                                    }
-
-                                    if (done)
-                                    {
-                                        break;
-                                    }
-                                }
-
-                                if (FileStream != null)
-                                {
-                                    string dest = Path.Combine(current_folder, xmlFile.CabPath);
-
-                                    string dirFromDest = Path.GetDirectoryName(dest);
-                                    if (!Directory.Exists(dirFromDest))
-                                    {
-                                        Directory.CreateDirectory(dirFromDest);
-                                    }
-
-                                    using Stream destStream = File.Open(dest, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
-
-                                    FileStream.CopyTo(destStream);
-                                }
-                                else
-                                {
-                                    throw new Exception($"Cannot find Binary Partition named: {xmlDSM.Partition}");
-                                }
-                            }
-                            else
-                            {
-                                Debugger.Break();
-                            }
-                        });
-                    }
-
                     try
                     {
-                        string packageName = current_folder.Split('\\').Last();
+                        using Stream stream = fileSystem.OpenFileAndDecompressAsGZip(manifestFile);
+                        XmlSerializer serializer = new(typeof(XmlDsm.Package));
+                        XmlDsm.Package dsm = (XmlDsm.Package)serializer.Deserialize(stream);
+
+                        string packageName = manifestFile.Split('\\').Last().Replace(".xml", "").Replace(".dsm", "");
 
                         string cabFileName = Path.Combine(partition.Name, packageName);
 
@@ -268,9 +374,11 @@ namespace ToSPKG
 
                         if (!File.Exists(cabFile))
                         {
+                            List<CabinetFileInfo> fileMappings = GetCabinetFileInfoForCbsPackage(dsm, partition, disks);
+
                             int oldPercentage = -1;
                             CabInfo cab = new(cabFile);
-                            cab.Pack(current_folder, true, CompressionLevel.Max, (object sender, ArchiveProgressEventArgs archiveProgressEventArgs) =>
+                            cab.PackFiles(null, fileMappings.Select(x => x.GetFileTuple()).ToArray(), fileMappings.Select(x => x.FileName).ToArray(), CompressionLevel.Min, (object sender, ArchiveProgressEventArgs archiveProgressEventArgs) =>
                             {
                                 int percentage = archiveProgressEventArgs.CurrentFileNumber * 100 / archiveProgressEventArgs.TotalFiles;
                                 if (percentage != oldPercentage)
@@ -280,6 +388,12 @@ namespace ToSPKG
                                     Console.Write($"\r{progressBarString}");
                                 }
                             });
+
+
+                            foreach (CabinetFileInfo fileMapping in fileMappings)
+                            {
+                                fileMapping.FileStream.Close();
+                            }
                         }
 
                         if (i != packagesCount - 1)

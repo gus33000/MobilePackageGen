@@ -74,6 +74,8 @@ namespace ToSPKG
             public string BuildType { get; set; }
             [XmlElement(ElementName = "CpuType", Namespace = "http://schemas.microsoft.com/embedded/2004/10/ImageUpdate")]
             public string CpuType { get; set; }
+            [XmlElement(ElementName = "Culture", Namespace = "http://schemas.microsoft.com/embedded/2004/10/ImageUpdate")]
+            public string Culture { get; set; }
             [XmlElement(ElementName = "Partition", Namespace = "http://schemas.microsoft.com/embedded/2004/10/ImageUpdate")]
             public string Partition { get; set; }
             [XmlElement(ElementName = "GroupingKey", Namespace = "http://schemas.microsoft.com/embedded/2004/10/ImageUpdate")]
