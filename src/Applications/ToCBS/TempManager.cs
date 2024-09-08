@@ -2,7 +2,7 @@
 {
     internal class TempManager
     {
-        private static readonly List<string> tempFiles = new();
+        private static readonly List<string> tempFiles = [];
 
         internal static string GetTempFile()
         {

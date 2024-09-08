@@ -19,7 +19,7 @@ namespace ToCBS
 
         private static List<Partition> GetPartitionStructures(string path)
         {
-            List<Partition> partitions = new();
+            List<Partition> partitions = [];
 
             Partition partition = new(new RealFileSystemBridge(path), path.Replace(":", "").Replace(Path.DirectorySeparatorChar, '_'), Guid.Empty, Guid.Empty, 0);
             partitions.Add(partition);
@@ -29,7 +29,7 @@ namespace ToCBS
 
         public static List<Disk> GetUpdateOSDisks(List<Disk> disks)
         {
-            List<Disk> updateOSDisks = new();
+            List<Disk> updateOSDisks = [];
 
             foreach (Disk disk in disks)
             {
@@ -56,7 +56,7 @@ namespace ToCBS
                     // Handle UpdateOS as well if found
                     if (fileSystem.FileExists("PROGRAMS\\UpdateOS\\UpdateOS.wim"))
                     {
-                        List<Partition> partitions = new();
+                        List<Partition> partitions = [];
 
                         Stream wimStream = fileSystem.OpenFileAndDecompressIfNeeded("PROGRAMS\\UpdateOS\\UpdateOS.wim");
                         DiscUtils.Wim.WimFile wimFile = new(wimStream);

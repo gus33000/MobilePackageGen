@@ -43,7 +43,7 @@ namespace ToCBS
         {
             List<int> physicalDisks = Utils.GetAllAvailableDrives(DiskNumberType.PhysicalDisk).ToList();
 
-            List<PartitionInfo> partition_tables = new();
+            List<PartitionInfo> partition_tables = [];
 
             try
             {
@@ -78,7 +78,7 @@ namespace ToCBS
             int offset = sectorSize * 2;
             bool finished = false;
 
-            List<PartitionInfo> partitions = new();
+            List<PartitionInfo> partitions = [];
 
             while (!finished && offset < (header.Length - (2 * sectorSize)))
             {

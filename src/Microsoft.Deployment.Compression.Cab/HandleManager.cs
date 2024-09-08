@@ -21,7 +21,7 @@ namespace Microsoft.Deployment.Compression.Cab
         /// </summary>
         public HandleManager()
         {
-            handles = new List<T>();
+            handles = [];
         }
 
         /// <summary>

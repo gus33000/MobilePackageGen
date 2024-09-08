@@ -10,7 +10,7 @@ namespace CbsToReg
         //ctor
         public CbsToReg()
         {
-            _registries = new List<RegistryCollection>();
+            _registries = [];
         }
 
         public void Add(RegistryCollection reg)

@@ -93,7 +93,7 @@ namespace SevenZipExtractor
 
         public void Extract(Func<Entry, string> getOutputPath)
         {
-            IList<Stream> fileStreams = new List<Stream>();
+            IList<Stream> fileStreams = [];
 
             try
             {
@@ -157,7 +157,7 @@ namespace SevenZipExtractor
 
                 uint itemsCount = this.archive.GetNumberOfItems();
 
-                this.entries = new List<Entry>();
+                this.entries = [];
 
                 for (uint fileIndex = 0; fileIndex < itemsCount; fileIndex++)
                 {

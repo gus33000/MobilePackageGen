@@ -58,7 +58,7 @@ namespace Microsoft.Deployment.Compression.Cab
             fciGetNextCabinet = CabGetNextCabinet;
             fciCreateStatus = CabCreateStatus;
             fciGetOpenInfo = CabGetOpenInfo;
-            tempStreams = new List<Stream>();
+            tempStreams = [];
             compressionLevel = CompressionLevel.Normal;
         }
 

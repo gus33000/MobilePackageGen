@@ -250,7 +250,7 @@ namespace ToSPKG
 
         private static List<Partition> GetPartitionsWithServicing(List<Disk> disks)
         {
-            List<Partition> fileSystemsWithServicing = new();
+            List<Partition> fileSystemsWithServicing = [];
 
             foreach (Disk disk in disks)
             {

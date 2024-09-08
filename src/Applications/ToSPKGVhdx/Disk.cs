@@ -21,7 +21,7 @@ namespace ToSPKG
 
         private static List<Partition> GetPartitionStructures(List<PartitionInfo> partitionInfos, uint SectorSize)
         {
-            List<Partition> partitions = new();
+            List<Partition> partitions = [];
 
             foreach (PartitionInfo partitionInfo in partitionInfos)
             {
@@ -35,7 +35,7 @@ namespace ToSPKG
 
         public static List<Disk> GetUpdateOSDisks(List<Disk> disks)
         {
-            List<Disk> updateOSDisks = new();
+            List<Disk> updateOSDisks = [];
 
             foreach (Disk disk in disks)
             {
@@ -62,7 +62,7 @@ namespace ToSPKG
                     // Handle UpdateOS as well if found
                     if (fileSystem.FileExists("PROGRAMS\\UpdateOS\\UpdateOS.wim"))
                     {
-                        List<Partition> partitions = new();
+                        List<Partition> partitions = [];
 
                         Stream wimStream = fileSystem.OpenFile("PROGRAMS\\UpdateOS\\UpdateOS.wim", FileMode.Open, FileAccess.Read);
                         DiscUtils.Wim.WimFile wimFile = new(wimStream);
@@ -89,7 +89,7 @@ namespace ToSPKG
 
         private static List<PartitionInfo> GetPartitions(string vhdx)
         {
-            List<PartitionInfo> partitions = new();
+            List<PartitionInfo> partitions = [];
 
             bool hasOsPool = false;
 

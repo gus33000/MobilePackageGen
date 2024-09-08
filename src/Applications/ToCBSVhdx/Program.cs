@@ -38,7 +38,7 @@ Version: 1.0.0.0
 
         private static List<Disk> GetDisks(string[] vhdxs)
         {
-            List<Disk> disks = new();
+            List<Disk> disks = [];
 
             foreach (string vhdx in vhdxs)
             {

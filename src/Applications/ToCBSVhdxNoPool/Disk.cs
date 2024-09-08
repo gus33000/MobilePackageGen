@@ -22,7 +22,7 @@ namespace ToCBS
 
         private static List<Partition> GetPartitionStructures(List<PartitionInfo> partitionInfos, uint SectorSize)
         {
-            List<Partition> partitions = new();
+            List<Partition> partitions = [];
 
             foreach (PartitionInfo partitionInfo in partitionInfos)
             {
@@ -36,7 +36,7 @@ namespace ToCBS
 
         public static List<Disk> GetUpdateOSDisks(List<Disk> disks)
         {
-            List<Disk> updateOSDisks = new();
+            List<Disk> updateOSDisks = [];
 
             foreach (Disk disk in disks)
             {
@@ -63,7 +63,7 @@ namespace ToCBS
                     // Handle UpdateOS as well if found
                     if (fileSystem.FileExists("PROGRAMS\\UpdateOS\\UpdateOS.wim"))
                     {
-                        List<Partition> partitions = new();
+                        List<Partition> partitions = [];
 
                         Stream wimStream = fileSystem.OpenFileAndDecompressIfNeeded("PROGRAMS\\UpdateOS\\UpdateOS.wim");
                         DiscUtils.Wim.WimFile wimFile = new(wimStream);
@@ -90,7 +90,7 @@ namespace ToCBS
 
         private static List<PartitionInfo> GetPartitions(string vhdx)
         {
-            List<PartitionInfo> partitions = new();
+            List<PartitionInfo> partitions = [];
 
             bool hasOsPool = false;
 

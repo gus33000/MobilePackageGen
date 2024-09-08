@@ -671,7 +671,7 @@ namespace Microsoft.Deployment.Compression
         internal static IList<string> GetRelativeFilePathsInDirectoryTree(
             string dir, bool includeSubdirectories)
         {
-            IList<string> fileList = new List<string>();
+            IList<string> fileList = [];
             RecursiveGetRelativeFilePathsInDirectoryTree(
                 dir, string.Empty, includeSubdirectories, fileList);
             return fileList;

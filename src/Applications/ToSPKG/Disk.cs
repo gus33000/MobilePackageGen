@@ -18,7 +18,7 @@ namespace ToSPKG
 
         private static List<Partition> GetPartitionStructures(string path)
         {
-            List<Partition> partitions = new();
+            List<Partition> partitions = [];
 
             Partition partition = new(new RealFileSystemBridge(path), path.Replace(":", "").Replace(Path.DirectorySeparatorChar, '_'), Guid.Empty, Guid.Empty, 0);
             partitions.Add(partition);
@@ -28,7 +28,7 @@ namespace ToSPKG
 
         public static List<Disk> GetUpdateOSDisks(List<Disk> disks)
         {
-            List<Disk> updateOSDisks = new();
+            List<Disk> updateOSDisks = [];
 
             foreach (Disk disk in disks)
             {
@@ -55,7 +55,7 @@ namespace ToSPKG
                     // Handle UpdateOS as well if found
                     if (fileSystem.FileExists("PROGRAMS\\UpdateOS\\UpdateOS.wim"))
                     {
-                        List<Partition> partitions = new();
+                        List<Partition> partitions = [];
 
                         Stream wimStream = fileSystem.OpenFile("PROGRAMS\\UpdateOS\\UpdateOS.wim", FileMode.Open, FileAccess.Read);
                         DiscUtils.Wim.WimFile wimFile = new(wimStream);

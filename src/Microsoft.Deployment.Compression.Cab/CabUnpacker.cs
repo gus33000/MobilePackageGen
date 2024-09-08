@@ -88,7 +88,7 @@ namespace Microsoft.Deployment.Compression.Cab
                 context = streamContext;
                 filter = fileFilter;
                 NextCabinetName = string.Empty;
-                fileList = new List<ArchiveFileInfo>();
+                fileList = [];
                 bool tmpSuppress = SuppressProgressEvents;
                 SuppressProgressEvents = true;
                 try

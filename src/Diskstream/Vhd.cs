@@ -15,7 +15,7 @@ namespace Microsoft.Spaces.Diskstream
 		{
 			List<string> list = new(vhdFilePaths);
 			list.Reverse();
-			List<Vhd> list2 = new();
+			List<Vhd> list2 = [];
 			bool flag = false;
 			try
 			{

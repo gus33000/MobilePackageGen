@@ -10,7 +10,7 @@ namespace ToCBS
     {
         private static List<CabinetFileInfo> GetCabinetFileInfoForCbsPackage(XmlMum.Assembly cbs, Partition partition, List<Disk> disks)
         {
-            List<CabinetFileInfo> fileMappings = new();
+            List<CabinetFileInfo> fileMappings = [];
 
             IFileSystem fileSystem = partition.FileSystem;
 
@@ -267,7 +267,7 @@ namespace ToCBS
 
         private static List<Partition> GetPartitionsWithServicing(List<Disk> disks)
         {
-            List<Partition> fileSystemsWithServicing = new();
+            List<Partition> fileSystemsWithServicing = [];
 
             foreach (Disk disk in disks)
             {
