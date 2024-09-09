@@ -27,7 +27,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Archives.DiscUtils", "src\A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Diskstream", "src\Diskstream\Diskstream.csproj", "{1EA0B0B9-42CC-4860-8DC9-5C50D971B838}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Img2Ffu", "src\Img2Ffu.Common\Img2Ffu.Common.csproj", "{4B0C8574-9D79-436D-A491-B75C71FC9A76}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Img2Ffu", "src\Img2Ffu.Library\Img2Ffu.Library.csproj", "{4B0C8574-9D79-436D-A491-B75C71FC9A76}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToCBSVhdx", "src\Applications\ToCBSVhdx\ToCBSVhdx.csproj", "{403AFD7E-3C31-460A-B02D-B480ACA11647}"
 EndProject
