@@ -38,7 +38,7 @@ jobs:
       - name: Build Utilities
         shell: pwsh
         run: |
-          msbuild /m /t:restore,cbstoreg:publish,tocbs:publish,tocbsffunopool:publish,tocbsvhdxnopool:publish,tocbswim:publish,tospkg:publish,tospkgffu:publish,tospkgvhdx:publish,tospkgwim:publish,secwim2wim:publish /p:Platform=${{ matrix.architecture }} /p:RuntimeIdentifier=${{ matrix.platform }}-${{ matrix.architecture }} /p:PublishDir=${{ github.workspace }}/artifacts/${{ matrix.platform }}-${{ matrix.architecture }} /p:PublishSingleFile=true /p:PublishTrimmed=false /p:Configuration=Release MobilePackageGen.sln
+          msbuild /m /t:restore,cbstoreg:publish,secwim2wim:publish,tocbs:publish,tocbsffunopool:publish,tocbsvhdxnopool:publish,tocbswim:publish,tospkg:publish,tospkgffu:publish,tospkgvhdx:publish,tospkgwim:publish /p:Platform=${{ matrix.architecture }} /p:RuntimeIdentifier=${{ matrix.platform }}-${{ matrix.architecture }} /p:PublishDir=${{ github.workspace }}/artifacts/${{ matrix.platform }}-${{ matrix.architecture }} /p:PublishSingleFile=true /p:PublishTrimmed=false /p:Configuration=Release MobilePackageGen.sln
 
       - name: Create PDB Output Directory
         shell: pwsh

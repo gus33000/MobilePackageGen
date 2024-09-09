@@ -1,13 +1,10 @@
 ﻿using Img2Ffu.Reader.Enums;
 using Img2Ffu.Reader.Structs;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Text;
 
 namespace Img2Ffu.Reader.Data
 {
-    public class WriteDescriptor
+    internal class WriteDescriptor
     {
         public BlockDataEntry BlockDataEntry;
         public uint DataSize;

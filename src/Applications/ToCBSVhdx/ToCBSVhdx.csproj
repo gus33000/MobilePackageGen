@@ -18,7 +18,7 @@
   <ItemGroup>
 	<ProjectReference Include="..\..\MobilePackageGen.Common\MobilePackageGen.Common.csproj" />
     <ProjectReference Include="..\..\Archives.DiscUtils\Archives.DiscUtils.csproj" />
-    <ProjectReference Include="..\..\Img2Ffu\Img2Ffu.csproj" />
+    <ProjectReference Include="..\..\Img2Ffu.Common\Img2Ffu.Common.csproj" />
     <ProjectReference Include="..\..\Diskstream\Diskstream.csproj" />
     <ProjectReference Include="..\..\Microsoft.Deployment.Compression.Cab\Microsoft.Deployment.Compression.Cab.csproj" />
   </ItemGroup>

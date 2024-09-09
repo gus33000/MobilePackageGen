@@ -12,7 +12,7 @@ namespace CbsToReg
         {
             Console.WriteLine(@"
 CBS to REG tool
-Version: 1.0.1.0
+Version: 1.0.2.0
 ");
 
             if (args.Length < 1)

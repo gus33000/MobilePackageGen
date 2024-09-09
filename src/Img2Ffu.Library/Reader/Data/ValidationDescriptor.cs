@@ -1,10 +1,8 @@
 ﻿using Img2Ffu.Reader.Structs;
-using System.Collections.Generic;
-using System.IO;
 
 namespace Img2Ffu.Reader.Data
 {
-    public class ValidationDescriptor
+    internal class ValidationDescriptor
     {
         public ValidationEntry ValidationEntry;
         public byte[] ValidationBytes;

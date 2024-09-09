@@ -1,15 +1,11 @@
 ﻿using Img2Ffu.Reader.Compression;
 using Img2Ffu.Reader.Enums;
 using Img2Ffu.Reader.Structs;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace Img2Ffu.Reader.Data
 {
-    public class ImageFlash
+    internal class ImageFlash
     {
         public ImageHeader ImageHeader;
         public string ManifestData = "";
@@ -162,16 +158,12 @@ namespace Img2Ffu.Reader.Data
 
                 switch ((CompressionAlgorithm)currentStore.CompressionAlgorithm)
                 {
-                    case CompressionAlgorithm.Default:
-                        {
-                            dataBlock = WindowsNativeCompression.Decompress(WindowsNativeCompressionAlgorithm.COMPRESSION_FORMAT_XPRESS, compressedDataBlock, (int)currentStore.StoreHeader.BlockSize);
-                            break;
-                        }
                     case CompressionAlgorithm.LZNT1:
                         {
                             dataBlock = WindowsNativeCompression.Decompress(WindowsNativeCompressionAlgorithm.COMPRESSION_FORMAT_LZNT1, compressedDataBlock, (int)currentStore.StoreHeader.BlockSize);
                             break;
                         }
+                    case CompressionAlgorithm.Default:
                     case CompressionAlgorithm.XPRESS:
                         {
                             dataBlock = WindowsNativeCompression.Decompress(WindowsNativeCompressionAlgorithm.COMPRESSION_FORMAT_XPRESS, compressedDataBlock, (int)currentStore.StoreHeader.BlockSize);
