@@ -2,6 +2,7 @@
 using DiscUtils.Streams;
 using DiscUtils;
 using Img2Ffu.Reader;
+using StorageSpace;
 
 namespace MobilePackageGen.Adapters.FullFlashUpdate
 {
@@ -97,7 +98,6 @@ namespace MobilePackageGen.Adapters.FullFlashUpdate
             for (int i = 0; i < FullFlashUpdateReaderStream.GetStoreCount(ffuPath); i++)
             {
                 FullFlashUpdateReaderStream store = new(ffuPath, (ulong)i);
-                bool hasOsPool = false;
 
                 long diskCapacity = store.Length;
                 VirtualDisk virtualDisk = new DiscUtils.Raw.Disk(store, Ownership.None, Geometry.FromCapacity(diskCapacity, store.SectorSize));
@@ -109,16 +109,34 @@ namespace MobilePackageGen.Adapters.FullFlashUpdate
                     foreach (PartitionInfo partitionInfo in partitionTable.Partitions)
                     {
                         partitions.Add(partitionInfo);
+
                         if (partitionInfo.GuidType == new Guid("E75CAF8F-F680-4CEE-AFA3-B001E56EFC2D"))
                         {
-                            hasOsPool = true;
+                            Stream pool = partitionInfo.Open();
+                            Dictionary<int, string> disks = OSPoolStream.GetDisks(pool);
+                            List<OSPoolStream> spaces = [];
+
+                            foreach (KeyValuePair<int, string> disk in disks)
+                            {
+                                OSPoolStream space = new(pool, (ulong)disk.Key);
+                                spaces.Add(space);
+                            }
+
+                            foreach (OSPoolStream space in spaces)
+                            {
+                                DiscUtils.Raw.Disk duVirtualDisk = new(space, Ownership.None, Geometry.FromCapacity(space.Length, 4096));
+                                PartitionTable msPartitionTable = duVirtualDisk.Partitions;
+
+                                if (msPartitionTable != null)
+                                {
+                                    foreach (PartitionInfo sspartition in msPartitionTable.Partitions)
+                                    {
+                                        partitions.Add(sspartition);
+                                    }
+                                }
+                            }
                         }
                     }
-                }
-
-                if (hasOsPool)
-                {
-                    throw new Exception("Image contains an OSPool which is unsupported by this program!");
                 }
             }
 

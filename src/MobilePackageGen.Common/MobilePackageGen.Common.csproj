@@ -19,6 +19,7 @@
     <ProjectReference Include="..\Archives.DiscUtils\Archives.DiscUtils.csproj" />
     <ProjectReference Include="..\Microsoft.Deployment.Compression.Cab\Microsoft.Deployment.Compression.Cab.csproj" />
     <ProjectReference Include="..\Img2Ffu.Library\Img2Ffu.Library.csproj" />
+    <ProjectReference Include="..\StorageSpace\StorageSpace.csproj" />
   </ItemGroup>
 
 </Project>
