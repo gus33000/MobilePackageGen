@@ -8,13 +8,21 @@ namespace MobilePackageGen
 {
     public class SPKGBuilder
     {
+        private static string GetSPKGComponentName(XmlDsm.Package dsm)
+        {
+            return $"{dsm.Identity.Owner}" +
+                $"{(string.IsNullOrEmpty(dsm.Identity.Component) ? "": $".{dsm.Identity.Component}")}" +
+                $"{(string.IsNullOrEmpty(dsm.Identity.SubComponent) ? "" : $".{dsm.Identity.SubComponent}")}" +
+                $"{(string.IsNullOrEmpty(dsm.Culture) == true ? "" : $"_Lang_{dsm.Culture}")}";
+        }
+
         private static List<CabinetFileInfo> GetCabinetFileInfoForDsmPackage(XmlDsm.Package dsm, IPartition partition, List<IDisk> disks)
         {
             List<CabinetFileInfo> fileMappings = [];
 
             IFileSystem? fileSystem = partition.FileSystem;
 
-            string packageName = $"{dsm.Identity.Owner}.{dsm.Identity.Component}{(dsm.Identity.SubComponent == null ? "" : $".{dsm.Identity.SubComponent}")}{(dsm.Culture == null ? "" : $"_Lang_{dsm.Culture}")}";
+            string packageName = GetSPKGComponentName(dsm);
 
             int i = 0;
 
@@ -354,7 +362,7 @@ namespace MobilePackageGen
                             dsm = (XmlDsm.Package)serializer.Deserialize(stream);
                         }
 
-                        string packageName = $"{dsm.Identity.Owner}.{dsm.Identity.Component}{(dsm.Identity.SubComponent == null ? "" : $".{dsm.Identity.SubComponent}")}{(dsm.Culture == null ? "" : $"_Lang_{dsm.Culture}")}";
+                        string packageName = GetSPKGComponentName(dsm);
 
                         string cabFileName = Path.Combine(partition.Name, packageName);
 

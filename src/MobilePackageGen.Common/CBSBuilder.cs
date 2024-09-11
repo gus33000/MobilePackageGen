@@ -7,6 +7,11 @@ namespace MobilePackageGen
 {
     public class CBSBuilder
     {
+        private static string GetCBSComponentName(XmlMum.Assembly cbs)
+        {
+            return $"{cbs.AssemblyIdentity.Name}~{cbs.AssemblyIdentity.PublicKeyToken}~{cbs.AssemblyIdentity.ProcessorArchitecture}~{(cbs.AssemblyIdentity.Language == "neutral" ? "" : cbs.AssemblyIdentity.Language)}~{cbs.AssemblyIdentity.Version}";
+        }
+
         private static List<CabinetFileInfo> GetCabinetFileInfoForCbsPackage(XmlMum.Assembly cbs, IPartition partition, List<IDisk> disks)
         {
             List<CabinetFileInfo> fileMappings = [];
@@ -16,7 +21,7 @@ namespace MobilePackageGen
             string packages_path = @"Windows\servicing\Packages";
             string winsxs_manifests_path = @"Windows\WinSxS\Manifests";
 
-            string packageName = $"{cbs.AssemblyIdentity.Name}~{cbs.AssemblyIdentity.PublicKeyToken}~{cbs.AssemblyIdentity.ProcessorArchitecture}~{(cbs.AssemblyIdentity.Language == "neutral" ? "" : cbs.AssemblyIdentity.Language)}~{cbs.AssemblyIdentity.Version}";
+            string packageName = GetCBSComponentName(cbs);
 
             int i = 0;
 
