@@ -20,15 +20,16 @@ namespace MobilePackageGen
 
             int i = 0;
 
-            int oldPercentage = -1;
+            uint oldPercentage = uint.MaxValue;
 
             foreach (XmlMum.File packageFile in cbs.Package.CustomInformation.File)
             {
-                int percentage = i++ * 50 / cbs.Package.CustomInformation.File.Count;
+                uint percentage = (uint)Math.Floor((double)i++ * 50 / cbs.Package.CustomInformation.File.Count);
+
                 if (percentage != oldPercentage)
                 {
                     oldPercentage = percentage;
-                    string progressBarString = GetDismLikeProgBar(percentage);
+                    string progressBarString = GetDISMLikeProgressBar(percentage);
                     Console.Write($"\r{progressBarString}");
                 }
 
@@ -352,7 +353,7 @@ namespace MobilePackageGen
                         }
 
                         Console.WriteLine(componentStatus);
-                        string progressBarString = GetDismLikeProgBar(0);
+                        string progressBarString = GetDISMLikeProgressBar(0);
                         Console.Write($"\r{progressBarString}");
 
                         string fileStatus = "";
@@ -361,28 +362,29 @@ namespace MobilePackageGen
                         {
                             List<CabinetFileInfo> fileMappings = GetCabinetFileInfoForCbsPackage(cbs, partition, disks);
 
-                            int oldPercentage = -1;
-                            int oldFilePercentage = -1;
+                            uint oldPercentage = uint.MaxValue;
+                            uint oldFilePercentage = uint.MaxValue;
                             string oldFileName = "";
 
                             CabInfo cab = new(cabFile);
-                            cab.PackFiles(null, fileMappings.Select(x => x.GetFileTuple()).ToArray(), fileMappings.Select(x => x.FileName).ToArray(), CompressionLevel.Min, (object sender, ArchiveProgressEventArgs archiveProgressEventArgs) =>
+                            cab.PackFiles(null, fileMappings.Select(x => x.GetFileTuple()).ToArray(), fileMappings.Select(x => x.FileName).ToArray(), CompressionLevel.Min, (object _, ArchiveProgressEventArgs archiveProgressEventArgs) =>
                             {
-                                int percentage = archiveProgressEventArgs.CurrentFileNumber * 50 / archiveProgressEventArgs.TotalFiles;
+                                uint percentage = (uint)Math.Floor((double)archiveProgressEventArgs.CurrentFileNumber * 50 / archiveProgressEventArgs.TotalFiles) + 50;
+
                                 if (percentage != oldPercentage)
                                 {
                                     oldPercentage = percentage;
-                                    string progressBarString = GetDismLikeProgBar(50 + percentage);
+                                    string progressBarString = GetDISMLikeProgressBar(percentage);
                                     Console.Write($"\r{progressBarString}");
                                 }
 
                                 if (archiveProgressEventArgs.CurrentFileName != oldFileName)
                                 {
-                                    Console.Write($"\n{new string(' ', fileStatus.Length)}\n{GetDismLikeProgBar(0)}");
+                                    Console.Write($"\n{new string(' ', fileStatus.Length)}\n{GetDISMLikeProgressBar(0)}");
                                     Console.SetCursorPosition(0, Console.CursorTop - 2);
 
                                     oldFileName = archiveProgressEventArgs.CurrentFileName;
-                                    oldFilePercentage = -1;
+                                    oldFilePercentage = uint.MaxValue;
 
                                     fileStatus = $"Adding file {archiveProgressEventArgs.CurrentFileNumber + 1} of {archiveProgressEventArgs.TotalFiles} - {archiveProgressEventArgs.CurrentFileName}";
                                     if (fileStatus.Length > Console.BufferWidth - 1)
@@ -390,15 +392,16 @@ namespace MobilePackageGen
                                         fileStatus = $"{fileStatus[..(Console.BufferWidth - 4)]}...";
                                     }
 
-                                    Console.Write($"\n{fileStatus}\n{GetDismLikeProgBar(0)}");
+                                    Console.Write($"\n{fileStatus}\n{GetDISMLikeProgressBar(0)}");
                                     Console.SetCursorPosition(0, Console.CursorTop - 2);
                                 }
 
-                                int filePercentage = (int)Math.Floor((double)archiveProgressEventArgs.CurrentFileBytesProcessed * 100 / archiveProgressEventArgs.CurrentFileTotalBytes);
+                                uint filePercentage = (uint)Math.Floor((double)archiveProgressEventArgs.CurrentFileBytesProcessed * 100 / archiveProgressEventArgs.CurrentFileTotalBytes);
+
                                 if (filePercentage != oldFilePercentage)
                                 {
                                     oldFilePercentage = filePercentage;
-                                    string progressBarString = GetDismLikeProgBar(filePercentage);
+                                    string progressBarString = GetDISMLikeProgressBar(filePercentage);
                                     Console.Write($"\n\n{progressBarString}");
 
                                     Console.SetCursorPosition(0, Console.CursorTop - 2);
@@ -414,7 +417,7 @@ namespace MobilePackageGen
                         if (i != packagesCount - 1)
                         {
                             Console.SetCursorPosition(0, Console.CursorTop - 1);
-                            Console.WriteLine($"{new string(' ', componentStatus.Length)}\n{GetDismLikeProgBar(100)}");
+                            Console.WriteLine($"{new string(' ', componentStatus.Length)}\n{GetDISMLikeProgressBar(100)}");
 
                             if (string.IsNullOrEmpty(fileStatus))
                             {
@@ -422,14 +425,14 @@ namespace MobilePackageGen
                             }
                             else
                             {
-                                Console.WriteLine($"{new string(' ', fileStatus.Length)}\n{GetDismLikeProgBar(100)}");
+                                Console.WriteLine($"{new string(' ', fileStatus.Length)}\n{GetDISMLikeProgressBar(100)}");
                             }
 
                             Console.SetCursorPosition(0, Console.CursorTop - 4);
                         }
                         else
                         {
-                            Console.WriteLine($"\r{GetDismLikeProgBar(100)}");
+                            Console.WriteLine($"\r{GetDISMLikeProgressBar(100)}");
 
                             if (string.IsNullOrEmpty(fileStatus))
                             {
@@ -437,7 +440,7 @@ namespace MobilePackageGen
                             }
                             else
                             {
-                                Console.WriteLine($"\n{GetDismLikeProgBar(100)}");
+                                Console.WriteLine($"\n{GetDISMLikeProgressBar(100)}");
                             }
                         }
 
@@ -452,11 +455,19 @@ namespace MobilePackageGen
             }
         }
 
-        private static string GetDismLikeProgBar(int percentage)
+        private static string GetDISMLikeProgressBar(uint percentage)
         {
-            int eqsLength = (int)((double)percentage / 100 * 55);
-            string bases = new string('=', eqsLength) + new string(' ', 55 - eqsLength);
+            if (percentage > 100)
+            {
+                percentage = 100;
+            }
+
+            int eqsLength = (int)Math.Floor((double)percentage * 55u / 100u);
+
+            string bases = $"{new string('=', eqsLength)}{new string(' ', 55 - eqsLength)}";
+
             bases = bases.Insert(28, percentage + "%");
+
             if (percentage == 100)
             {
                 bases = bases[1..];
