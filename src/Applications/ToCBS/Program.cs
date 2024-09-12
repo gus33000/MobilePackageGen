@@ -18,8 +18,8 @@ Version: 1.0.2.0
                 Console.WriteLine("You need to pass at least 2 parameters:");
                 Console.WriteLine(@"	<Path to MainOS/Data/EFIESP> <Output folder CBSs>");
                 Console.WriteLine("Examples:");
-                Console.WriteLine(@"	 ""D:\"" ""C:\OutputCabs\""");
-                Console.WriteLine(@"	 ""D:\"" ""E:\"" ""F:\"" ""C:\OutputCabs\""");
+                Console.WriteLine(@"	 D:\ ""C:\OutputCabs\""");
+                Console.WriteLine(@"	 D:\ E:\ F:\ ""C:\OutputCabs\""");
                 return;
             }
 
