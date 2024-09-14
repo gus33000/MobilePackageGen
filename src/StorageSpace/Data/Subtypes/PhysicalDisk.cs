@@ -22,7 +22,13 @@ namespace StorageSpace.Data.Subtypes
             private set;
         }
 
-        public string PhysicalDiskName
+        public string Name
+        {
+            get;
+            private set;
+        }
+
+        public string Description
         {
             get;
             private set;
@@ -83,7 +89,22 @@ namespace StorageSpace.Data.Subtypes
 
             string PhysicalDiskName = Encoding.Unicode.GetString(PhysicalDiskNameBuffer).Replace("\0", "");
 
-            stream.Seek(3, SeekOrigin.Current);
+            ushort PhysicalDiskDescriptionLength = reader.ReadUInt16();
+            PhysicalDiskDescriptionLength = (ushort)((PhysicalDiskDescriptionLength & 0xFF00) >> 8 | (PhysicalDiskDescriptionLength & 0xFF) << 8);
+
+            byte[] PhysicalDiskDescriptionBuffer = new byte[PhysicalDiskDescriptionLength * 2];
+            for (int i = 0; i < PhysicalDiskDescriptionLength; i++)
+            {
+                byte low = reader.ReadByte();
+                byte high = reader.ReadByte();
+
+                PhysicalDiskDescriptionBuffer[i * 2] = high;
+                PhysicalDiskDescriptionBuffer[(i * 2) + 1] = low;
+            }
+
+            string PhysicalDiskDescription = Encoding.Unicode.GetString(PhysicalDiskDescriptionBuffer).Replace("\0", "");
+
+            stream.Seek(1, SeekOrigin.Current);
 
             byte SDBBStatus = reader.ReadByte();
             byte Usage = reader.ReadByte();
@@ -100,7 +121,8 @@ namespace StorageSpace.Data.Subtypes
                 PhysicalDiskNumber = BigEndianToInt(PhysicalDiskNumber),
                 CommandSerialNumber = CommandSerialNumber,
                 SPACEDBGUID = SPACEDBGUID,
-                PhysicalDiskName = PhysicalDiskName,
+                Name = PhysicalDiskName,
+                Description = PhysicalDiskDescription,
                 SDBBStatus = SDBBStatus,
                 Usage = Usage,
                 MediaType = MediaType,
@@ -119,6 +141,11 @@ namespace StorageSpace.Data.Subtypes
                 val += buf[i];
             }
             return val;
+        }
+
+        public override string ToString()
+        {
+            return $"PhysicalDiskNumber: {PhysicalDiskNumber}, SPACEDBGUID: {SPACEDBGUID}, PhysicalDiskName: {Name}";
         }
     }
 }

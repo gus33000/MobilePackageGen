@@ -104,5 +104,10 @@
 
             return slabAllocation;
         }
+
+        public override string ToString()
+        {
+            return $"VolumeID: {VolumeID}, VolumeBlockNumber: {VolumeBlockNumber}, PhysicalDiskBlockNumber: {PhysicalDiskBlockNumber}";
+        }
     }
 }

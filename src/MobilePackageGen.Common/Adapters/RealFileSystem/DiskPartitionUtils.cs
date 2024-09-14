@@ -89,8 +89,8 @@ namespace MobilePackageGen.Adapters.RealFileSystem
                 {
                     PartitionType = new Guid(SliceByteArray(sliced, 16, 0)),
                     PartitionGuid = new Guid(SliceByteArray(sliced, 16, 16)),
-                    FirstLBA = BitConverter.ToInt32(SliceByteArray(sliced, 8, 32).ToArray(), 0),
-                    LastLBA = BitConverter.ToInt32(SliceByteArray(sliced, 8, 40).ToArray(), 0),
+                    FirstLBA = BitConverter.ToInt32([.. SliceByteArray(sliced, 8, 32)], 0),
+                    LastLBA = BitConverter.ToInt32([.. SliceByteArray(sliced, 8, 40)], 0),
                     AttributeFlags = SliceByteArray(sliced, 8, 48),
                     PartitionName = Encoding.Unicode.GetString(SliceByteArray(sliced, 72, 56)).Replace("\0", ""),
                     PhysicalNumber = physicalNumber
@@ -109,7 +109,7 @@ namespace MobilePackageGen.Adapters.RealFileSystem
                 }
             }
 
-            return partitions.ToArray();
+            return [.. partitions];
         }
 
         private static byte[] SliceByteArray(byte[] source, int length, int offset)

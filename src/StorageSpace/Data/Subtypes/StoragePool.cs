@@ -1,4 +1,6 @@
-﻿namespace StorageSpace.Data.Subtypes
+﻿using System.Text;
+
+namespace StorageSpace.Data.Subtypes
 {
     public class StoragePool
     {
@@ -8,7 +10,13 @@
             private set;
         }
 
-        public string StorageName
+        public string Name
+        {
+            get;
+            private set;
+        }
+
+        public string Description
         {
             get;
             private set;
@@ -49,11 +57,24 @@
                 StorageNameBuffer[(i * 2) + 1] = low;
             }
 
-            string StorageName = System.Text.Encoding.Unicode.GetString(StorageNameBuffer).Replace("\0", "");
+            string StorageName = Encoding.Unicode.GetString(StorageNameBuffer).Replace("\0", "");
 
-            stream.Seek(10, SeekOrigin.Current);
+            ushort StorageDescriptionLength = reader.ReadUInt16();
+            StorageDescriptionLength = (ushort)((StorageDescriptionLength & 0xFF00) >> 8 | (StorageDescriptionLength & 0xFF) << 8);
 
-            byte DataValue = reader.ReadByte();
+            byte[] StorageDescriptionBuffer = new byte[StorageDescriptionLength * 2];
+            for (int i = 0; i < StorageDescriptionLength; i++)
+            {
+                byte low = reader.ReadByte();
+                byte high = reader.ReadByte();
+
+                StorageDescriptionBuffer[i * 2] = high;
+                StorageDescriptionBuffer[(i * 2) + 1] = low;
+            }
+
+            string StorageDescription = Encoding.Unicode.GetString(StorageDescriptionBuffer).Replace("\0", "");
+
+            stream.Seek(8, SeekOrigin.Current);
 
             byte ProvisioningTypeDefault = reader.ReadByte();
 
@@ -88,12 +109,15 @@
             byte[] DataValue7 = reader.ReadBytes(dataLength);
 
             dataLength = reader.ReadByte();
-            byte[] DataValue8 = reader.ReadBytes(dataLength);*/
+            byte[] DataValue8 = reader.ReadBytes(dataLength);
+
+            byte DataValue = reader.ReadByte();*/
 
             StoragePool storagePool = new()
             {
                 StorageGUID = StorageGUID,
-                StorageName = StorageName,
+                Name = StorageName,
+                Description = StorageDescription,
                 ProvisioningTypeDefault = ProvisioningTypeDefault
             };
 

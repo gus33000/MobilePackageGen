@@ -7,15 +7,20 @@ namespace StorageSpace
         private readonly Stream Stream;
         private readonly long OriginalSeekPosition;
         private readonly long length;
-        private readonly long blockSize = 0x100000;
-        private readonly Dictionary<long, int> blockTable;
+
+        private readonly bool IsAncientFormat = false;
+
+        private long blockSize => IsAncientFormat ? 0x10000000 : 0x100000;
+
+        private readonly Dictionary<int, int> blockTable;
         private readonly List<SlabAllocation> slabAllocations = [];
         private readonly int TotalBlocks;
 
         private long currentPosition = 0;
 
-        internal Space(Stream Stream, int storeIndex, StorageSpace storageSpace, long OriginalSeekPosition)
+        internal Space(Stream Stream, int storeIndex, Pool storageSpace, long OriginalSeekPosition, bool IsAncientFormat)
         {
+            this.IsAncientFormat = IsAncientFormat;
             this.OriginalSeekPosition = OriginalSeekPosition;
             this.Stream = Stream;
 
@@ -50,11 +55,11 @@ namespace StorageSpace
 
         public override long Length => length;
 
-        private (long, Dictionary<long, int>) BuildBlockTable()
+        private (long, Dictionary<int, int>) BuildBlockTable()
         {
-            Dictionary<long, int> blockTable = [];
+            Dictionary<int, int> blockTable = [];
 
-            long blockSize = 0x10000000;
+            long blockSize = IsAncientFormat ? this.blockSize : 0x10000000;
 
             int maxVirtualDiskBlockNumber = 0;
 
@@ -76,7 +81,7 @@ namespace StorageSpace
             return (totalBlocks * blockSize, blockTable);
         }
 
-        private int GetBlockDataIndex(long realBlockOffset)
+        private int GetBlockDataIndex(int realBlockOffset)
         {
             if (blockTable.TryGetValue(realBlockOffset, out int value))
             {
@@ -111,17 +116,7 @@ namespace StorageSpace
             // Nothing to do here
         }
 
-        private byte[] ImageGetStoreDataBlock(int physicalDiskBlockNumber)
-        {
-            byte[] buffer = new byte[blockSize];
-
-            long physicalDiskLocation = physicalDiskBlockNumber * blockSize + 0x2000 + 0x4000000;
-
-            Stream.Seek(OriginalSeekPosition + physicalDiskLocation, SeekOrigin.Begin);
-            Stream.Read(buffer, 0, buffer.Length);
-
-            return buffer;
-        }
+        private long ImageGetStoreDataBlockOffset(int physicalDiskBlockNumber) => IsAncientFormat ? ((long)physicalDiskBlockNumber + 2) * blockSize : physicalDiskBlockNumber * blockSize + 0x2000 + 0x4000000;
 
         public override int Read(byte[] buffer, int offset, int count)
         {
@@ -158,31 +153,43 @@ namespace StorageSpace
                 readBytes = (int)(Length - Position);
             }
 
-            byte[] readBuffer = new byte[readBytes];
-            Array.Fill<byte>(readBuffer, 0);
-
             // Read the buffer from the FFU file.
             // First we have to figure out where do we land here.
 
             long overflowBlockStartByteCount = Position % blockSize;
             long overflowBlockEndByteCount = (Position + readBytes) % blockSize;
 
-            long startBlockIndex = (Position - overflowBlockStartByteCount) / blockSize;
-            long endBlockIndex = (Position + readBytes + (blockSize - overflowBlockEndByteCount)) / blockSize;
+            int startBlockIndex = (int)((Position - overflowBlockStartByteCount) / blockSize);
+            int endBlockIndex = (int)((Position + readBytes + (blockSize - overflowBlockEndByteCount)) / blockSize);
 
-            byte[] allReadBlocks = new byte[(endBlockIndex - startBlockIndex + 1) * blockSize];
-
-            for (long currentBlock = startBlockIndex; currentBlock < endBlockIndex; currentBlock++)
+            for (int currentBlock = startBlockIndex; currentBlock < endBlockIndex; currentBlock++)
             {
                 int virtualBlockIndex = GetBlockDataIndex(currentBlock);
                 if (virtualBlockIndex != -1)
                 {
-                    byte[] block = ImageGetStoreDataBlock(virtualBlockIndex);
-                    Array.Copy(block, 0, allReadBlocks, (int)((currentBlock - startBlockIndex) * blockSize), blockSize);
+                    long physicalDiskLocation = ImageGetStoreDataBlockOffset(virtualBlockIndex);
+
+                    long bytesToRead = blockSize;
+                    long bufferDestination = (blockSize - overflowBlockStartByteCount) + (currentBlock - startBlockIndex - 1) * blockSize;
+
+                    if (currentBlock == startBlockIndex)
+                    {
+                        bytesToRead = blockSize - overflowBlockStartByteCount;
+                        physicalDiskLocation += overflowBlockStartByteCount;
+                        bufferDestination = 0;
+                    }
+
+                    if (currentBlock == endBlockIndex - 1)
+                    {
+                        bytesToRead -= blockSize - overflowBlockEndByteCount;
+                    }
+
+                    byte[] block = new byte[bytesToRead];
+
+                    Stream.Seek(OriginalSeekPosition + physicalDiskLocation, SeekOrigin.Begin);
+                    Stream.Read(buffer, (int)bufferDestination, block.Length);
                 }
             }
-
-            Array.Copy(allReadBlocks, overflowBlockStartByteCount, buffer, offset, readBytes);
 
             Position += readBytes;
 

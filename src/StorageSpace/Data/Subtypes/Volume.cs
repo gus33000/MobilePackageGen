@@ -22,13 +22,13 @@ namespace StorageSpace.Data.Subtypes
             private set;
         }
 
-        public string VolumeName
+        public string Name
         {
             get;
             private set;
         }
 
-        public string VolumeDescription
+        public string Description
         {
             get;
             private set;
@@ -115,7 +115,7 @@ namespace StorageSpace.Data.Subtypes
             dataLength = reader.ReadByte();
             byte[] VolumeBlockNumber = reader.ReadBytes(dataLength);
 
-            int ParsedVolumeBlockNumber = 0;
+            /*int ParsedVolumeBlockNumber = 0;
             dataLength -= 3;
             ParsedVolumeBlockNumber = BigEndianToInt(VolumeBlockNumber.Take(dataLength).ToArray()) / 0x10;
 
@@ -123,7 +123,9 @@ namespace StorageSpace.Data.Subtypes
             {
                 dataLength += 3;
                 ParsedVolumeBlockNumber = BigEndianToInt(VolumeBlockNumber.Take(dataLength).ToArray());
-            }
+            }*/
+
+            int ParsedVolumeBlockNumber = BigEndianToInt(VolumeBlockNumber.Take(dataLength).ToArray());
 
             dataLength = reader.ReadByte();
             byte[] DataValue2 = reader.ReadBytes(dataLength);
@@ -152,8 +154,8 @@ namespace StorageSpace.Data.Subtypes
                 VolumeNumber = BigEndianToInt(VolumeNumber),
                 CommandSerialNumber = BigEndianToInt(CommandSerialNumber),
                 VolumeGUID = VolumeGUID,
-                VolumeName = VolumeName,
-                VolumeDescription = VolumeDescription,
+                Name = VolumeName,
+                Description = VolumeDescription,
                 VolumeBlockNumber = ParsedVolumeBlockNumber,
                 ProvisioningType = ProvisioningType,
                 ResiliencySettingName = ResiliencySettingName,
@@ -173,6 +175,11 @@ namespace StorageSpace.Data.Subtypes
                 val += buf[i];
             }
             return val;
+        }
+
+        public override string ToString()
+        {
+            return $"VolumeNumber: {VolumeNumber}, VolumeGUID: {VolumeGUID}, VolumeName: {Name}";
         }
     }
 }

@@ -87,13 +87,13 @@ namespace MobilePackageGen.Adapters
                     {
                         Console.WriteLine();
 
-                        Console.WriteLine($"{((GuidPartitionInfo)partitionInfo).Name} {((GuidPartitionInfo)partitionInfo).Identity} {((GuidPartitionInfo)partitionInfo).GuidType} {((GuidPartitionInfo)partitionInfo).SectorCount * virtualDisk.SectorSize} StoragePool");
+                        Console.WriteLine($"{((GuidPartitionInfo)partitionInfo).Name} {((GuidPartitionInfo)partitionInfo).Identity} {((GuidPartitionInfo)partitionInfo).GuidType} {((GuidPartitionInfo)partitionInfo).SectorCount * virtualDisk.Geometry!.Value.BytesPerSector} StoragePool");
 
                         Stream storageSpacePartitionStream = partitionInfo.Open();
 
-                        StorageSpace.StorageSpace storageSpace = new(storageSpacePartitionStream);
+                        Pool pool = new(storageSpacePartitionStream);
 
-                        Dictionary<int, string> disks = storageSpace.GetDisks();
+                        Dictionary<int, string> disks = pool.GetDisks();
 
                         foreach (KeyValuePair<int, string> disk in disks.OrderBy(x => x.Key))
                         {
@@ -104,7 +104,7 @@ namespace MobilePackageGen.Adapters
 
                         foreach (KeyValuePair<int, string> disk in disks)
                         {
-                            Space space = storageSpace.OpenDisk(disk.Key);
+                            Space space = pool.OpenDisk(disk.Key);
 
                             DiscUtils.Raw.Disk duVirtualDisk = new(space, Ownership.None, Geometry.FromCapacity(space.Length, 4096));
                             PartitionTable msPartitionTable = duVirtualDisk.Partitions;

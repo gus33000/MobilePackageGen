@@ -3,10 +3,12 @@ using StorageSpace.Data.Subtypes;
 
 namespace StorageSpace
 {
-    public class StorageSpace
+    public class Pool
     {
         private readonly Stream Stream;
         private readonly long OriginalSeekPosition;
+
+        private readonly bool IsAncientFormat = false;
 
         public SPACEDB SPACEDB
         {
@@ -53,18 +55,22 @@ namespace StorageSpace
             get; private set;
         }
 
-        public StorageSpace(Stream Stream)
+        public Pool(Stream Stream)
         {
             this.Stream = Stream;
             OriginalSeekPosition = Stream.Position;
 
             using BinaryReader reader = new(Stream);
 
+            Stream.Seek(0x18, SeekOrigin.Current);
+            IsAncientFormat = reader.ReadUInt64() != 0;
+            Stream.Seek(OriginalSeekPosition, SeekOrigin.Begin);
+
             SPACEDB = SPACEDB.Parse(Stream);
 
-            int SDBCOffset = 0x1000;
+            int SDBCStartPosition = 0x1000;
 
-            Stream.Seek(OriginalSeekPosition + SDBCOffset, SeekOrigin.Begin);
+            Stream.Seek(OriginalSeekPosition + SDBCStartPosition, SeekOrigin.Begin);
 
             SDBC = SDBC.Parse(Stream);
 
@@ -73,7 +79,9 @@ namespace StorageSpace
                 throw new Exception("Invalid OSPool! SDBC is not for the given SpaceDB!");
             }
 
-            Stream.Seek(OriginalSeekPosition + SDBCOffset + SDBC.SDBCLength, SeekOrigin.Begin);
+            int SDBBChainStartPosition = SDBCStartPosition + SDBC.SDBCLength;
+
+            Stream.Seek(OriginalSeekPosition + SDBBChainStartPosition, SeekOrigin.Begin);
 
             SDBBStorageInformation = [];
             SDBBPhysicalDisks = [];
@@ -85,7 +93,7 @@ namespace StorageSpace
             SDBBs = [];
             Blocks = [];
 
-            for (uint j = 8; j < SDBC.SDBBLength; j++)
+            for (uint j = 8; j < SDBC.SDBBLength + (IsAncientFormat ? 8 : 0); j++)
             {
                 SDBB SDBB = SDBB.Parse(Stream);
                 SDBBs.Add(SDBB);
@@ -106,7 +114,7 @@ namespace StorageSpace
                 }
             }
 
-            for (uint j = 8; j < SDBC.SDBBLength; j++)
+            for (uint j = 8; j < SDBC.SDBBLength + (IsAncientFormat ? 8 : 0); j++)
             {
                 if (!BlockEntries.ContainsKey(j))
                 {
@@ -140,6 +148,10 @@ namespace StorageSpace
                 }
             }
 
+            SDBBVolumes = [.. SDBBVolumes.OrderBy(x => x.VolumeNumber)];
+            SDBBSlabAllocation = [.. SDBBSlabAllocation.OrderBy(x => x.VolumeBlockNumber)];
+            SDBBSlabAllocation = [.. SDBBSlabAllocation.OrderBy(x => x.VolumeID)];
+
             Stream.Seek(OriginalSeekPosition, SeekOrigin.Begin);
         }
 
@@ -149,7 +161,7 @@ namespace StorageSpace
 
             foreach (Volume SDBBVolume in SDBBVolumes)
             {
-                disks.Add(SDBBVolume.VolumeNumber, string.IsNullOrEmpty(SDBBVolume.VolumeName) ? SDBBVolume.VolumeGUID.ToString() : SDBBVolume.VolumeName);
+                disks.Add(SDBBVolume.VolumeNumber, string.IsNullOrEmpty(SDBBVolume.Name) ? SDBBVolume.VolumeGUID.ToString() : SDBBVolume.Name);
             }
 
             return disks;
@@ -157,7 +169,7 @@ namespace StorageSpace
 
         public Space OpenDisk(int storeIndex)
         {
-            return new Space(Stream, storeIndex, this, OriginalSeekPosition);
+            return new Space(Stream, storeIndex, this, OriginalSeekPosition, IsAncientFormat);
         }
     }
 }

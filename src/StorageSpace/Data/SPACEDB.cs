@@ -44,7 +44,7 @@ namespace StorageSpace.Data
 
         public static SPACEDB Parse(Stream stream)
         {
-            long ogSeek = stream.Position;
+            long originalStreamPosition = stream.Position;
 
             using BinaryReader reader = new(stream);
 
@@ -64,7 +64,7 @@ namespace StorageSpace.Data
 
             uint SPACEDBCRC32 = reader.ReadUInt32();
 
-            stream.Seek(ogSeek + SPACEDBStorageGUIDLocation * 16, SeekOrigin.Begin);
+            stream.Seek(originalStreamPosition + SPACEDBStorageGUIDLocation * 16, SeekOrigin.Begin);
 
             Guid StorageGUID = new(reader.ReadBytes(16));
             Guid SPACEDBGUID = new(reader.ReadBytes(16));
