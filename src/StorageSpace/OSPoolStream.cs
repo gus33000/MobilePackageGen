@@ -1,5 +1,4 @@
-﻿using StorageSpace.Data;
-using System.Text;
+﻿using System.Text;
 
 namespace StorageSpace
 {
@@ -8,10 +7,10 @@ namespace StorageSpace
         private readonly Stream stream;
         private readonly Dictionary<int, Disk> parsedDisks = [];
         private readonly Disk store;
-        private readonly ulong storeIndex;
         private readonly long length;
         private readonly long blockSize = 0x100000;
         private readonly Dictionary<long, int> blockTable;
+        private readonly StorageSpace storageSpace;
 
         private long currentPosition = 0;
 
@@ -19,200 +18,37 @@ namespace StorageSpace
 
         public OSPoolStream(Stream stream, ulong storeIndex)
         {
-            long ogSeek = stream.Position;
-
             this.stream = stream;
-            this.storeIndex = storeIndex;
 
-            using BinaryReader reader = new(stream);
+            storageSpace = new(stream);
 
-            SPACEDB SPACEDB = SPACEDB.Parse(stream);
-
-            int SDBCOffset = 0x1000;
-
-            stream.Seek(ogSeek + SDBCOffset, SeekOrigin.Begin);
-
-            SDBC SDBC = SDBC.Parse(stream);
-
-            if (SDBC.StorageGUID != SPACEDB.StorageGUID)
-            {
-                throw new Exception("Invalid OSPool! SDBC is not for the given SpaceDB!");
-            }
-
-            stream.Seek(ogSeek + SDBCOffset + SDBC.SDBCLength, SeekOrigin.Begin);
-
-            List<byte[]> SDBBStorageInformation = [];
-            List<byte[]> SDBBPhysicalDisks = [];
-            List<byte[]> SDBBVolumes = [];
-            List<byte[]> SDBBSlabAllocation = [];
-
-            Dictionary<uint, byte[]> entryDataList = [];
-
-            for (int j = 8; j < SDBC.SDBBLength; j++)
-            {
-                SDBB SDBB = SDBB.Parse(stream);
-
-                if (SDBB.ParentSDBBIndex == 0) // Empty Entry
-                {
-                    //throw new Exception("An entry exists which is empty, this is abnormal");
-                    continue;
-                }
-
-                if (entryDataList.ContainsKey(SDBB.ParentSDBBIndex))
-                {
-                    entryDataList[SDBB.ParentSDBBIndex] = [.. entryDataList[SDBB.ParentSDBBIndex], .. SDBB.Data];
-                }
-                else
-                {
-                    entryDataList[SDBB.ParentSDBBIndex] = SDBB.Data;
-                }
-            }
-
-            for (uint j = 8; j < SDBC.SDBBLength; j++)
-            {
-                if (!entryDataList.ContainsKey(j))
-                {
-                    continue;
-                }
-
-                byte[] entry = entryDataList[j];
-                nint EntryType = entry[0];
-                int TotalDataLength = BitConverter.ToInt32(entry.Skip(0x04).Take(4).Reverse().ToArray(), 0);
-                nint DataLength = entry[8];
-
-                byte[] EntryData = entry.Skip(8).Take(TotalDataLength).ToArray();
-
-                switch (EntryType)
-                {
-                    case 1:
-                        SDBBStorageInformation.Add(EntryData);
-                        break;
-                    case 2:
-                        SDBBPhysicalDisks.Add(EntryData);
-                        break;
-                    case 3:
-                        SDBBVolumes.Add(EntryData);
-                        break;
-                    case 4:
-                        SDBBSlabAllocation.Add(EntryData);
-                        break;
-                    default:
-                        throw new Exception($"Unknown Entry Type! {EntryType}");
-                        //Console.WriteLine(BitConverter.ToString(entry).Replace("-", ""));
-                        //Console.WriteLine($"Unknown Entry Type! {EntryType}");
-                        //break;
-                }
-            }
-
-            ParseEntryType2(SDBBPhysicalDisks);
-            ParseEntryType3(SDBBVolumes);
-            ParseEntryType4(SDBBSlabAllocation);
+            ParseEntryType2(storageSpace.SDBBPhysicalDisks);
+            ParseEntryType3(storageSpace.SDBBVolumes);
+            ParseEntryType4(storageSpace.SDBBSlabAllocation);
 
             store = parsedDisks[(int)storeIndex];
 
             (length, blockTable) = BuildBlockTable();
-
-            stream.Seek(ogSeek, SeekOrigin.Begin);
         }
 
         public static Dictionary<int, string> GetDisks(Stream stream)
         {
             Dictionary<int, string> disks = [];
 
-            long ogSeek = stream.Position;
+            StorageSpace storageSpace = new(stream);
 
-            using BinaryReader reader = new(stream);
-
-            SPACEDB SPACEDB = SPACEDB.Parse(stream);
-
-            int SDBCOffset = 0x1000;
-
-            stream.Seek(ogSeek + SDBCOffset, SeekOrigin.Begin);
-
-            SDBC SDBC = SDBC.Parse(stream);
-
-            if (SDBC.StorageGUID != SPACEDB.StorageGUID)
-            {
-                throw new Exception("Invalid OSPool! SDBC is not for the given SpaceDB!");
-            }
-
-            stream.Seek(ogSeek + SDBCOffset + SDBC.SDBCLength, SeekOrigin.Begin);
-
-            List<byte[]> SDBBStorageInformation = [];
-            List<byte[]> SDBBPhysicalDisks = [];
-            List<byte[]> SDBBVolumes = [];
-            List<byte[]> SDBBSlabAllocation = [];
-
-            Dictionary<uint, byte[]> entryDataList = [];
-
-            for (int j = 8; j < SDBC.SDBBLength; j++)
-            {
-                SDBB SDBB = SDBB.Parse(stream);
-
-                if (SDBB.ParentSDBBIndex == 0) // Empty Entry
-                {
-                    //throw new Exception("An entry exists which is empty, this is abnormal");
-                    continue;
-                }
-
-                if (entryDataList.ContainsKey(SDBB.ParentSDBBIndex))
-                {
-                    entryDataList[SDBB.ParentSDBBIndex] = [.. entryDataList[SDBB.ParentSDBBIndex], .. SDBB.Data];
-                }
-                else
-                {
-                    entryDataList[SDBB.ParentSDBBIndex] = SDBB.Data;
-                }
-            }
-
-            for (uint j = 8; j < SDBC.SDBBLength; j++)
-            {
-                if (!entryDataList.ContainsKey(j))
-                {
-                    continue;
-                }
-
-                byte[] entry = entryDataList[j];
-                nint EntryType = entry[0];
-                int TotalDataLength = BitConverter.ToInt32(entry.Skip(0x04).Take(4).Reverse().ToArray(), 0);
-                nint DataLength = entry[8];
-
-                byte[] EntryData = entry.Skip(8).Take(TotalDataLength).ToArray();
-
-                switch (EntryType)
-                {
-                    case 1:
-                        SDBBStorageInformation.Add(EntryData);
-                        break;
-                    case 2:
-                        SDBBPhysicalDisks.Add(EntryData);
-                        break;
-                    case 3:
-                        SDBBVolumes.Add(EntryData);
-                        break;
-                    case 4:
-                        SDBBSlabAllocation.Add(EntryData);
-                        break;
-                    default:
-                        throw new Exception($"Unknown Entry Type! {EntryType}");
-                        //Console.WriteLine(BitConverter.ToString(entry).Replace("-", ""));
-                        //Console.WriteLine($"Unknown Entry Type! {EntryType}");
-                        //break;
-                }
-            }
-
-            foreach (byte[] SDBBVolume in SDBBVolumes)
+            foreach (byte[] SDBBVolume in storageSpace.SDBBVolumes)
             {
                 int tempOffset = 0;
 
-                nint DataLength = SDBBVolume[0];
-                int Data = BigEndianToInt(SDBBVolume.Skip(1).Take((int)DataLength).ToArray());
+                byte DataLength = SDBBVolume[0];
+                int Data = BigEndianToInt(SDBBVolume.Skip(1).Take(DataLength).ToArray());
 
-                nint DataLength2 = SDBBVolume[1 + DataLength];
+                byte DataLength2 = SDBBVolume[1 + DataLength];
 
-                int CommandSerialNumber = BigEndianToInt(SDBBVolume.Skip(1 + (int)DataLength + 1).Take((int)DataLength2).ToArray());
+                int CommandSerialNumber = BigEndianToInt(SDBBVolume.Skip(1 + DataLength + 1).Take(DataLength2).ToArray());
 
-                Guid VolumeGUID = new(SDBBVolume.Skip(1 + (int)DataLength + 1 + (int)DataLength2).Take(16).ToArray());
+                Guid VolumeGUID = new(SDBBVolume.Skip(1 + DataLength + 1 + DataLength2).Take(16).ToArray());
 
                 /*tempOffset += 0x02;
 
@@ -223,14 +59,14 @@ namespace StorageSpace
 
                 tempOffset += 0x10;*/
 
-                int VolumeLengthName = BitConverter.ToUInt16(SDBBVolume.Skip(1 + (int)DataLength + 1 + (int)DataLength2 + 16).Take(0x02).Reverse().ToArray(), 0);
+                int VolumeLengthName = BitConverter.ToUInt16(SDBBVolume.Skip(1 + DataLength + 1 + DataLength2 + 16).Take(0x02).Reverse().ToArray(), 0);
 
                 if (VolumeLengthName == 0)
                 {
                     continue;
                 }
 
-                tempOffset = 1 + (int)DataLength + 1 + (int)DataLength2 + 16 + 0x02;
+                tempOffset = 1 + DataLength + 1 + DataLength2 + 16 + 0x02;
 
                 byte[] virtualDiskName = new byte[VolumeLengthName * 2];
                 byte[] tempVirtualDiskName = SDBBVolume.Skip(tempOffset).Take(VolumeLengthName * 2).ToArray();
@@ -246,8 +82,6 @@ namespace StorageSpace
 
                 disks.Add(diskId, diskName);
             }
-
-            stream.Seek(ogSeek, SeekOrigin.Begin);
 
             return disks;
         }
@@ -512,14 +346,14 @@ namespace StorageSpace
 
                 int tempOffset = 0;
 
-                nint DataLength = SDBBVolume[0];
-                int Data = BigEndianToInt(SDBBVolume.Skip(1).Take((int)DataLength).ToArray());
+                byte DataLength = SDBBVolume[0];
+                int Data = BigEndianToInt(SDBBVolume.Skip(1).Take(DataLength).ToArray());
 
-                nint DataLength2 = SDBBVolume[1 + DataLength];
+                byte DataLength2 = SDBBVolume[1 + DataLength];
 
-                int CommandSerialNumber = BigEndianToInt(SDBBVolume.Skip(1 + (int)DataLength + 1).Take((int)DataLength2).ToArray());
+                int CommandSerialNumber = BigEndianToInt(SDBBVolume.Skip(1 + DataLength + 1).Take(DataLength2).ToArray());
 
-                Guid VolumeGUID = new(SDBBVolume.Skip(1 + (int)DataLength + 1 + (int)DataLength2).Take(16).ToArray());
+                Guid VolumeGUID = new(SDBBVolume.Skip(1 + DataLength + 1 + DataLength2).Take(16).ToArray());
 
                 /*tempOffset += 0x02;
 
@@ -530,14 +364,14 @@ namespace StorageSpace
 
                 tempOffset += 0x10;*/
 
-                int VolumeLengthName = BitConverter.ToUInt16(SDBBVolume.Skip(1 + (int)DataLength + 1 + (int)DataLength2 + 16).Take(0x02).Reverse().ToArray(), 0);
+                int VolumeLengthName = BitConverter.ToUInt16(SDBBVolume.Skip(1 + DataLength + 1 + DataLength2 + 16).Take(0x02).Reverse().ToArray(), 0);
 
                 if (VolumeLengthName == 0)
                 {
                     continue;
                 }
 
-                tempOffset = 1 + (int)DataLength + 1 + (int)DataLength2 + 16 + 0x02;
+                tempOffset = 1 + DataLength + 1 + DataLength2 + 16 + 0x02;
 
                 byte[] virtualDiskName = new byte[VolumeLengthName * 2];
                 byte[] tempVirtualDiskName = SDBBVolume.Skip(tempOffset).Take(VolumeLengthName * 2).ToArray();
