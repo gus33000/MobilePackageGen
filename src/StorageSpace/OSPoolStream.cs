@@ -6,11 +6,11 @@ namespace StorageSpace
     {
         private readonly Stream Stream;
         private readonly long OriginalSeekPosition;
-        private readonly Dictionary<int, Disk> Disks = [];
-        private readonly Disk CurrentDisk;
         private readonly long length;
         private readonly long blockSize = 0x100000;
         private readonly Dictionary<long, int> blockTable;
+        private readonly List<SlabAllocation> slabAllocations = [];
+        private readonly int TotalBlocks;
 
         private long currentPosition = 0;
 
@@ -19,46 +19,25 @@ namespace StorageSpace
             this.OriginalSeekPosition = OriginalSeekPosition;
             this.Stream = Stream;
 
-            foreach (PhysicalDisk physicalDisk in storageSpace.SDBBPhysicalDisks)
-            {
-                if (!Disks.TryGetValue(physicalDisk.PhysicalDiskNumber, out Disk? value))
-                {
-                    value = new Disk();
-                    Disks.Add(physicalDisk.PhysicalDiskNumber, value);
-                }
-
-                value.ID = physicalDisk.PhysicalDiskNumber;
-                value.UUID = physicalDisk.SPACEDBGUID;
-                value.Name = physicalDisk.PhysicalDiskName;
-                value.TotalBlocks = physicalDisk.DiskBlockNumber;
-            }
-
             foreach (Volume volume in storageSpace.SDBBVolumes)
             {
-                if (!Disks.TryGetValue(volume.VolumeNumber, out Disk? value))
+                if (volume.VolumeNumber != storeIndex)
                 {
-                    value = new Disk();
-                    Disks.Add(volume.VolumeNumber, value);
+                    continue;
                 }
 
-                value.ID = volume.VolumeNumber;
-                value.UUID = volume.VolumeGUID;
-                value.Name = volume.VolumeName;
-                value.TotalBlocks = volume.VolumeBlockNumber;
+                TotalBlocks = volume.VolumeBlockNumber;
             }
 
             foreach (SlabAllocation slabAllocation in storageSpace.SDBBSlabAllocation)
             {
-                if (!Disks.TryGetValue(slabAllocation.VolumeID, out Disk? value))
+                if (slabAllocation.VolumeID != storeIndex)
                 {
-                    value = new Disk();
-                    Disks.Add(slabAllocation.VolumeID, value);
+                    continue;
                 }
 
-                value.SlabAllocations.Add(slabAllocation);
+                slabAllocations.Add(slabAllocation);
             }
-
-            CurrentDisk = Disks[storeIndex];
 
             (length, blockTable) = BuildBlockTable();
         }
@@ -79,7 +58,7 @@ namespace StorageSpace
 
             int maxVirtualDiskBlockNumber = 0;
 
-            foreach (SlabAllocation slabAllocation in CurrentDisk.SlabAllocations)
+            foreach (SlabAllocation slabAllocation in slabAllocations)
             {
                 int virtualDiskBlockNumber = slabAllocation.VolumeBlockNumber;
                 int physicalDiskBlockNumber = slabAllocation.PhysicalDiskBlockNumber;
@@ -92,7 +71,7 @@ namespace StorageSpace
                 blockTable.Add(virtualDiskBlockNumber, physicalDiskBlockNumber);
             }
 
-            long totalBlocks = Math.Max(CurrentDisk.TotalBlocks, maxVirtualDiskBlockNumber);
+            long totalBlocks = Math.Max(TotalBlocks, maxVirtualDiskBlockNumber);
 
             return (totalBlocks * blockSize, blockTable);
         }
