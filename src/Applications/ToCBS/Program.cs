@@ -1,4 +1,5 @@
 ﻿using MobilePackageGen;
+using MobilePackageGen.Adapters;
 using MobilePackageGen.Adapters.RealFileSystem;
 
 namespace ToCBS
@@ -29,7 +30,7 @@ Version: 1.0.2.0
 
             Console.WriteLine("Getting Update OS Disks...");
 
-            disks.AddRange(Disk.GetUpdateOSDisks(disks));
+            disks.AddRange(DiskCommon.GetUpdateOSDisks(disks));
 
             CBSBuilder.BuildCBS(disks, args[^1]);
         }

@@ -1,4 +1,5 @@
 ﻿using MobilePackageGen;
+using MobilePackageGen.Adapters;
 using MobilePackageGen.Adapters.FullFlashUpdate;
 
 namespace ToSPKG
@@ -28,7 +29,7 @@ Version: 1.0.2.0
 
             Console.WriteLine("Getting Update OS Disks...");
 
-            disks.AddRange(Disk.GetUpdateOSDisks(disks));
+            disks.AddRange(DiskCommon.GetUpdateOSDisks(disks));
 
             SPKGBuilder.BuildSPKG(disks, args[1]);
         }

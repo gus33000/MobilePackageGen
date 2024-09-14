@@ -37,60 +37,6 @@ namespace MobilePackageGen.Adapters.FullFlashUpdate
             return partitions;
         }
 
-        public static List<IDisk> GetUpdateOSDisks(List<IDisk> disks)
-        {
-            List<IDisk> updateOSDisks = [];
-
-            foreach (IDisk disk in disks)
-            {
-                foreach (IPartition partition in disk.Partitions)
-                {
-                    IDisk? updateOSDisk = GetUpdateOSDisk(partition);
-                    if (updateOSDisk != null)
-                    {
-                        updateOSDisks.Add(updateOSDisk);
-                    }
-                }
-            }
-
-            return updateOSDisks;
-        }
-
-        public static IDisk? GetUpdateOSDisk(IPartition partition)
-        {
-            if (partition.FileSystem != null)
-            {
-                IFileSystem fileSystem = partition.FileSystem;
-                try
-                {
-                    // Handle UpdateOS as well if found
-                    if (fileSystem.FileExists("PROGRAMS\\UpdateOS\\UpdateOS.wim"))
-                    {
-                        List<IPartition> partitions = [];
-
-                        Stream wimStream = fileSystem.OpenFile("PROGRAMS\\UpdateOS\\UpdateOS.wim", FileMode.Open, FileAccess.Read);
-                        DiscUtils.Wim.WimFile wimFile = new(wimStream);
-
-                        for (int i = 0; i < wimFile.ImageCount; i++)
-                        {
-                            IFileSystem wimFileSystem = wimFile.GetImage(i);
-                            IPartition wimPartition = new FileSystemPartition(wimStream, wimFileSystem, $"{partition.Name}-UpdateOS-{i}", Guid.Empty, Guid.Empty);
-                            partitions.Add(wimPartition);
-                        }
-
-                        Disk updateOSDisk = new(partitions);
-                        return updateOSDisk;
-                    }
-                }
-                catch
-                {
-
-                }
-            }
-
-            return null;
-        }
-
         private static List<PartitionInfo> GetPartitions(string ffuPath)
         {
             List<PartitionInfo> partitions = [];
@@ -101,7 +47,7 @@ namespace MobilePackageGen.Adapters.FullFlashUpdate
                 long diskCapacity = store.Length;
                 VirtualDisk virtualDisk = new DiscUtils.Raw.Disk(store, Ownership.None, Geometry.FromCapacity(diskCapacity, store.SectorSize));
 
-                partitions.AddRange(FileSystemPartition.GetPartitions(virtualDisk));
+                partitions.AddRange(DiskCommon.GetPartitions(virtualDisk));
             }
 
             return partitions;
