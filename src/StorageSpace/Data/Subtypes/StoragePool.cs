@@ -49,7 +49,7 @@
                 StorageNameBuffer[(i * 2) + 1] = low;
             }
 
-            string StorageName = System.Text.Encoding.Unicode.GetString(StorageNameBuffer);
+            string StorageName = System.Text.Encoding.Unicode.GetString(StorageNameBuffer).Replace("\0", "");
 
             stream.Seek(10, SeekOrigin.Current);
 

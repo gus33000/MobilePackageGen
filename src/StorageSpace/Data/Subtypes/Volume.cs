@@ -93,7 +93,7 @@ namespace StorageSpace.Data.Subtypes
                 VolumeNameBuffer[(i * 2) + 1] = low;
             }
 
-            string VolumeName = Encoding.Unicode.GetString(VolumeNameBuffer);
+            string VolumeName = Encoding.Unicode.GetString(VolumeNameBuffer).Replace("\0", "");
 
             ushort VolumeDescriptionLength = reader.ReadUInt16();
             VolumeDescriptionLength = (ushort)((VolumeDescriptionLength & 0xFF00) >> 8 | (VolumeDescriptionLength & 0xFF) << 8);
@@ -108,7 +108,7 @@ namespace StorageSpace.Data.Subtypes
                 VolumeDescriptionBuffer[(i * 2) + 1] = low;
             }
 
-            string VolumeDescription = Encoding.Unicode.GetString(VolumeDescriptionBuffer);
+            string VolumeDescription = Encoding.Unicode.GetString(VolumeDescriptionBuffer).Replace("\0", "");
 
             stream.Seek(3, SeekOrigin.Current);
 

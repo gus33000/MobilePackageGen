@@ -81,7 +81,7 @@ namespace StorageSpace.Data.Subtypes
                 PhysicalDiskNameBuffer[(i * 2) + 1] = low;
             }
 
-            string PhysicalDiskName = Encoding.Unicode.GetString(PhysicalDiskNameBuffer);
+            string PhysicalDiskName = Encoding.Unicode.GetString(PhysicalDiskNameBuffer).Replace("\0", "");
 
             stream.Seek(3, SeekOrigin.Current);
 
