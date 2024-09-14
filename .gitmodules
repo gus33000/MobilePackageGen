@@ -1,0 +1,6 @@
+[submodule "thirdparty/StorageSpace"]
+	path = thirdparty/StorageSpace
+	url = https://github.com/gus33000/StorageSpace
+[submodule "thirdparty/Img2Ffu"]
+	path = thirdparty/Img2Ffu
+	url = https://github.com/WOA-Project/Img2Ffu
