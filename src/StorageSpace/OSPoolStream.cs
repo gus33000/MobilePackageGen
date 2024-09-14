@@ -4,10 +4,10 @@ namespace StorageSpace
 {
     public class OSPoolStream : Stream
     {
-        private readonly Stream stream;
-        private readonly long ogSeek;
-        private readonly Dictionary<int, Disk> parsedDisks = [];
-        private readonly Disk store;
+        private readonly Stream Stream;
+        private readonly long OriginalSeekPosition;
+        private readonly Dictionary<int, Disk> Disks = [];
+        private readonly Disk CurrentDisk;
         private readonly long length;
         private readonly long blockSize = 0x100000;
         private readonly Dictionary<long, int> blockTable;
@@ -17,16 +17,42 @@ namespace StorageSpace
 
         public OSPoolStream(Stream stream, ulong storeIndex)
         {
-            ogSeek = stream.Position;
-            this.stream = stream;
+            OriginalSeekPosition = stream.Position;
+            this.Stream = stream;
 
             storageSpace = new(stream);
 
-            PhysicalDisk.ParseEntryType2(storageSpace.SDBBPhysicalDisks, parsedDisks);
-            Volume.ParseEntryType3(storageSpace.SDBBVolumes, parsedDisks);
-            SlabAllocation.ParseEntryType4(storageSpace.SDBBSlabAllocation, parsedDisks);
+            foreach (PhysicalDisk physicalDisk in storageSpace.SDBBPhysicalDisks)
+            {
+                if (!Disks.TryGetValue(physicalDisk.PhysicalDiskNumber, out Disk? value))
+                {
+                    value = new Disk();
+                    Disks.Add(physicalDisk.PhysicalDiskNumber, value);
+                }
 
-            store = parsedDisks[(int)storeIndex];
+                value.ID = physicalDisk.PhysicalDiskNumber;
+                value.UUID = physicalDisk.SPACEDBGUID;
+                value.Name = physicalDisk.PhysicalDiskName;
+                value.TotalBlocks = physicalDisk.DiskBlockNumber;
+            }
+
+            foreach (Volume volume in storageSpace.SDBBVolumes)
+            {
+                if (!Disks.TryGetValue(volume.VolumeNumber, out Disk? value))
+                {
+                    value = new Disk();
+                    Disks.Add(volume.VolumeNumber, value);
+                }
+
+                value.ID = volume.VolumeNumber;
+                value.UUID = volume.VolumeGUID;
+                value.Name = volume.VolumeName;
+                value.TotalBlocks = volume.VolumeBlockNumber;
+            }
+
+            SlabAllocation.ParseEntryType4(storageSpace.SDBBSlabAllocation, Disks);
+
+            CurrentDisk = Disks[(int)storeIndex];
 
             (length, blockTable) = BuildBlockTable();
         }
@@ -45,7 +71,7 @@ namespace StorageSpace
 
             long blockSize = 0x10000000;
 
-            foreach (DataEntry sdbbEntry in store.sdbbEntryType4)
+            foreach (DataEntry sdbbEntry in CurrentDisk.sdbbEntryType4)
             {
                 int virtualDiskBlockNumber = sdbbEntry.virtual_disk_block_number;
                 int physicalDiskBlockNumber = sdbbEntry.physical_disk_block_number;
@@ -53,7 +79,7 @@ namespace StorageSpace
                 blockTable.Add(virtualDiskBlockNumber, physicalDiskBlockNumber);
             }
 
-            long totalBlocks = store.TotalBlocks;
+            long totalBlocks = CurrentDisk.TotalBlocks;
 
             return (totalBlocks * blockSize, blockTable);
         }
@@ -99,8 +125,8 @@ namespace StorageSpace
 
             long physicalDiskLocation = physicalDiskBlockNumber * blockSize + 0x2000 + 0x4000000;
 
-            stream.Seek(ogSeek + physicalDiskLocation, SeekOrigin.Begin);
-            stream.Read(buffer, 0, buffer.Length);
+            Stream.Seek(OriginalSeekPosition + physicalDiskLocation, SeekOrigin.Begin);
+            Stream.Read(buffer, 0, buffer.Length);
 
             return buffer;
         }
@@ -218,7 +244,7 @@ namespace StorageSpace
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
-            stream.Dispose();
+            Stream.Dispose();
         }
     }
 }

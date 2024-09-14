@@ -226,7 +226,7 @@ namespace SevenZipExtractor
 
         private T GetProperty<T>(ItemPropId name)
         {
-            PropVariant propVariant = new PropVariant();
+            PropVariant propVariant = new();
             this.archive.GetArchiveProperty((uint)name, ref propVariant);
             object value = propVariant.GetObject();
 
@@ -266,7 +266,7 @@ namespace SevenZipExtractor
 
         private T GetProperty<T>(uint fileIndex, ItemPropId name)
         {
-            PropVariant propVariant = new PropVariant();
+            PropVariant propVariant = new();
             this.archive.GetProperty(fileIndex, name, ref propVariant);
             object value = propVariant.GetObject();
 
@@ -388,7 +388,7 @@ namespace SevenZipExtractor
 
         private bool GuessFormatFromSignature(string filePath, out SevenZipFormat format)
         {
-            using (FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (FileStream fileStream = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 return GuessFormatFromSignature(fileStream, out format);
             }

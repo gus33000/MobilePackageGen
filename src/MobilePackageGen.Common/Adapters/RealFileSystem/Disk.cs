@@ -70,7 +70,7 @@ namespace MobilePackageGen.Adapters.RealFileSystem
                             partitions.Add(wimPartition);
                         }
 
-                        Disk updateOSDisk = new Disk(partitions);
+                        Disk updateOSDisk = new(partitions);
                         return updateOSDisk;
                     }
                 }

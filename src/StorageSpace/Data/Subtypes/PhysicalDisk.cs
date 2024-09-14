@@ -4,52 +4,110 @@ namespace StorageSpace.Data.Subtypes
 {
     public class PhysicalDisk
     {
-        public static void ParseEntryType2(List<byte[]> sdbbEntryType2, Dictionary<int, Disk> parsedDisks)
+        public int PhysicalDiskNumber
         {
-            foreach (byte[] sdbbEntry in sdbbEntryType2)
+            get;
+            private set;
+        }
+
+        public byte[] CommandSerialNumber
+        {
+            get;
+            private set;
+        }
+
+        public Guid SPACEDBGUID
+        {
+            get;
+            private set;
+        }
+
+        public string PhysicalDiskName
+        {
+            get;
+            private set;
+        }
+
+        public byte SDBBStatus
+        {
+            get;
+            private set;
+        }
+
+        public byte Usage
+        {
+            get;
+            private set;
+        }
+
+        public byte MediaType
+        {
+            get;
+            private set;
+        }
+
+        public int DiskBlockNumber
+        {
+            get;
+            private set;
+        }
+
+        private PhysicalDisk()
+        {
+        }
+
+        public static PhysicalDisk Parse(Stream stream)
+        {
+            using BinaryReader reader = new(stream);
+
+            byte dataLength = reader.ReadByte();
+            byte[] PhysicalDiskNumber = reader.ReadBytes(dataLength);
+
+            dataLength = reader.ReadByte();
+            byte[] CommandSerialNumber = reader.ReadBytes(dataLength);
+
+            Guid SPACEDBGUID = new(reader.ReadBytes(16));
+
+            ushort PhysicalDiskNameLength = reader.ReadUInt16();
+            PhysicalDiskNameLength = (ushort)((PhysicalDiskNameLength & 0xFF00) >> 8 | (PhysicalDiskNameLength & 0xFF) << 8);
+
+            byte[] PhysicalDiskNameBuffer = new byte[PhysicalDiskNameLength * 2];
+            for (int i = 0; i < PhysicalDiskNameLength; i++)
             {
-                int tempOffset = 0;
-                int dataRecordLen = sdbbEntry[tempOffset];
-                int physicalDiskId = BigEndianToInt(sdbbEntry.Skip(tempOffset + 1).Take(dataRecordLen).ToArray());
+                byte low = reader.ReadByte();
+                byte high = reader.ReadByte();
 
-                tempOffset += sdbbEntry[tempOffset] + 1;
-                tempOffset += sdbbEntry[tempOffset] + 1;
-
-                byte[] physicalDiskUuid = sdbbEntry.Skip(tempOffset).Take(0x10).ToArray();
-                tempOffset += 0x10;
-
-                int physicalDiskNameLength = BitConverter.ToUInt16(sdbbEntry.Skip(tempOffset).Take(0x02).Reverse().ToArray(), 0);
-                tempOffset += 0x02;
-
-                byte[] physicalDiskName = new byte[physicalDiskNameLength * 2];
-                byte[] tempPhysicalDiskName = sdbbEntry.Skip(tempOffset).Take(physicalDiskNameLength * 2).ToArray();
-                tempOffset += physicalDiskNameLength * 2;
-                for (int j = 0; j < physicalDiskNameLength * 2; j += 2)
-                {
-                    physicalDiskName[j] = tempPhysicalDiskName[j + 1];
-                    physicalDiskName[j + 1] = tempPhysicalDiskName[j];
-                }
-                tempOffset += 6;
-
-                dataRecordLen = sdbbEntry[tempOffset];
-                int physicalDiskBlockNumber = BigEndianToInt(sdbbEntry.Skip(tempOffset + 1).Take(dataRecordLen).ToArray());
-
-                int diskId = physicalDiskId;
-                Guid diskUuid = new(physicalDiskUuid);
-                string diskName = Encoding.Unicode.GetString(physicalDiskName);
-                int diskBlockNumber = physicalDiskBlockNumber;
-
-                if (!parsedDisks.TryGetValue(diskId, out Disk? value))
-                {
-                    value = new Disk();
-                    parsedDisks.Add(diskId, value);
-                }
-
-                value.ID = diskId;
-                value.UUID = diskUuid;
-                value.Name = diskName;
-                value.TotalBlocks = diskBlockNumber;
+                PhysicalDiskNameBuffer[i * 2] = high;
+                PhysicalDiskNameBuffer[(i * 2) + 1] = low;
             }
+
+            string PhysicalDiskName = Encoding.Unicode.GetString(PhysicalDiskNameBuffer);
+
+            stream.Seek(3, SeekOrigin.Current);
+
+            byte SDBBStatus = reader.ReadByte();
+            byte Usage = reader.ReadByte();
+            byte MediaType = reader.ReadByte();
+
+            dataLength = reader.ReadByte();
+            byte[] DiskBlockNumber = reader.ReadBytes(dataLength);
+
+            dataLength = reader.ReadByte();
+            byte[] DataValue1 = reader.ReadBytes(dataLength);
+
+            PhysicalDisk physicalDisk = new()
+            {
+                PhysicalDiskNumber = BigEndianToInt(PhysicalDiskNumber),
+                CommandSerialNumber = CommandSerialNumber,
+                SPACEDBGUID = SPACEDBGUID,
+                PhysicalDiskName = PhysicalDiskName,
+                SDBBStatus = SDBBStatus,
+                Usage = Usage,
+                MediaType = MediaType,
+                DiskBlockNumber = BigEndianToInt(DiskBlockNumber)
+            };
+
+            return physicalDisk;
         }
 
         private static int BigEndianToInt(byte[] buf)

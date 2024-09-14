@@ -4,107 +4,164 @@ namespace StorageSpace.Data.Subtypes
 {
     public class Volume
     {
-        public static void ParseEntryType3(List<byte[]> sdbbEntryType3, Dictionary<int, Disk> parsedDisks)
+        public int VolumeNumber
         {
-            foreach (byte[] SDBBVolume in sdbbEntryType3)
+            get;
+            private set;
+        }
+
+        public int CommandSerialNumber
+        {
+            get;
+            private set;
+        }
+
+        public Guid VolumeGUID
+        {
+            get;
+            private set;
+        }
+
+        public string VolumeName
+        {
+            get;
+            private set;
+        }
+
+        public string VolumeDescription
+        {
+            get;
+            private set;
+        }
+
+        public int VolumeBlockNumber
+        {
+            get;
+            private set;
+        }
+
+        public byte ProvisioningType
+        {
+            get;
+            private set;
+        }
+
+        public byte ResiliencySettingName
+        {
+            get;
+            private set;
+        }
+
+        public byte NumberOfCopies
+        {
+            get;
+            private set;
+        }
+
+        public byte NumberOfClusters
+        {
+            get;
+            private set;
+        }
+
+        private Volume()
+        {
+        }
+
+        public static Volume Parse(Stream stream)
+        {
+            using BinaryReader reader = new(stream);
+
+            byte dataLength = reader.ReadByte();
+            byte[] VolumeNumber = reader.ReadBytes(dataLength);
+
+            dataLength = reader.ReadByte();
+            byte[] CommandSerialNumber = reader.ReadBytes(dataLength);
+
+            Guid VolumeGUID = new(reader.ReadBytes(16));
+
+            ushort VolumeNameLength = reader.ReadUInt16();
+            VolumeNameLength = (ushort)((VolumeNameLength & 0xFF00) >> 8 | (VolumeNameLength & 0xFF) << 8);
+
+            byte[] VolumeNameBuffer = new byte[VolumeNameLength * 2];
+            for (int i = 0; i < VolumeNameLength; i++)
             {
-                /*int tempOffset = 0;
-                int dataRecordLen = sdbbEntry[tempOffset];
-                int virtualDiskId = BigEndianToInt(sdbbEntry.Skip(tempOffset + 1).Take(dataRecordLen).ToArray());
-                tempOffset += 0x02;
+                byte low = reader.ReadByte();
+                byte high = reader.ReadByte();
 
-                if (sdbbEntry[tempOffset] == 0x01)
-                {
-                    tempOffset += sdbbEntry[tempOffset] + 1;
-                }
-
-                byte[] virtualDiskUuid = sdbbEntry.Skip(tempOffset).Take(0x10).ToArray();
-                tempOffset += 0x10;
-
-                int virtualDiskNameLength = BitConverter.ToUInt16(sdbbEntry.Skip(tempOffset).Take(0x02).Reverse().ToArray(), 0);
-                tempOffset += 0x02;*/
-
-
-                int tempOffset = 0;
-
-                byte DataLength = SDBBVolume[0];
-                int Data = BigEndianToInt(SDBBVolume.Skip(1).Take(DataLength).ToArray());
-
-                byte DataLength2 = SDBBVolume[1 + DataLength];
-
-                int CommandSerialNumber = BigEndianToInt(SDBBVolume.Skip(1 + DataLength + 1).Take(DataLength2).ToArray());
-
-                Guid VolumeGUID = new(SDBBVolume.Skip(1 + DataLength + 1 + DataLength2).Take(16).ToArray());
-
-                /*tempOffset += 0x02;
-
-                if (SDBBVolume[tempOffset] == 0x01)
-                {
-                    tempOffset += SDBBVolume[tempOffset] + 1;
-                }
-
-                tempOffset += 0x10;*/
-
-                int VolumeLengthName = BitConverter.ToUInt16(SDBBVolume.Skip(1 + DataLength + 1 + DataLength2 + 16).Take(0x02).Reverse().ToArray(), 0);
-
-                if (VolumeLengthName == 0)
-                {
-                    continue;
-                }
-
-                tempOffset = 1 + DataLength + 1 + DataLength2 + 16 + 0x02;
-
-                byte[] virtualDiskName = new byte[VolumeLengthName * 2];
-                byte[] tempVirtualDiskName = SDBBVolume.Skip(tempOffset).Take(VolumeLengthName * 2).ToArray();
-                tempOffset += VolumeLengthName * 2;
-                for (int j = 0; j < VolumeLengthName * 2; j += 2)
-                {
-                    virtualDiskName[j] = tempVirtualDiskName[j + 1];
-                    virtualDiskName[j + 1] = tempVirtualDiskName[j];
-                }
-
-                int diskDescriptionLength = BitConverter.ToUInt16(SDBBVolume.Skip(tempOffset).Take(0x02).Reverse().ToArray(), 0);
-                tempOffset += 0x02;
-
-                byte[] diskDescription = new byte[diskDescriptionLength * 2];
-                byte[] tempDiskDescription = SDBBVolume.Skip(tempOffset).Take(diskDescriptionLength * 2).ToArray();
-                tempOffset += diskDescriptionLength * 2;
-                for (int j = 0; j < diskDescriptionLength * 2; j += 2)
-                {
-                    diskDescription[j] = tempDiskDescription[j + 1];
-                    diskDescription[j + 1] = tempDiskDescription[j];
-                }
-
-                tempOffset += 3;
-
-                int virtualDiskBlockNumber = 0;
-
-                int dataRecordLen = SDBBVolume[tempOffset];
-                dataRecordLen -= 3;
-                virtualDiskBlockNumber = BigEndianToInt(SDBBVolume.Skip(tempOffset + 1).Take(dataRecordLen).ToArray()) / 0x10;
-
-                if (virtualDiskBlockNumber == 0)
-                {
-                    dataRecordLen = SDBBVolume[tempOffset];
-                    virtualDiskBlockNumber = BigEndianToInt(SDBBVolume.Skip(tempOffset + 1).Take(dataRecordLen).ToArray());
-                }
-
-                int diskId = Data;
-                Guid diskUuid = VolumeGUID;
-                string diskName = Encoding.Unicode.GetString(virtualDiskName);
-                int diskBlockNumber = virtualDiskBlockNumber;
-
-                if (!parsedDisks.TryGetValue(diskId, out Disk? value))
-                {
-                    value = new Disk();
-                    parsedDisks.Add(diskId, value);
-                }
-
-                value.ID = diskId;
-                value.UUID = diskUuid;
-                value.Name = diskName;
-                value.TotalBlocks = diskBlockNumber;
+                VolumeNameBuffer[i * 2] = high;
+                VolumeNameBuffer[(i * 2) + 1] = low;
             }
+
+            string VolumeName = Encoding.Unicode.GetString(VolumeNameBuffer);
+
+            ushort VolumeDescriptionLength = reader.ReadUInt16();
+            VolumeDescriptionLength = (ushort)((VolumeDescriptionLength & 0xFF00) >> 8 | (VolumeDescriptionLength & 0xFF) << 8);
+
+            byte[] VolumeDescriptionBuffer = new byte[VolumeDescriptionLength * 2];
+            for (int i = 0; i < VolumeDescriptionLength; i++)
+            {
+                byte low = reader.ReadByte();
+                byte high = reader.ReadByte();
+
+                VolumeDescriptionBuffer[i * 2] = high;
+                VolumeDescriptionBuffer[(i * 2) + 1] = low;
+            }
+
+            string VolumeDescription = Encoding.Unicode.GetString(VolumeDescriptionBuffer);
+
+            stream.Seek(3, SeekOrigin.Current);
+
+            dataLength = reader.ReadByte();
+            byte[] VolumeBlockNumber = reader.ReadBytes(dataLength);
+
+            int ParsedVolumeBlockNumber = 0;
+            dataLength -= 3;
+            ParsedVolumeBlockNumber = BigEndianToInt(VolumeBlockNumber.Take(dataLength).ToArray()) / 0x10;
+
+            if (ParsedVolumeBlockNumber == 0)
+            {
+                dataLength += 3;
+                ParsedVolumeBlockNumber = BigEndianToInt(VolumeBlockNumber.Take(dataLength).ToArray());
+            }
+
+            dataLength = reader.ReadByte();
+            byte[] DataValue2 = reader.ReadBytes(dataLength);
+
+            byte ProvisioningType = reader.ReadByte();
+
+            stream.Seek(9, SeekOrigin.Current);
+
+            byte ResiliencySettingName = reader.ReadByte();
+
+            dataLength = reader.ReadByte();
+            byte[] DataValue3 = reader.ReadBytes(dataLength);
+
+            stream.Seek(1, SeekOrigin.Current);
+
+            byte NumberOfCopies = reader.ReadByte();
+
+            stream.Seek(3, SeekOrigin.Current);
+
+            byte NumberOfClusters = reader.ReadByte();
+
+            // Unknown
+
+            Volume volume = new()
+            {
+                VolumeNumber = BigEndianToInt(VolumeNumber),
+                CommandSerialNumber = BigEndianToInt(CommandSerialNumber),
+                VolumeGUID = VolumeGUID,
+                VolumeName = VolumeName,
+                VolumeDescription = VolumeDescription,
+                VolumeBlockNumber = ParsedVolumeBlockNumber,
+                ProvisioningType = ProvisioningType,
+                ResiliencySettingName = ResiliencySettingName,
+                NumberOfCopies = NumberOfCopies,
+                NumberOfClusters = NumberOfClusters
+            };
+
+            return volume;
         }
 
         private static int BigEndianToInt(byte[] buf)

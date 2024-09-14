@@ -2,7 +2,7 @@
 {
     public class Formats
     {
-        internal static readonly Dictionary<string, SevenZipFormat> ExtensionFormatMapping = new Dictionary<string, SevenZipFormat>
+        internal static readonly Dictionary<string, SevenZipFormat> ExtensionFormatMapping = new()
         {
             {"7z", SevenZipFormat.SevenZip},
             {"gz", SevenZipFormat.GZip},
@@ -33,7 +33,7 @@
             {"vhd", SevenZipFormat.Vhd}
         };
 
-        internal static Dictionary<SevenZipFormat, Guid> FormatGuidMapping = new Dictionary<SevenZipFormat, Guid>
+        internal static Dictionary<SevenZipFormat, Guid> FormatGuidMapping = new()
         {
             {SevenZipFormat.SevenZip, new Guid("23170f69-40c1-278a-1000-000110070000")},
             {SevenZipFormat.Arj, new Guid("23170f69-40c1-278a-1000-000110040000")},
@@ -83,7 +83,7 @@
             {SevenZipFormat.MachO, new Guid("23170f69-40c1-278a-1000-000110DF0000")}
         };
 
-        internal static Dictionary<SevenZipFormat, byte[]> FileSignatures = new Dictionary<SevenZipFormat, byte[]>
+        internal static Dictionary<SevenZipFormat, byte[]> FileSignatures = new()
         {
             {SevenZipFormat.Rar5, new byte[] {0x52, 0x61, 0x72, 0x21, 0x1A, 0x07, 0x01, 0x00}},
             {SevenZipFormat.Rar, new byte[] { 0x52, 0x61, 0x72, 0x21, 0x1A, 0x07, 0x00 }},
