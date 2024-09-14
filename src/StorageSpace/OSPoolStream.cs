@@ -11,16 +11,13 @@ namespace StorageSpace
         private readonly long length;
         private readonly long blockSize = 0x100000;
         private readonly Dictionary<long, int> blockTable;
-        private readonly StorageSpace storageSpace;
 
         private long currentPosition = 0;
 
-        public OSPoolStream(Stream stream, ulong storeIndex)
+        internal OSPoolStream(Stream Stream, int storeIndex, StorageSpace storageSpace, long OriginalSeekPosition)
         {
-            OriginalSeekPosition = stream.Position;
-            Stream = stream;
-
-            storageSpace = new(stream);
+            this.OriginalSeekPosition = OriginalSeekPosition;
+            this.Stream = Stream;
 
             foreach (PhysicalDisk physicalDisk in storageSpace.SDBBPhysicalDisks)
             {
@@ -61,7 +58,7 @@ namespace StorageSpace
                 value.SlabAllocations.Add(slabAllocation);
             }
 
-            CurrentDisk = Disks[(int)storeIndex];
+            CurrentDisk = Disks[storeIndex];
 
             (length, blockTable) = BuildBlockTable();
         }
@@ -80,15 +77,22 @@ namespace StorageSpace
 
             long blockSize = 0x10000000;
 
+            int maxVirtualDiskBlockNumber = 0;
+
             foreach (SlabAllocation slabAllocation in CurrentDisk.SlabAllocations)
             {
                 int virtualDiskBlockNumber = slabAllocation.VolumeBlockNumber;
                 int physicalDiskBlockNumber = slabAllocation.PhysicalDiskBlockNumber;
 
+                if (virtualDiskBlockNumber > maxVirtualDiskBlockNumber)
+                {
+                    maxVirtualDiskBlockNumber = virtualDiskBlockNumber;
+                }
+
                 blockTable.Add(virtualDiskBlockNumber, physicalDiskBlockNumber);
             }
 
-            long totalBlocks = CurrentDisk.TotalBlocks;
+            long totalBlocks = Math.Max(CurrentDisk.TotalBlocks, maxVirtualDiskBlockNumber);
 
             return (totalBlocks * blockSize, blockTable);
         }

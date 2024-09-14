@@ -115,26 +115,24 @@ namespace MobilePackageGen.Adapters.Vhdx
 
                     if (partitionInfo.GuidType == new Guid("E75CAF8F-F680-4CEE-AFA3-B001E56EFC2D"))
                     {
-                        Stream pool = partitionInfo.Open();
-                        Dictionary<int, string> disks = StorageSpace.StorageSpace.GetDisks(pool);
-                        List<OSPoolStream> spaces = [];
+                        Stream storageSpacePartitionStream = partitionInfo.Open();
+
+                        StorageSpace.StorageSpace storageSpace = new(storageSpacePartitionStream);
+
+                        Dictionary<int, string> disks = storageSpace.GetDisks();
 
                         foreach (KeyValuePair<int, string> disk in disks)
                         {
-                            OSPoolStream space = new(pool, (ulong)disk.Key);
-                            spaces.Add(space);
-                        }
+                            OSPoolStream space = storageSpace.OpenDisk(disk.Key);
 
-                        foreach (OSPoolStream space in spaces)
-                        {
                             DiscUtils.Raw.Disk duVirtualDisk = new(space, Ownership.None, Geometry.FromCapacity(space.Length, 4096));
                             PartitionTable msPartitionTable = duVirtualDisk.Partitions;
 
                             if (msPartitionTable != null)
                             {
-                                foreach (PartitionInfo sspartition in msPartitionTable.Partitions)
+                                foreach (PartitionInfo storageSpacePartition in msPartitionTable.Partitions)
                                 {
-                                    partitions.Add(sspartition);
+                                    partitions.Add(storageSpacePartition);
                                 }
                             }
                         }

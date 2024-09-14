@@ -5,6 +5,9 @@ namespace StorageSpace
 {
     public class StorageSpace
     {
+        private readonly Stream Stream;
+        private readonly long OriginalSeekPosition;
+
         public SPACEDB SPACEDB
         {
             get; private set;
@@ -50,26 +53,27 @@ namespace StorageSpace
             get; private set;
         }
 
-        public StorageSpace(Stream stream)
+        public StorageSpace(Stream Stream)
         {
-            long ogSeek = stream.Position;
+            this.Stream = Stream;
+            OriginalSeekPosition = Stream.Position;
 
-            using BinaryReader reader = new(stream);
+            using BinaryReader reader = new(Stream);
 
-            SPACEDB = SPACEDB.Parse(stream);
+            SPACEDB = SPACEDB.Parse(Stream);
 
             int SDBCOffset = 0x1000;
 
-            stream.Seek(ogSeek + SDBCOffset, SeekOrigin.Begin);
+            Stream.Seek(OriginalSeekPosition + SDBCOffset, SeekOrigin.Begin);
 
-            SDBC = SDBC.Parse(stream);
+            SDBC = SDBC.Parse(Stream);
 
             if (SDBC.StorageGUID != SPACEDB.StorageGUID)
             {
                 throw new Exception("Invalid OSPool! SDBC is not for the given SpaceDB!");
             }
 
-            stream.Seek(ogSeek + SDBCOffset + SDBC.SDBCLength, SeekOrigin.Begin);
+            Stream.Seek(OriginalSeekPosition + SDBCOffset + SDBC.SDBCLength, SeekOrigin.Begin);
 
             SDBBStorageInformation = [];
             SDBBPhysicalDisks = [];
@@ -83,7 +87,7 @@ namespace StorageSpace
 
             for (uint j = 8; j < SDBC.SDBBLength; j++)
             {
-                SDBB SDBB = SDBB.Parse(stream);
+                SDBB SDBB = SDBB.Parse(Stream);
                 SDBBs.Add(SDBB);
 
                 if (SDBB.ParentSDBBIndex == 0) // Empty Entry
@@ -136,21 +140,24 @@ namespace StorageSpace
                 }
             }
 
-            stream.Seek(ogSeek, SeekOrigin.Begin);
+            Stream.Seek(OriginalSeekPosition, SeekOrigin.Begin);
         }
 
-        public static Dictionary<int, string> GetDisks(Stream stream)
+        public Dictionary<int, string> GetDisks()
         {
             Dictionary<int, string> disks = [];
 
-            StorageSpace storageSpace = new(stream);
-
-            foreach (Volume SDBBVolume in storageSpace.SDBBVolumes)
+            foreach (Volume SDBBVolume in SDBBVolumes)
             {
                 disks.Add(SDBBVolume.VolumeNumber, SDBBVolume.VolumeName);
             }
 
             return disks;
+        }
+
+        public OSPoolStream OpenDisk(int storeIndex)
+        {
+            return new OSPoolStream(Stream, storeIndex, this, OriginalSeekPosition);
         }
     }
 }
