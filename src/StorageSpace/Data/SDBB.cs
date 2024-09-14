@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace StorageSpace
+namespace StorageSpace.Data
 {
     public class SDBB
     {
