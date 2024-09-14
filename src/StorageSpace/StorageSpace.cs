@@ -155,9 +155,9 @@ namespace StorageSpace
             return disks;
         }
 
-        public OSPoolStream OpenDisk(int storeIndex)
+        public Space OpenDisk(int storeIndex)
         {
-            return new OSPoolStream(Stream, storeIndex, this, OriginalSeekPosition);
+            return new Space(Stream, storeIndex, this, OriginalSeekPosition);
         }
     }
 }

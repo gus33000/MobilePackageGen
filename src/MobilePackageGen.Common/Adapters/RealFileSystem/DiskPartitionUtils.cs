@@ -13,7 +13,7 @@ namespace MobilePackageGen.Adapters.RealFileSystem
 
                 if (s.Count > 0)
                 {
-                    using RawDisk disk = new(DiskNumberType.PhysicalDisk, s[0].PhysicalNumber, FileAccess.Read);
+                    using RawDiskLib.RawDisk disk = new(DiskNumberType.PhysicalDisk, s[0].PhysicalNumber, FileAccess.Read);
                     byte[] partitionRaw = disk.ReadSectors(s[0].FirstLBA, s[0].LastLBA - s[0].FirstLBA);
                     string dirFromDest = Path.GetDirectoryName(destinationFile);
                     if (!Directory.Exists(dirFromDest))
@@ -49,7 +49,7 @@ namespace MobilePackageGen.Adapters.RealFileSystem
             {
                 physicalDisks.ForEach(phy =>
                 {
-                    using RawDisk disk = new(DiskNumberType.PhysicalDisk, phy, FileAccess.Read);
+                    using RawDiskLib.RawDisk disk = new(DiskNumberType.PhysicalDisk, phy, FileAccess.Read);
                     if (disk.SectorCount < 34 * 2)
                     {
                         Console.WriteLine("Too low sector count: " + disk.SectorCount);

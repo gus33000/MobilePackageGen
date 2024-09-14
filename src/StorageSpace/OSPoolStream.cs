@@ -2,7 +2,7 @@
 
 namespace StorageSpace
 {
-    public class OSPoolStream : Stream
+    public class Space : Stream
     {
         private readonly Stream Stream;
         private readonly long OriginalSeekPosition;
@@ -14,7 +14,7 @@ namespace StorageSpace
 
         private long currentPosition = 0;
 
-        internal OSPoolStream(Stream Stream, int storeIndex, StorageSpace storageSpace, long OriginalSeekPosition)
+        internal Space(Stream Stream, int storeIndex, StorageSpace storageSpace, long OriginalSeekPosition)
         {
             this.OriginalSeekPosition = OriginalSeekPosition;
             this.Stream = Stream;

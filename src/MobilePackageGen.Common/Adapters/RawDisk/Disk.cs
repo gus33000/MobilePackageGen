@@ -1,9 +1,8 @@
 ﻿using DiscUtils.Partitions;
 using DiscUtils.Streams;
 using DiscUtils;
-using Img2Ffu.Reader;
 
-namespace MobilePackageGen.Adapters.FullFlashUpdate
+namespace MobilePackageGen.Adapters.RawDisk
 {
     public class Disk : IDisk
     {
@@ -12,9 +11,9 @@ namespace MobilePackageGen.Adapters.FullFlashUpdate
             get;
         }
 
-        public Disk(string ffuPath)
+        public Disk(Stream diskStream)
         {
-            List<PartitionInfo> partitionInfos = GetPartitions(ffuPath);
+            List<PartitionInfo> partitionInfos = GetPartitions(diskStream);
             Partitions = GetPartitionStructures(partitionInfos);
         }
 
@@ -91,20 +90,10 @@ namespace MobilePackageGen.Adapters.FullFlashUpdate
             return null;
         }
 
-        private static List<PartitionInfo> GetPartitions(string ffuPath)
+        private static List<PartitionInfo> GetPartitions(Stream diskStream)
         {
-            List<PartitionInfo> partitions = [];
-            for (int i = 0; i < FullFlashUpdateReaderStream.GetStoreCount(ffuPath); i++)
-            {
-                FullFlashUpdateReaderStream store = new(ffuPath, (ulong)i);
-
-                long diskCapacity = store.Length;
-                VirtualDisk virtualDisk = new DiscUtils.Raw.Disk(store, Ownership.None, Geometry.FromCapacity(diskCapacity, store.SectorSize));
-
-                partitions.AddRange(FileSystemPartition.GetPartitions(virtualDisk));
-            }
-
-            return partitions;
+            VirtualDisk virtualDisk = new DiscUtils.Raw.Disk(diskStream, Ownership.None);
+            return FileSystemPartition.GetPartitions(virtualDisk);
         }
     }
 }

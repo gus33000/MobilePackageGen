@@ -1,6 +1,9 @@
 ﻿using Archives.DiscUtils;
 using DiscUtils;
+using DiscUtils.Partitions;
+using DiscUtils.Streams;
 using SevenZipExtractor;
+using StorageSpace;
 
 namespace MobilePackageGen.Adapters
 {
@@ -92,6 +95,48 @@ namespace MobilePackageGen.Adapters
             }
 
             return null;
+        }
+
+        public static List<PartitionInfo> GetPartitions(VirtualDisk virtualDisk)
+        {
+            List<PartitionInfo> partitions = [];
+
+            PartitionTable partitionTable = virtualDisk.Partitions;
+
+            if (partitionTable != null)
+            {
+                foreach (PartitionInfo partitionInfo in partitionTable.Partitions)
+                {
+                    partitions.Add(partitionInfo);
+
+                    if (partitionInfo.GuidType == new Guid("E75CAF8F-F680-4CEE-AFA3-B001E56EFC2D"))
+                    {
+                        Stream storageSpacePartitionStream = partitionInfo.Open();
+
+                        StorageSpace.StorageSpace storageSpace = new(storageSpacePartitionStream);
+
+                        Dictionary<int, string> disks = storageSpace.GetDisks();
+
+                        foreach (KeyValuePair<int, string> disk in disks)
+                        {
+                            Space space = storageSpace.OpenDisk(disk.Key);
+
+                            DiscUtils.Raw.Disk duVirtualDisk = new(space, Ownership.None, Geometry.FromCapacity(space.Length, 4096));
+                            PartitionTable msPartitionTable = duVirtualDisk.Partitions;
+
+                            if (msPartitionTable != null)
+                            {
+                                foreach (PartitionInfo storageSpacePartition in msPartitionTable.Partitions)
+                                {
+                                    partitions.Add(storageSpacePartition);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return partitions;
         }
     }
 }
