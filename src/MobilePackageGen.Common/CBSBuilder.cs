@@ -246,7 +246,14 @@ namespace MobilePackageGen
                 {
                     if (partition.FileSystem == null)
                     {
-                        Console.WriteLine($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} UnknownFS");
+                        if (partition.Type == new Guid("E75CAF8F-F680-4CEE-AFA3-B001E56EFC2D"))
+                        {
+                            Console.WriteLine($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} StoragePool");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} UnknownFS");
+                        }
                     }
                 }
             }
