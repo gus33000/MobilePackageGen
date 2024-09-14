@@ -9,52 +9,52 @@ namespace SevenZipExtractor
 
         public SevenZipHandle(string sevenZipLibPath)
         {
-            this.sevenZipSafeHandle = Kernel32Dll.LoadLibrary(sevenZipLibPath);
+            sevenZipSafeHandle = Kernel32Dll.LoadLibrary(sevenZipLibPath);
 
-            if (this.sevenZipSafeHandle.IsInvalid)
+            if (sevenZipSafeHandle.IsInvalid)
             {
                 throw new Win32Exception();
             }
 
-            IntPtr functionPtr = Kernel32Dll.GetProcAddress(this.sevenZipSafeHandle, "GetHandlerProperty");
+            IntPtr functionPtr = Kernel32Dll.GetProcAddress(sevenZipSafeHandle, "GetHandlerProperty");
             
             // Not valid dll
             if (functionPtr == IntPtr.Zero)
             {
-                this.sevenZipSafeHandle.Close();
+                sevenZipSafeHandle.Close();
                 throw new ArgumentException();
             }
         }
 
         ~SevenZipHandle()
         {
-            this.Dispose(false);
+            Dispose(false);
         }
 
         protected void Dispose(bool disposing)
         {
-            if ((this.sevenZipSafeHandle != null) && !this.sevenZipSafeHandle.IsClosed)
+            if ((sevenZipSafeHandle != null) && !sevenZipSafeHandle.IsClosed)
             {
-                this.sevenZipSafeHandle.Close();
+                sevenZipSafeHandle.Close();
             }
 
-            this.sevenZipSafeHandle = null;
+            sevenZipSafeHandle = null;
         }
 
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
         public IInArchive CreateInArchive(Guid classId)
         {
-            if (this.sevenZipSafeHandle == null)
+            if (sevenZipSafeHandle == null)
             {
                 throw new ObjectDisposedException("SevenZipHandle");
             }
 
-            IntPtr procAddress = Kernel32Dll.GetProcAddress(this.sevenZipSafeHandle, "CreateObject");
+            IntPtr procAddress = Kernel32Dll.GetProcAddress(sevenZipSafeHandle, "CreateObject");
             CreateObjectDelegate createObject = (CreateObjectDelegate) Marshal.GetDelegateForFunctionPointer(procAddress, typeof (CreateObjectDelegate));
 
             object result;

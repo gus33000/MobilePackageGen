@@ -2,60 +2,40 @@
 {
     public class SlabAllocation
     {
-        public static void ParseEntryType4(List<byte[]> sdbbEntryType4, Dictionary<int, Disk> parsedDisks)
+        public int VolumeID
         {
-            foreach (byte[] sdbbEntry in sdbbEntryType4)
-            {
-                int tempOffset = 0;
+            get;
+            private set;
+        }
 
-                tempOffset += sdbbEntry[tempOffset] + 1;
-                tempOffset += sdbbEntry[tempOffset] + 1;
-                tempOffset += sdbbEntry[tempOffset] + 1;
-                tempOffset += sdbbEntry[tempOffset] + 1;
-                tempOffset += sdbbEntry[tempOffset] + 1;
+        public int VolumeBlockNumber
+        {
+            get;
+            private set;
+        }
 
-                int dataRecordLen = sdbbEntry[tempOffset];
-                int virtual_disk_id = BigEndianToInt(sdbbEntry.Skip(tempOffset + 1).Take(dataRecordLen).ToArray());
-                tempOffset += sdbbEntry[tempOffset] + 1;
+        public int ParitySequenceNumber
+        {
+            get;
+            private set;
+        }
 
-                dataRecordLen = sdbbEntry[tempOffset];
-                int virtual_disk_block_number = BigEndianToInt(sdbbEntry.Skip(tempOffset + 1).Take(dataRecordLen).ToArray());
-                tempOffset += sdbbEntry[tempOffset] + 1;
+        public int MirrorSequenceNumber
+        {
+            get;
+            private set;
+        }
 
-                dataRecordLen = sdbbEntry[tempOffset];
-                int parity_sequence_number = BigEndianToInt(sdbbEntry.Skip(tempOffset + 1).Take(dataRecordLen).ToArray());
-                tempOffset += sdbbEntry[tempOffset] + 1;
+        public int PhysicalDiskID
+        {
+            get;
+            private set;
+        }
 
-                dataRecordLen = sdbbEntry[tempOffset];
-                int mirror_sequence_number = BigEndianToInt(sdbbEntry.Skip(tempOffset + 1).Take(dataRecordLen).ToArray());
-                tempOffset += sdbbEntry[tempOffset] + 1;
-
-                tempOffset += sdbbEntry[tempOffset] + 1;
-
-                dataRecordLen = sdbbEntry[tempOffset];
-                int physical_disk_id = BigEndianToInt(sdbbEntry.Skip(tempOffset + 1).Take(dataRecordLen).ToArray());
-                tempOffset += sdbbEntry[tempOffset] + 1;
-
-                dataRecordLen = sdbbEntry[tempOffset];
-                int physical_disk_block_number = BigEndianToInt(sdbbEntry.Skip(tempOffset + 1).Take(dataRecordLen).ToArray());
-                tempOffset += sdbbEntry[tempOffset] + 1;
-
-                if (!parsedDisks.TryGetValue(virtual_disk_id, out Disk? value))
-                {
-                    value = new Disk();
-                    parsedDisks.Add(virtual_disk_id, value);
-                }
-
-                value.sdbbEntryType4.Add(new DataEntry()
-                {
-                    mirror_sequence_number = mirror_sequence_number,
-                    parity_sequence_number = parity_sequence_number,
-                    physical_disk_block_number = physical_disk_block_number,
-                    physical_disk_id = physical_disk_id,
-                    virtual_disk_block_number = virtual_disk_block_number,
-                    virtual_disk_id = virtual_disk_id,
-                });
-            }
+        public int PhysicalDiskBlockNumber
+        {
+            get;
+            private set;
         }
 
         private static int BigEndianToInt(byte[] buf)
@@ -67,6 +47,62 @@
                 val += buf[i];
             }
             return val;
+        }
+        private SlabAllocation()
+        {
+        }
+
+        public static SlabAllocation Parse(Stream stream)
+        {
+            using BinaryReader reader = new(stream);
+
+            byte dataLength = reader.ReadByte();
+            byte[] DataValue1 = reader.ReadBytes(dataLength);
+
+            dataLength = reader.ReadByte();
+            byte[] DataValue2 = reader.ReadBytes(dataLength);
+
+            dataLength = reader.ReadByte();
+            byte[] DataValue3 = reader.ReadBytes(dataLength);
+
+            dataLength = reader.ReadByte();
+            byte[] DataValue4 = reader.ReadBytes(dataLength);
+
+            dataLength = reader.ReadByte();
+            byte[] DataValue5 = reader.ReadBytes(dataLength);
+
+            dataLength = reader.ReadByte();
+            int VolumeID = BigEndianToInt(reader.ReadBytes(dataLength));
+
+            dataLength = reader.ReadByte();
+            int VolumeBlockNumber = BigEndianToInt(reader.ReadBytes(dataLength));
+
+            dataLength = reader.ReadByte();
+            int ParitySequenceNumber = BigEndianToInt(reader.ReadBytes(dataLength));
+
+            dataLength = reader.ReadByte();
+            int MirrorSequenceNumber = BigEndianToInt(reader.ReadBytes(dataLength));
+
+            dataLength = reader.ReadByte();
+            byte[] DataValue6 = reader.ReadBytes(dataLength);
+
+            dataLength = reader.ReadByte();
+            int PhysicalDiskID = BigEndianToInt(reader.ReadBytes(dataLength));
+
+            dataLength = reader.ReadByte();
+            int PhysicalDiskBlockNumber = BigEndianToInt(reader.ReadBytes(dataLength));
+
+            SlabAllocation slabAllocation = new()
+            {
+                VolumeID = VolumeID,
+                VolumeBlockNumber = VolumeBlockNumber,
+                ParitySequenceNumber = ParitySequenceNumber,
+                MirrorSequenceNumber = MirrorSequenceNumber,
+                PhysicalDiskID = PhysicalDiskID,
+                PhysicalDiskBlockNumber = PhysicalDiskBlockNumber
+            };
+
+            return slabAllocation;
         }
     }
 }

@@ -18,7 +18,7 @@ namespace StorageSpace
         public OSPoolStream(Stream stream, ulong storeIndex)
         {
             OriginalSeekPosition = stream.Position;
-            this.Stream = stream;
+            Stream = stream;
 
             storageSpace = new(stream);
 
@@ -50,7 +50,16 @@ namespace StorageSpace
                 value.TotalBlocks = volume.VolumeBlockNumber;
             }
 
-            SlabAllocation.ParseEntryType4(storageSpace.SDBBSlabAllocation, Disks);
+            foreach (SlabAllocation slabAllocation in storageSpace.SDBBSlabAllocation)
+            {
+                if (!Disks.TryGetValue(slabAllocation.VolumeID, out Disk? value))
+                {
+                    value = new Disk();
+                    Disks.Add(slabAllocation.VolumeID, value);
+                }
+
+                value.SlabAllocations.Add(slabAllocation);
+            }
 
             CurrentDisk = Disks[(int)storeIndex];
 
@@ -71,10 +80,10 @@ namespace StorageSpace
 
             long blockSize = 0x10000000;
 
-            foreach (DataEntry sdbbEntry in CurrentDisk.sdbbEntryType4)
+            foreach (SlabAllocation slabAllocation in CurrentDisk.SlabAllocations)
             {
-                int virtualDiskBlockNumber = sdbbEntry.virtual_disk_block_number;
-                int physicalDiskBlockNumber = sdbbEntry.physical_disk_block_number;
+                int virtualDiskBlockNumber = slabAllocation.VolumeBlockNumber;
+                int physicalDiskBlockNumber = slabAllocation.PhysicalDiskBlockNumber;
 
                 blockTable.Add(virtualDiskBlockNumber, physicalDiskBlockNumber);
             }

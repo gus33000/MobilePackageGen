@@ -45,7 +45,7 @@ namespace StorageSpace
             get; private set;
         }
 
-        public List<byte[]> SDBBSlabAllocation
+        public List<SlabAllocation> SDBBSlabAllocation
         {
             get; private set;
         }
@@ -129,7 +129,7 @@ namespace StorageSpace
                         SDBBVolumes.Add(Volume.Parse(dataStream));
                         break;
                     case BlockType.SlabAllocation:
-                        SDBBSlabAllocation.Add(Block.Data);
+                        SDBBSlabAllocation.Add(SlabAllocation.Parse(dataStream));
                         break;
                     default:
                         throw new Exception($"Unknown Entry Type! {Block.Type}");

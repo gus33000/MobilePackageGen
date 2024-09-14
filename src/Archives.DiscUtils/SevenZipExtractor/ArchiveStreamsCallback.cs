@@ -25,13 +25,13 @@
                 return 0;
             }
 
-            if (this.streams == null)
+            if (streams == null)
             {
                 outStream = null;
                 return 0;
             }
 
-            Stream stream = this.streams[(int) index];
+            Stream stream = streams[(int) index];
 
             if (stream == null)
             {

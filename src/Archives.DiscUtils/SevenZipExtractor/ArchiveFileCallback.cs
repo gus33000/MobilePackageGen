@@ -22,22 +22,22 @@ namespace SevenZipExtractor
 
         public int GetStream(uint index, out ISequentialOutStream outStream, AskMode askExtractMode)
         {
-            if ((index != this.fileNumber) || (askExtractMode != AskMode.kExtract))
+            if ((index != fileNumber) || (askExtractMode != AskMode.kExtract))
             {
                 outStream = null;
                 return 0;
             }
 
-            string fileDir = Path.GetDirectoryName(this.fileName);
+            string fileDir = Path.GetDirectoryName(fileName);
 
             if (!string.IsNullOrEmpty(fileDir))
             {
                 Directory.CreateDirectory(fileDir);
             }
 
-            this.fileStream = new OutStreamWrapper(File.Create(this.fileName));
+            fileStream = new OutStreamWrapper(File.Create(fileName));
 
-            outStream = this.fileStream;
+            outStream = fileStream;
 
             return 0;
         }
@@ -48,7 +48,7 @@ namespace SevenZipExtractor
 
         public void SetOperationResult(OperationResult resultEOperationResult)
         {
-            this.fileStream.Dispose();
+            fileStream.Dispose();
         }
     }
 }

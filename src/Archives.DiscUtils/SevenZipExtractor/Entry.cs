@@ -85,7 +85,7 @@
 
         public void Extract(string fileName, bool preserveTimestamp = true)
         {
-            if (this.IsFolder)
+            if (IsFolder)
             {
                 Directory.CreateDirectory(fileName);
                 return;
@@ -100,17 +100,17 @@
 
             using (FileStream fileStream = File.Create(fileName))
             {
-                this.Extract(fileStream);
+                Extract(fileStream);
             }
 
             if (preserveTimestamp)
             {
-                File.SetLastWriteTime(fileName, this.LastWriteTime);
+                File.SetLastWriteTime(fileName, LastWriteTime);
             }
         }
         public void Extract(Stream stream)
         {
-            this.archive.Extract([this.index], 1, 0, new ArchiveStreamCallback(this.index, stream));
+            archive.Extract([index], 1, 0, new ArchiveStreamCallback(index, stream));
         }
     }
 }

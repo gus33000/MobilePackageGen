@@ -21,13 +21,13 @@
 
         public int GetStream(uint index, out ISequentialOutStream outStream, AskMode askExtractMode)
         {
-            if ((index != this.fileNumber) || (askExtractMode != AskMode.kExtract))
+            if ((index != fileNumber) || (askExtractMode != AskMode.kExtract))
             {
                 outStream = null;
                 return 0;
             }
 
-            outStream = new OutStreamWrapper(this.stream);
+            outStream = new OutStreamWrapper(stream);
 
             return 0;
         }

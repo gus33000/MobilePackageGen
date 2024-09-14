@@ -28,13 +28,13 @@ namespace SevenZipExtractor
         {
             get
             {
-                return (VarEnum) this.vt;
+                return (VarEnum) vt;
             }
         }
 
         public void Clear()
         {
-            switch (this.VarType)
+            switch (VarType)
             {
                 case VarEnum.VT_EMPTY:
                     break;
@@ -59,7 +59,7 @@ namespace SevenZipExtractor
                 case VarEnum.VT_UINT:
                 case VarEnum.VT_HRESULT:
                 case VarEnum.VT_FILETIME:
-                    this.vt = 0;
+                    vt = 0;
                     break;
 
                 default:
@@ -70,13 +70,13 @@ namespace SevenZipExtractor
 
         public object GetObject()
         {
-            switch (this.VarType)
+            switch (VarType)
             {
                 case VarEnum.VT_EMPTY:
                     return null;
 
                 case VarEnum.VT_FILETIME:
-                    return DateTime.FromFileTime(this.longValue);
+                    return DateTime.FromFileTime(longValue);
 
                 default:
                     GCHandle PropHandle = GCHandle.Alloc(this, GCHandleType.Pinned);
@@ -396,17 +396,17 @@ namespace SevenZipExtractor
 
         protected StreamWrapper(Stream baseStream)
         {
-            this.BaseStream = baseStream;
+            BaseStream = baseStream;
         }
 
         public void Dispose()
         {
-            this.BaseStream.Close();
+            BaseStream.Close();
         }
 
         public virtual void Seek(long offset, uint seekOrigin, IntPtr newPosition)
         {
-            long Position = this.BaseStream.Seek(offset, (SeekOrigin) seekOrigin);
+            long Position = BaseStream.Seek(offset, (SeekOrigin) seekOrigin);
 
             if (newPosition != IntPtr.Zero)
             {
@@ -423,7 +423,7 @@ namespace SevenZipExtractor
 
         public uint Read(byte[] data, uint size)
         {
-            return (uint) this.BaseStream.Read(data, 0, (int) size);
+            return (uint) BaseStream.Read(data, 0, (int) size);
         }
     }
 
@@ -435,13 +435,13 @@ namespace SevenZipExtractor
 
         public int SetSize(long newSize)
         {
-            this.BaseStream.SetLength(newSize);
+            BaseStream.SetLength(newSize);
             return 0;
         }
 
         public int Write(byte[] data, uint size, IntPtr processedSize)
         {
-            this.BaseStream.Write(data, 0, (int) size);
+            BaseStream.Write(data, 0, (int) size);
 
             if (processedSize != IntPtr.Zero)
             {

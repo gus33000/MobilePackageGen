@@ -1,4 +1,6 @@
-﻿namespace StorageSpace
+﻿using StorageSpace.Data.Subtypes;
+
+namespace StorageSpace
 {
     public class Disk
     {
@@ -22,7 +24,7 @@
             get; set;
         }
 
-        public List<DataEntry> sdbbEntryType4
+        public List<SlabAllocation> SlabAllocations
         {
             get; set;
         } = [];
