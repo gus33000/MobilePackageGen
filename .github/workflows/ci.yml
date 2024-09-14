@@ -45,12 +45,12 @@ jobs:
       - name: Create PDB Output Directory
         shell: pwsh
         run: |
-          mkdir ${{ github.workspace }}\artifacts\${{ matrix.platform }}-${{ matrix.architecture }}\PDBs
+          mkdir ${{ github.workspace }}\artifacts\${{ matrix.platform }}-${{ matrix.architecture }}-symbols
 
       - name: Move PDBs
         shell: pwsh
         run: |
-          move ${{ github.workspace }}\artifacts\${{ matrix.platform }}-${{ matrix.architecture }}\*.pdb ${{ github.workspace }}\artifacts\${{ matrix.platform }}-${{ matrix.architecture }}\PDBs\
+          move ${{ github.workspace }}\artifacts\${{ matrix.platform }}-${{ matrix.architecture }}\*.pdb ${{ github.workspace }}\artifacts\${{ matrix.platform }}-${{ matrix.architecture }}-symbols
 
       - name: Upload artifact (Binaries)
         uses: actions/upload-artifact@v4
@@ -62,4 +62,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.platform }}-${{ matrix.architecture }}-symbols
-          path: ${{ github.workspace }}/artifacts/${{ matrix.platform }}-${{ matrix.architecture }}\PDBs
+          path: ${{ github.workspace }}/artifacts/${{ matrix.platform }}-${{ matrix.architecture }}-symbols
