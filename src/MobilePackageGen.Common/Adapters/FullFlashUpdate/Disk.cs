@@ -113,7 +113,7 @@ namespace MobilePackageGen.Adapters.FullFlashUpdate
                         if (partitionInfo.GuidType == new Guid("E75CAF8F-F680-4CEE-AFA3-B001E56EFC2D"))
                         {
                             Stream pool = partitionInfo.Open();
-                            Dictionary<int, string> disks = OSPoolStream.GetDisks(pool);
+                            Dictionary<int, string> disks = StorageSpace.StorageSpace.GetDisks(pool);
                             List<OSPoolStream> spaces = [];
 
                             foreach (KeyValuePair<int, string> disk in disks)

@@ -25,6 +25,6 @@
         public List<DataEntry> sdbbEntryType4
         {
             get; set;
-        } = new List<DataEntry>();
+        } = [];
     }
 }
