@@ -375,13 +375,13 @@ namespace SevenZipExtractor
                 return false;
             }
 
-            if (!Formats.ExtensionFormatMapping.ContainsKey(fileExtension))
+            if (!Formats.ExtensionFormatMapping.TryGetValue(fileExtension, out SevenZipFormat value))
             {
                 format = SevenZipFormat.Undefined;
                 return false;
             }
 
-            format = Formats.ExtensionFormatMapping[fileExtension];
+            format = value;
             return true;
         }
 

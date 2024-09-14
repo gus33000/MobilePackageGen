@@ -173,9 +173,9 @@ namespace Img2Ffu.Reader
 
         private long GetBlockDataIndex(long realBlockOffset)
         {
-            if (blockTable.ContainsKey(realBlockOffset))
+            if (blockTable.TryGetValue(realBlockOffset, out int value))
             {
-                return blockTable[realBlockOffset];
+                return value;
             }
 
             return -1; // Invalid

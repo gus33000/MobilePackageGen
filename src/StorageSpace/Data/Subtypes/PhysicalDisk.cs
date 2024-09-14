@@ -39,15 +39,16 @@ namespace StorageSpace.Data.Subtypes
                 string diskName = Encoding.Unicode.GetString(physicalDiskName);
                 int diskBlockNumber = physicalDiskBlockNumber;
 
-                if (!parsedDisks.ContainsKey(diskId))
+                if (!parsedDisks.TryGetValue(diskId, out Disk? value))
                 {
-                    parsedDisks.Add(diskId, new Disk());
+                    value = new Disk();
+                    parsedDisks.Add(diskId, value);
                 }
 
-                parsedDisks[diskId].ID = diskId;
-                parsedDisks[diskId].UUID = diskUuid;
-                parsedDisks[diskId].Name = diskName;
-                parsedDisks[diskId].TotalBlocks = diskBlockNumber;
+                value.ID = diskId;
+                value.UUID = diskUuid;
+                value.Name = diskName;
+                value.TotalBlocks = diskBlockNumber;
             }
         }
 

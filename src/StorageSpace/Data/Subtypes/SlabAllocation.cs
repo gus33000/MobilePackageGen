@@ -40,12 +40,13 @@
                 int physical_disk_block_number = BigEndianToInt(sdbbEntry.Skip(tempOffset + 1).Take(dataRecordLen).ToArray());
                 tempOffset += sdbbEntry[tempOffset] + 1;
 
-                if (!parsedDisks.ContainsKey(virtual_disk_id))
+                if (!parsedDisks.TryGetValue(virtual_disk_id, out Disk? value))
                 {
-                    parsedDisks.Add(virtual_disk_id, new Disk());
+                    value = new Disk();
+                    parsedDisks.Add(virtual_disk_id, value);
                 }
 
-                parsedDisks[virtual_disk_id].sdbbEntryType4.Add(new DataEntry()
+                value.sdbbEntryType4.Add(new DataEntry()
                 {
                     mirror_sequence_number = mirror_sequence_number,
                     parity_sequence_number = parity_sequence_number,
