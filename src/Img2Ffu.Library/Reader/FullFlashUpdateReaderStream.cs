@@ -188,7 +188,7 @@ namespace Img2Ffu.Reader
             {
                 if (currentPosition < 0)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 // Workaround for malformed MBRs
@@ -210,7 +210,7 @@ namespace Img2Ffu.Reader
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
 
             if (offset + count > buffer.Length)
@@ -220,12 +220,12 @@ namespace Img2Ffu.Reader
 
             if (offset < 0)
             {
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
 
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
 
             // Workaround for malformed MBRs

@@ -65,7 +65,7 @@ namespace Microsoft.Spaces.Diskstream
 			bool flag = disks == null;
 			if (flag)
 			{
-				throw new ArgumentNullException("disks");
+				throw new ArgumentNullException(nameof(disks));
 			}
 			bool flag2 = disks.Length < 1;
 			if (flag2)

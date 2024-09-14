@@ -96,7 +96,7 @@ namespace Microsoft.Spaces.Diskstream
 				bool flag = position < 0L;
 				if (flag)
 				{
-					throw new ArgumentOutOfRangeException("value");
+					throw new ArgumentOutOfRangeException(nameof(value));
 				}
 				bool flag2 = position > Length;
 				if (flag2)
@@ -126,7 +126,7 @@ namespace Microsoft.Spaces.Diskstream
 			bool flag = buffer == null;
 			if (flag)
 			{
-				throw new ArgumentNullException("buffer");
+				throw new ArgumentNullException(nameof(buffer));
 			}
 			bool flag2 = offset + count > buffer.Length;
 			if (flag2)
@@ -136,12 +136,12 @@ namespace Microsoft.Spaces.Diskstream
 			bool flag3 = offset < 0;
 			if (flag3)
 			{
-				throw new ArgumentOutOfRangeException("offset");
+				throw new ArgumentOutOfRangeException(nameof(offset));
 			}
 			bool flag4 = count < 0;
 			if (flag4)
 			{
-				throw new ArgumentOutOfRangeException("count");
+				throw new ArgumentOutOfRangeException(nameof(count));
 			}
 			bool flag5 = Disk.DiskHandleRead(GetHandle(), buffer, (uint)buffer.Length, (uint)offset, (ulong)Position, (uint)count);
 			bool flag6 = !flag5;

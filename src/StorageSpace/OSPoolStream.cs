@@ -5,6 +5,7 @@ namespace StorageSpace
     public class OSPoolStream : Stream
     {
         private readonly Stream stream;
+        private readonly long ogSeek;
         private readonly Dictionary<int, Disk> parsedDisks = [];
         private readonly Disk store;
         private readonly long length;
@@ -14,10 +15,9 @@ namespace StorageSpace
 
         private long currentPosition = 0;
 
-        private readonly long ogSeek;
-
         public OSPoolStream(Stream stream, ulong storeIndex)
         {
+            ogSeek = stream.Position;
             this.stream = stream;
 
             storageSpace = new(stream);
@@ -75,7 +75,7 @@ namespace StorageSpace
             {
                 if (currentPosition < 0)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 // Workaround for malformed MBRs
@@ -109,7 +109,7 @@ namespace StorageSpace
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
 
             if (offset + count > buffer.Length)
@@ -119,12 +119,12 @@ namespace StorageSpace
 
             if (offset < 0)
             {
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
 
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
 
             // Workaround for malformed MBRs
