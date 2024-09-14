@@ -1,6 +1,4 @@
-﻿using DiscUtils;
-
-namespace MobilePackageGen.Adapters.RealFileSystem
+﻿namespace MobilePackageGen.Adapters.RealFileSystem
 {
     public class Disk : IDisk
     {
@@ -11,7 +9,11 @@ namespace MobilePackageGen.Adapters.RealFileSystem
 
         public Disk(string path)
         {
+            Console.WriteLine();
+
             Partitions = GetPartitionStructures(path);
+
+            Console.WriteLine();
         }
 
         public Disk(List<IPartition> Partitions)

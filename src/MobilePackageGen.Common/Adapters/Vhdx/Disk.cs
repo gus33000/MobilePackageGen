@@ -13,8 +13,14 @@ namespace MobilePackageGen.Adapters.Vhdx
 
         public Disk(string vhdx)
         {
+            Console.WriteLine();
+
+            Console.WriteLine($"{Path.GetFileName(vhdx)} {new FileInfo(vhdx).Length} VirtualHardDisk");
+
             List<PartitionInfo> partitionInfos = GetPartitions(vhdx);
             Partitions = GetPartitionStructures(partitionInfos);
+
+            Console.WriteLine();
         }
 
         public Disk(List<IPartition> Partitions)

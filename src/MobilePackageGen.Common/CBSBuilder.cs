@@ -224,7 +224,7 @@ namespace MobilePackageGen
         public static void BuildCBS(List<IDisk> disks, string destination_path)
         {
             Console.WriteLine();
-            Console.WriteLine("Found Disks:");
+            Console.WriteLine("Found partitions with recognized file system:");
             Console.WriteLine();
 
             foreach (IDisk disk in disks)
@@ -235,25 +235,24 @@ namespace MobilePackageGen
                     {
                         Console.WriteLine($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} KnownFS");
                     }
+                    else if (partition.Type == new Guid("E75CAF8F-F680-4CEE-AFA3-B001E56EFC2D"))
+                    {
+                        Console.WriteLine($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} StoragePool");
+                    }
                 }
             }
 
+            Console.WriteLine();
+            Console.WriteLine("Found partitions with unrecognized file system:");
             Console.WriteLine();
 
             foreach (IDisk disk in disks)
             {
                 foreach (IPartition partition in disk.Partitions)
                 {
-                    if (partition.FileSystem == null)
+                    if (partition.FileSystem == null && partition.Type != new Guid("E75CAF8F-F680-4CEE-AFA3-B001E56EFC2D"))
                     {
-                        if (partition.Type == new Guid("E75CAF8F-F680-4CEE-AFA3-B001E56EFC2D"))
-                        {
-                            Console.WriteLine($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} StoragePool");
-                        }
-                        else
-                        {
-                            Console.WriteLine($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} UnknownFS");
-                        }
+                        Console.WriteLine($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} UnknownFS");
                     }
                 }
             }

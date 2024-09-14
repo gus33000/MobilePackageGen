@@ -2,6 +2,7 @@
 using DiscUtils.Streams;
 using DiscUtils;
 using StorageSpace;
+using DiscUtils.Wim;
 
 namespace MobilePackageGen.Adapters
 {
@@ -36,17 +37,26 @@ namespace MobilePackageGen.Adapters
                     // Handle UpdateOS as well if found
                     if (fileSystem.FileExists("PROGRAMS\\UpdateOS\\UpdateOS.wim"))
                     {
+                        Console.WriteLine();
+
+                        Console.WriteLine($"UpdateOS.wim {fileSystem.GetFileLength("PROGRAMS\\UpdateOS\\UpdateOS.wim")} WindowsImageFile");
+
                         List<IPartition> partitions = [];
 
                         Stream wimStream = fileSystem.OpenFile("PROGRAMS\\UpdateOS\\UpdateOS.wim", FileMode.Open, FileAccess.Read);
-                        DiscUtils.Wim.WimFile wimFile = new(wimStream);
+                        WimFile wimFile = new(wimStream);
 
                         for (int i = 0; i < wimFile.ImageCount; i++)
                         {
                             IFileSystem wimFileSystem = wimFile.GetImage(i);
+
+                            Console.WriteLine($"- {i} WindowsImageIndex");
+
                             IPartition wimPartition = new FileSystemPartition(wimStream, wimFileSystem, $"{partition.Name}-UpdateOS-{i}", Guid.Empty, Guid.Empty);
                             partitions.Add(wimPartition);
                         }
+
+                        Console.WriteLine();
 
                         Wim.Disk updateOSDisk = new(partitions);
                         return updateOSDisk;
@@ -75,11 +85,22 @@ namespace MobilePackageGen.Adapters
 
                     if (partitionInfo.GuidType == new Guid("E75CAF8F-F680-4CEE-AFA3-B001E56EFC2D"))
                     {
+                        Console.WriteLine();
+
+                        Console.WriteLine($"{((GuidPartitionInfo)partitionInfo).Name} {((GuidPartitionInfo)partitionInfo).Identity} {((GuidPartitionInfo)partitionInfo).GuidType} {((GuidPartitionInfo)partitionInfo).SectorCount * virtualDisk.SectorSize} StoragePool");
+
                         Stream storageSpacePartitionStream = partitionInfo.Open();
 
                         StorageSpace.StorageSpace storageSpace = new(storageSpacePartitionStream);
 
                         Dictionary<int, string> disks = storageSpace.GetDisks();
+
+                        foreach (KeyValuePair<int, string> disk in disks.OrderBy(x => x.Key))
+                        {
+                            Console.WriteLine($"- {disk.Key}: {disk.Value} StorageSpace");
+                        }
+
+                        Console.WriteLine();
 
                         foreach (KeyValuePair<int, string> disk in disks)
                         {

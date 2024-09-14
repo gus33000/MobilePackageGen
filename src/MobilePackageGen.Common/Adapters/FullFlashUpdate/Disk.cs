@@ -2,6 +2,7 @@
 using DiscUtils.Streams;
 using DiscUtils;
 using Img2Ffu.Reader;
+using MobilePackageGen.Common;
 
 namespace MobilePackageGen.Adapters.FullFlashUpdate
 {
@@ -14,8 +15,14 @@ namespace MobilePackageGen.Adapters.FullFlashUpdate
 
         public Disk(string ffuPath)
         {
+            Console.WriteLine();
+
+            Console.WriteLine($"{Path.GetFileName(ffuPath)} {new FileInfo(ffuPath).Length} FullFlashUpdate");
+
             List<PartitionInfo> partitionInfos = GetPartitions(ffuPath);
             Partitions = GetPartitionStructures(partitionInfos);
+
+            Console.WriteLine();
         }
 
         public Disk(List<IPartition> Partitions)
@@ -43,6 +50,10 @@ namespace MobilePackageGen.Adapters.FullFlashUpdate
             for (int i = 0; i < FullFlashUpdateReaderStream.GetStoreCount(ffuPath); i++)
             {
                 FullFlashUpdateReaderStream store = new(ffuPath, (ulong)i);
+
+                string FriendlyDevicePath = DevicePathUtils.FormatDevicePath(store.DevicePath);
+
+                Console.WriteLine($"- {i}: {FriendlyDevicePath} {store.Length} FullFlashUpdateStore");
 
                 long diskCapacity = store.Length;
                 VirtualDisk virtualDisk = new DiscUtils.Raw.Disk(store, Ownership.None, Geometry.FromCapacity(diskCapacity, store.SectorSize));
