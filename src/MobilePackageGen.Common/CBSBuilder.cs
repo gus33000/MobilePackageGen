@@ -155,7 +155,7 @@ namespace MobilePackageGen
 
                         foreach (string partitionNameWithLink in partitionNamesWithLinks)
                         {
-                            if (normalized.StartsWith(partitionNameWithLink + '\\', StringComparison.InvariantCultureIgnoreCase))
+                            if (normalized.StartsWith($"{partitionNameWithLink}\\", StringComparison.InvariantCultureIgnoreCase))
                             {
                                 foreach (IDisk disk in disks)
                                 {
