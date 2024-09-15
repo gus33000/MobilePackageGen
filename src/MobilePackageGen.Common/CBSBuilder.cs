@@ -130,6 +130,8 @@ namespace MobilePackageGen
                             {
                                 done = true;
 
+                                diskPartition.Stream.Seek(0, SeekOrigin.Begin);
+
                                 cabinetFileInfo = new CabinetFileInfo()
                                 {
                                     FileName = packageFile.Cabpath,

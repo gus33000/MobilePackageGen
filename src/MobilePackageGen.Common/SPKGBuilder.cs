@@ -70,6 +70,8 @@ namespace MobilePackageGen
 
                                 Stream partitionStream = packageFile.FileSize != null ? new Substream(diskPartition.Stream, long.Parse(packageFile.FileSize)) : diskPartition.Stream;
 
+                                diskPartition.Stream.Seek(0, SeekOrigin.Begin);
+
                                 cabinetFileInfo = new CabinetFileInfo()
                                 {
                                     FileName = packageFile.CabPath,
