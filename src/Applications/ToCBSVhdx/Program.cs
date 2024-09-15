@@ -10,7 +10,7 @@ namespace ToCBS
         {
             Console.WriteLine(@"
 Image To Component Based Servicing Cabinets tool
-Version: 1.0.3.0
+Version: 1.0.4.0
 ");
 
             if (args.Length < 2)
