@@ -234,40 +234,6 @@ namespace MobilePackageGen
         public static void BuildCBS(List<IDisk> disks, string destination_path)
         {
             Logging.Log();
-            Logging.Log("Found partitions with recognized file system:");
-            Logging.Log();
-
-            foreach (IDisk disk in disks)
-            {
-                foreach (IPartition partition in disk.Partitions)
-                {
-                    if (partition.FileSystem != null)
-                    {
-                        Logging.Log($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} KnownFS");
-                    }
-                    else if (partition.Type == new Guid("E75CAF8F-F680-4CEE-AFA3-B001E56EFC2D"))
-                    {
-                        Logging.Log($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} StoragePool");
-                    }
-                }
-            }
-
-            Logging.Log();
-            Logging.Log("Found partitions with unrecognized file system:");
-            Logging.Log();
-
-            foreach (IDisk disk in disks)
-            {
-                foreach (IPartition partition in disk.Partitions)
-                {
-                    if (partition.FileSystem == null && partition.Type != new Guid("E75CAF8F-F680-4CEE-AFA3-B001E56EFC2D"))
-                    {
-                        Logging.Log($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} UnknownFS");
-                    }
-                }
-            }
-
-            Logging.Log();
             Logging.Log("Building CBS Cabinet Files...");
             Logging.Log();
 
@@ -278,8 +244,6 @@ namespace MobilePackageGen
             Logging.Log();
 
             TempManager.CleanupTempFiles();
-
-            Logging.Log("The operation completed successfully.");
         }
 
         private static List<IPartition> GetPartitionsWithServicing(List<IDisk> disks)

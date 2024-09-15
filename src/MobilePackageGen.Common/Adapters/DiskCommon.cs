@@ -162,5 +162,42 @@ namespace MobilePackageGen.Adapters
 
             return partitions;
         }
+
+        public static void PrintDiskInfo(IEnumerable<IDisk> disks)
+        {
+            Logging.Log();
+            Logging.Log("Found partitions with recognized file system:");
+            Logging.Log();
+
+            foreach (IDisk disk in disks)
+            {
+                foreach (IPartition partition in disk.Partitions)
+                {
+                    if (partition.FileSystem != null)
+                    {
+                        Logging.Log($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} KnownFS");
+                    }
+                    else if (partition.Type == new Guid("E75CAF8F-F680-4CEE-AFA3-B001E56EFC2D"))
+                    {
+                        Logging.Log($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} StoragePool");
+                    }
+                }
+            }
+
+            Logging.Log();
+            Logging.Log("Found partitions with unrecognized file system:");
+            Logging.Log();
+
+            foreach (IDisk disk in disks)
+            {
+                foreach (IPartition partition in disk.Partitions)
+                {
+                    if (partition.FileSystem == null && partition.Type != new Guid("E75CAF8F-F680-4CEE-AFA3-B001E56EFC2D"))
+                    {
+                        Logging.Log($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} UnknownFS");
+                    }
+                }
+            }
+        }
     }
 }
