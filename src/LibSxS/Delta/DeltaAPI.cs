@@ -49,7 +49,7 @@ namespace LibSxS.Delta
             wcpBaseFileStream.CopyTo(wcpBaseStream);
             source = wcpBaseStream.ToArray();
 
-            using MemoryStream mStr = new((int)compressedManifest.Length);
+            MemoryStream mStr = new((int)compressedManifest.Length);
 
             byte[] compTest = new byte[4];
             compressedManifest.Read(compTest, 0, 4);
@@ -67,6 +67,8 @@ namespace LibSxS.Delta
 
             compressedManifest.CopyTo(mStr);
             delta = mStr.ToArray();
+
+            mStr.Dispose();
 
             fixed (byte* sourcePtr = source)
             fixed (byte* deltaPtr = delta)
