@@ -166,7 +166,7 @@ namespace Microsoft.Deployment.Compression
         /// containing information about a file in the archive.</returns>
         public IList<ArchiveFileInfo> GetFiles()
         {
-            return InternalGetFiles((Predicate<string>)null);
+            return InternalGetFiles(null);
         }
 
         /// <summary>

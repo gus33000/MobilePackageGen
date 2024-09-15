@@ -6,6 +6,17 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Platforms>x86;x64;ARM64;ARM32</Platforms>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="manifest.bin" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="manifest.bin">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
 </Project>

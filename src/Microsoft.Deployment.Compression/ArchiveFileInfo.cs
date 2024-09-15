@@ -162,7 +162,7 @@ namespace Microsoft.Deployment.Compression
         {
             get
             {
-                return (ArchiveInfo)archiveInfo;
+                return archiveInfo;
             }
 
             internal set

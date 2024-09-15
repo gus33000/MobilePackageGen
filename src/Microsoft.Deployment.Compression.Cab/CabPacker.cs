@@ -192,7 +192,7 @@ namespace Microsoft.Deployment.Compression.Cab
                             continue;
                         }
 
-                        if (fileStream.Length >= (long)NativeMethods.FCI.MAX_FOLDER)
+                        if (fileStream.Length >= NativeMethods.FCI.MAX_FOLDER)
                         {
                             throw new NotSupportedException(string.Format(
                                 CultureInfo.InvariantCulture,
@@ -206,7 +206,7 @@ namespace Microsoft.Deployment.Compression.Cab
                             // Automatically create a new folder if this file
                             // won't fit in the current folder.
                             bool nextFolder = uncompressedBytesInFolder
-                                + fileStream.Length >= (long)NativeMethods.FCI.MAX_FOLDER;
+                                + fileStream.Length >= NativeMethods.FCI.MAX_FOLDER;
 
                             // Otherwise ask the client if it wants to
                             // move to the next folder.

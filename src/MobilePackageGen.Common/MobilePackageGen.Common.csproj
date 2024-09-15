@@ -10,9 +10,9 @@
 
   <ItemGroup>
     <PackageReference Include="RawDiskLib" Version="0.2.1" />
-    <PackageReference Include="LTRData.DiscUtils.Vhd" Version="1.0.46" />
-    <PackageReference Include="LTRData.DiscUtils.Vhdx" Version="1.0.46" />
-    <PackageReference Include="LTRData.DiscUtils.Wim" Version="1.0.46" />
+    <PackageReference Include="LTRData.DiscUtils.Vhd" Version="1.0.47" />
+    <PackageReference Include="LTRData.DiscUtils.Vhdx" Version="1.0.47" />
+    <PackageReference Include="LTRData.DiscUtils.Wim" Version="1.0.47" />
   </ItemGroup>
 
   <ItemGroup>

@@ -230,7 +230,7 @@ namespace Microsoft.Deployment.Compression.Cab
         internal virtual int CabReadStreamEx(int streamHandle, IntPtr memory, int cb, out int err, IntPtr pv)
         {
             Stream stream = streamHandles[streamHandle];
-            int count = (int)cb;
+            int count = cb;
             if (count > buf.Length)
             {
                 buf = new byte[count];
@@ -249,7 +249,7 @@ namespace Microsoft.Deployment.Compression.Cab
         internal virtual int CabWriteStreamEx(int streamHandle, IntPtr memory, int cb, out int err, IntPtr pv)
         {
             Stream stream = streamHandles[streamHandle];
-            int count = (int)cb;
+            int count = cb;
             if (count > buf.Length)
             {
                 buf = new byte[count];
