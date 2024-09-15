@@ -30,7 +30,7 @@ Version: 1.0.5.0
                 {
                     if (Directory.Exists(Path.Combine(inputArg, @"Windows\Servicing\Packages")) || Directory.Exists(Path.Combine(inputArg, @"Windows\Packages\DsmFiles")))
                     {
-                        disks.Add(new MobilePackageGen.Adapters.RealFileSystem.Disk(inputArg));
+                        disks.Add(new Adapters.RealFileSystem.Disk(inputArg));
                     }
                     else
                     {
@@ -82,27 +82,27 @@ Version: 1.0.5.0
             {
                 case ".wim":
                     {
-                        return new MobilePackageGen.Adapters.Wim.Disk(file);
+                        return new Adapters.Wim.Disk(file);
                     }
                 case ".ffu":
                     {
-                        return new MobilePackageGen.Adapters.FullFlashUpdate.Disk(file);
+                        return new Adapters.FullFlashUpdate.Disk(file);
                     }
                 case ".vhd":
                     {
-                        return new MobilePackageGen.Adapters.Vhdx.Disk(file);
+                        return new Adapters.Vhdx.Disk(file);
                     }
                 case ".vhdx":
                     {
-                        return new MobilePackageGen.Adapters.Vhdx.Disk(file);
+                        return new Adapters.Vhdx.Disk(file);
                     }
                 case ".img":
                     {
-                        return new MobilePackageGen.Adapters.RawDisk.Disk(File.OpenRead(file));
+                        return new Adapters.RawDisk.Disk(File.OpenRead(file));
                     }
                 case ".bin":
                     {
-                        return new MobilePackageGen.Adapters.RawDisk.Disk(File.OpenRead(file));
+                        return new Adapters.RawDisk.Disk(File.OpenRead(file));
                     }
                 default:
                     {
