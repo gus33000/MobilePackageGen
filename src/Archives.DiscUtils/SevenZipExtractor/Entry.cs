@@ -46,12 +46,12 @@
         /// <summary>
         /// CRC hash of the entry
         /// </summary>
-        public UInt32 CRC { get; internal set; }
+        public uint CRC { get; internal set; }
 
         /// <summary>
         /// Attributes of the entry
         /// </summary>
-        public UInt32 Attributes { get; internal set; }
+        public uint Attributes { get; internal set; }
 
         /// <summary>
         /// True if entry is encrypted, otherwise false
