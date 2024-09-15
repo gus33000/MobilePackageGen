@@ -43,6 +43,10 @@ Version: 1.0.4.0
             catch
             {
                 string manifestString = LibSxS.Delta.DeltaAPI.GetManifest(file);
+
+                Console.WriteLine($"Exporting to {file}.expanded");
+                File.WriteAllText($"{file}.expanded", manifestString, Encoding.Unicode);
+
                 StringReader stringReader = new(manifestString);
                 cbs = (Mum.Assembly)serializer.Deserialize(stringReader)!;
             }
@@ -64,6 +68,8 @@ Version: 1.0.4.0
                 }
 
                 string reg = regExporter.Build(SoftwareKeyName, SystemKeyName);
+
+                Console.WriteLine($"Exporting to {file}.reg");
                 File.WriteAllText($"{file}.reg", reg, Encoding.Unicode);
             }
 

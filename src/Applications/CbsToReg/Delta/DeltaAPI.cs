@@ -47,8 +47,8 @@ namespace LibSxS.Delta
             byte[] delta;
             DeltaHeaderInfo info;
 
-            using (FileStream fStr = new(path, FileMode.Open, FileAccess.Read, FileShare.Read))
-            using (MemoryStream mStr = new((int)fStr.Length))
+            using (FileStream fStr = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (MemoryStream mStr = new MemoryStream((int)fStr.Length))
             {
                 fStr.Position = 4;
                 fStr.CopyTo(mStr);
@@ -57,10 +57,10 @@ namespace LibSxS.Delta
 
             fixed (byte* deltaPtr = delta)
             {
-                DeltaInput deltaData = new()
+                DeltaInput deltaData = new DeltaInput()
                 {
                     lpStart = new IntPtr(deltaPtr),
-                    uSize = delta.Length,
+                    uSize = (IntPtr)delta.Length,
                     Editable = false
                 };
 
@@ -80,15 +80,15 @@ namespace LibSxS.Delta
             byte[] source, delta, output;
             bool success = false;
 
-            using (FileStream fStr = new(wcpBasePath, FileMode.Open, FileAccess.Read, FileShare.Read))
-            using (MemoryStream mStr = new((int)fStr.Length))
+            using (FileStream fStr = new FileStream(wcpBasePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (MemoryStream mStr = new MemoryStream((int)fStr.Length))
             {
                 fStr.CopyTo(mStr);
                 source = mStr.ToArray();
             }
 
-            using (FileStream fStr = new(path, FileMode.Open, FileAccess.Read, FileShare.Read))
-            using (MemoryStream mStr = new((int)fStr.Length))
+            using (FileStream fStr = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (MemoryStream mStr = new MemoryStream((int)fStr.Length))
             {
                 //fStr.Position = 4;
                 byte[] compTest = new byte[4];
@@ -115,17 +115,17 @@ namespace LibSxS.Delta
             fixed (byte* sourcePtr = source)
             fixed (byte* deltaPtr = delta)
             {
-                DeltaInput sourceData = new()
+                DeltaInput sourceData = new DeltaInput()
                 {
                     lpStart = new IntPtr(sourcePtr),
-                    uSize = source.Length,
+                    uSize = (IntPtr)source.Length,
                     Editable = false
                 };
 
-                DeltaInput deltaData = new()
+                DeltaInput deltaData = new DeltaInput()
                 {
                     lpStart = new IntPtr(deltaPtr),
-                    uSize = delta.Length,
+                    uSize = (IntPtr)delta.Length,
                     Editable = false
                 };
 
@@ -155,14 +155,14 @@ namespace LibSxS.Delta
             byte[] source, delta;
             bool success = false;
 
-            using (FileStream fStr = new(basisPath, FileMode.Open, FileAccess.Read, FileShare.Read))
-            using (MemoryStream mStr = new((int)fStr.Length))
+            using (FileStream fStr = new FileStream(basisPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (MemoryStream mStr = new MemoryStream((int)fStr.Length))
             {
                 fStr.CopyTo(mStr);
                 source = mStr.ToArray();
             }
 
-            using (FileStream fStr = new(patchPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (FileStream fStr = new FileStream(patchPath, FileMode.Open, FileAccess.Read, FileShare.Read))
             //using (MemoryStream mStr = new MemoryStream((int)fStr.Length))
             {
                 //fStr.Position = 4;
@@ -176,17 +176,17 @@ namespace LibSxS.Delta
             fixed (byte* sourcePtr = source)
             fixed (byte* deltaPtr = delta)
             {
-                DeltaInput sourceData = new()
+                DeltaInput sourceData = new DeltaInput()
                 {
                     lpStart = new IntPtr(sourcePtr),
-                    uSize = source.Length,
+                    uSize = (IntPtr)source.Length,
                     Editable = false
                 };
 
-                DeltaInput deltaData = new()
+                DeltaInput deltaData = new DeltaInput()
                 {
                     lpStart = new IntPtr(deltaPtr),
-                    uSize = delta.Length,
+                    uSize = (IntPtr)delta.Length,
                     Editable = false
                 };
 
@@ -210,7 +210,7 @@ namespace LibSxS.Delta
                 //{
                 //    output[i] = (byte)Marshal.PtrToStructure(outData.lpStart + i, typeof(byte));
                 //}
-                using (FileStream fs = new(outputPath, FileMode.Create, FileAccess.Write))
+                using (FileStream fs = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
                 {
                     if (!WriteFile(fs.Handle, outData.pBuf, outData.cbBuf.ToInt32(), out int written, IntPtr.Zero))
                         throw new Win32Exception(Marshal.GetLastWin32Error());
@@ -227,8 +227,8 @@ namespace LibSxS.Delta
             byte[] delta;
             DeltaHeaderInfo info;
 
-            using (FileStream fStr = new(path, FileMode.Open, FileAccess.Read, FileShare.Read))
-            using (MemoryStream mStr = new((int)fStr.Length))
+            using (FileStream fStr = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (MemoryStream mStr = new MemoryStream((int)fStr.Length))
             {
                 fStr.Position = patchOffset;
                 delta = new byte[patchSize];
@@ -237,10 +237,10 @@ namespace LibSxS.Delta
 
             fixed (byte* deltaPtr = delta)
             {
-                DeltaInput deltaData = new()
+                DeltaInput deltaData = new DeltaInput()
                 {
                     lpStart = new IntPtr(deltaPtr),
-                    uSize = delta.Length,
+                    uSize = (IntPtr)delta.Length,
                     Editable = false
                 };
 
