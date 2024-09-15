@@ -114,6 +114,13 @@ namespace MobilePackageGen
                                                 break;
                                             }
 
+                                            string targetFile = normalized[(partitionNameWithLink.Length + 1)..];
+
+                                            if (!fileSystemData.FileExists(targetFile))
+                                            {
+                                                break;
+                                            }
+
                                             bool needsDecompression = packageFile.FileType.Contains("registry", StringComparison.CurrentCultureIgnoreCase) || packageFile.FileType.Contains("policy", StringComparison.CurrentCultureIgnoreCase) || packageFile.FileType.Contains("manifest", StringComparison.CurrentCultureIgnoreCase);
                                             bool doesNotNeedDecompression = packageFile.FileType.Contains("catalog", StringComparison.CurrentCultureIgnoreCase) || packageFile.FileType.Contains("regular", StringComparison.CurrentCultureIgnoreCase);
 
@@ -123,19 +130,19 @@ namespace MobilePackageGen
 
                                                 try
                                                 {
-                                                    cabFileStream = fileSystemData.OpenFileAndDecompressAsGZip(normalized[5..]);
+                                                    cabFileStream = fileSystemData.OpenFileAndDecompressAsGZip(targetFile);
                                                 }
                                                 catch (InvalidDataException)
                                                 {
-                                                    cabFileStream = fileSystemData.OpenFile(normalized[5..], FileMode.Open, FileAccess.Read);
+                                                    cabFileStream = fileSystemData.OpenFile(targetFile, FileMode.Open, FileAccess.Read);
                                                 }
 
                                                 cabinetFileInfo = new CabinetFileInfo()
                                                 {
                                                     FileName = packageFile.CabPath,
                                                     FileStream = cabFileStream,
-                                                    Attributes = fileSystemData.GetAttributes(normalized[5..]) & ~FileAttributes.ReparsePoint,
-                                                    DateTime = fileSystemData.GetLastWriteTime(normalized[5..])
+                                                    Attributes = fileSystemData.GetAttributes(targetFile) & ~FileAttributes.ReparsePoint,
+                                                    DateTime = fileSystemData.GetLastWriteTime(targetFile)
                                                 };
                                             }
                                             else if (doesNotNeedDecompression)
@@ -143,9 +150,9 @@ namespace MobilePackageGen
                                                 cabinetFileInfo = new CabinetFileInfo()
                                                 {
                                                     FileName = packageFile.CabPath,
-                                                    FileStream = fileSystemData.OpenFile(normalized[5..], FileMode.Open, FileAccess.Read),
-                                                    Attributes = fileSystemData.GetAttributes(normalized[5..]) & ~FileAttributes.ReparsePoint,
-                                                    DateTime = fileSystemData.GetLastWriteTime(normalized[5..])
+                                                    FileStream = fileSystemData.OpenFile(targetFile, FileMode.Open, FileAccess.Read),
+                                                    Attributes = fileSystemData.GetAttributes(targetFile) & ~FileAttributes.ReparsePoint,
+                                                    DateTime = fileSystemData.GetLastWriteTime(targetFile)
                                                 };
                                             }
                                             else
@@ -153,9 +160,9 @@ namespace MobilePackageGen
                                                 cabinetFileInfo = new CabinetFileInfo()
                                                 {
                                                     FileName = packageFile.CabPath,
-                                                    FileStream = fileSystemData.OpenFile(normalized[5..], FileMode.Open, FileAccess.Read),
-                                                    Attributes = fileSystemData.GetAttributes(normalized[5..]) & ~FileAttributes.ReparsePoint,
-                                                    DateTime = fileSystemData.GetLastWriteTime(normalized[5..])
+                                                    FileStream = fileSystemData.OpenFile(targetFile, FileMode.Open, FileAccess.Read),
+                                                    Attributes = fileSystemData.GetAttributes(targetFile) & ~FileAttributes.ReparsePoint,
+                                                    DateTime = fileSystemData.GetLastWriteTime(targetFile)
                                                 };
                                             }
 
