@@ -59,7 +59,7 @@ namespace MobilePackageGen
 
                         foreach (IPartition diskPartition in disk.Partitions)
                         {
-                            if (diskPartition.Name.Equals(dsm.Partition, StringComparison.InvariantCultureIgnoreCase))
+                            if (diskPartition.Name.Split("\0")[0].Equals(dsm.Partition, StringComparison.InvariantCultureIgnoreCase))
                             {
                                 done = true;
 
@@ -105,7 +105,7 @@ namespace MobilePackageGen
 
                                     foreach (IPartition diskPartition in disk.Partitions)
                                     {
-                                        if (diskPartition.Name.Equals(partitionNameWithLink, StringComparison.InvariantCultureIgnoreCase))
+                                        if (diskPartition.Name.Split("\0")[0].Equals(partitionNameWithLink, StringComparison.InvariantCultureIgnoreCase))
                                         {
                                             done = true;
 
@@ -343,7 +343,7 @@ namespace MobilePackageGen
 
                         string packageName = GetSPKGComponentName(dsm);
 
-                        string cabFileName = Path.Combine(partition.Name, packageName);
+                        string cabFileName = Path.Combine(partition.Name.Replace("\0", "-"), packageName);
 
                         string cabFile = Path.Combine(outputPath, $"{cabFileName}.spkg");
                         if (Path.GetDirectoryName(cabFile) is string directory && !Directory.Exists(directory))

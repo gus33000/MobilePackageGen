@@ -126,7 +126,7 @@ namespace MobilePackageGen
 
                         foreach (IPartition diskPartition in disk.Partitions)
                         {
-                            if (diskPartition.Name.Equals(cbs.Package.TargetPartition, StringComparison.InvariantCultureIgnoreCase))
+                            if (diskPartition.Name.Split("\0")[0].Equals(cbs.Package.TargetPartition, StringComparison.InvariantCultureIgnoreCase))
                             {
                                 done = true;
 
@@ -165,7 +165,7 @@ namespace MobilePackageGen
 
                                     foreach (IPartition diskPartition in disk.Partitions)
                                     {
-                                        if (diskPartition.Name.Equals(partitionNameWithLink, StringComparison.InvariantCultureIgnoreCase))
+                                        if (diskPartition.Name.Split("\0")[0].Equals(partitionNameWithLink, StringComparison.InvariantCultureIgnoreCase))
                                         {
                                             done = true;
 
@@ -323,7 +323,7 @@ namespace MobilePackageGen
                             packageName = $"{packageName}~{cbs.AssemblyIdentity.PublicKeyToken.Replace("628844477771337a", "31bf3856ad364e35", StringComparison.InvariantCultureIgnoreCase)}~{cbs.AssemblyIdentity.ProcessorArchitecture}~{(cbs.AssemblyIdentity.Language == "neutral" ? "" : cbs.AssemblyIdentity.Language)}~";
                         }
 
-                        string cabFileName = Path.Combine(partition.Name, packageName);
+                        string cabFileName = Path.Combine(partition.Name.Replace("\0", "-"), packageName);
 
                         string cabFile = Path.Combine(outputPath, $"{cabFileName}.cab");
                         if (Path.GetDirectoryName(cabFile) is string directory && !Directory.Exists(directory))

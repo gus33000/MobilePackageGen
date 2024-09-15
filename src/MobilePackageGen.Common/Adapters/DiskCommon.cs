@@ -52,7 +52,7 @@ namespace MobilePackageGen.Adapters
 
                             Logging.Log($"- {i} WindowsImageIndex");
 
-                            IPartition wimPartition = new FileSystemPartition(wimStream, wimFileSystem, $"{partition.Name}-UpdateOS-{i}", Guid.Empty, Guid.Empty);
+                            IPartition wimPartition = new FileSystemPartition(wimStream, wimFileSystem, $"{partition.Name.Replace("\0", "-")}-UpdateOS-{i}", Guid.Empty, Guid.Empty);
                             partitions.Add(wimPartition);
                         }
 
@@ -175,11 +175,11 @@ namespace MobilePackageGen.Adapters
                 {
                     if (partition.FileSystem != null)
                     {
-                        Logging.Log($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} KnownFS");
+                        Logging.Log($"{partition.Name.Replace("\0", "-")} {partition.ID} {partition.Type} {partition.Size} KnownFS");
                     }
                     else if (partition.Type == new Guid("E75CAF8F-F680-4CEE-AFA3-B001E56EFC2D"))
                     {
-                        Logging.Log($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} StoragePool");
+                        Logging.Log($"{partition.Name.Replace("\0", "-")} {partition.ID} {partition.Type} {partition.Size} StoragePool");
                     }
                 }
             }
@@ -194,7 +194,7 @@ namespace MobilePackageGen.Adapters
                 {
                     if (partition.FileSystem == null && partition.Type != new Guid("E75CAF8F-F680-4CEE-AFA3-B001E56EFC2D"))
                     {
-                        Logging.Log($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} UnknownFS");
+                        Logging.Log($"{partition.Name.Replace("\0", "-")} {partition.ID} {partition.Type} {partition.Size} UnknownFS");
                     }
                 }
             }
