@@ -13,12 +13,12 @@ namespace MobilePackageGen.Adapters.RawDisk
 
         public Disk(Stream diskStream)
         {
-            Console.WriteLine();
+            Logging.Log();
 
             List<PartitionInfo> partitionInfos = GetPartitions(diskStream);
             Partitions = GetPartitionStructures(partitionInfos);
 
-            Console.WriteLine();
+            Logging.Log();
         }
 
         public Disk(List<IPartition> Partitions)

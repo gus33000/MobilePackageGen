@@ -56,7 +56,7 @@ namespace Microsoft.Deployment.Compression
             string archiveFile,
             string directory,
             IDictionary<string, string> files)
-            : this(new string[] { archiveFile }, directory, files)
+            : this([archiveFile], directory, files)
         {
             if (archiveFile == null)
             {

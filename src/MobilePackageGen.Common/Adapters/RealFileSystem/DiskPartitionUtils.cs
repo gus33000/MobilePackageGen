@@ -24,17 +24,13 @@ namespace MobilePackageGen.Adapters.RealFileSystem
                 }
                 else
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Error: Partition not found! " + partitionName);
-                    Console.ResetColor();
+                    Logging.Log("Error: Partition not found! " + partitionName, LoggingLevel.Error);
                     throw new DriveNotFoundException();
                 }
             }
             catch (Exception exception)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Error: " + exception.Message);
-                Console.ResetColor();
+                Logging.Log("Error: " + exception.Message, LoggingLevel.Error);
                 throw;
             }
         }
@@ -52,7 +48,7 @@ namespace MobilePackageGen.Adapters.RealFileSystem
                     using RawDiskLib.RawDisk disk = new(DiskNumberType.PhysicalDisk, phy, FileAccess.Read);
                     if (disk.SectorCount < 34 * 2)
                     {
-                        Console.WriteLine("Too low sector count: " + disk.SectorCount);
+                        Logging.Log("Too low sector count: " + disk.SectorCount);
                         return;
                     }
 
@@ -64,9 +60,7 @@ namespace MobilePackageGen.Adapters.RealFileSystem
             }
             catch (Exception exception)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Error: " + exception.Message);
-                Console.ResetColor();
+                Logging.Log("Error: " + exception.Message, LoggingLevel.Error);
                 throw;
             }
 

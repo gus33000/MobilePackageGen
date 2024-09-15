@@ -16,7 +16,7 @@ namespace MobilePackageGen
         {
             List<CabinetFileInfo> fileMappings = [];
 
-            IFileSystem fileSystem = partition.FileSystem;
+            IFileSystem fileSystem = partition.FileSystem!;
 
             string packages_path = @"Windows\servicing\Packages";
             string winsxs_manifests_path = @"Windows\WinSxS\Manifests";
@@ -34,8 +34,9 @@ namespace MobilePackageGen
                 if (percentage != oldPercentage)
                 {
                     oldPercentage = percentage;
-                    string progressBarString = GetDISMLikeProgressBar(percentage);
-                    Console.Write($"\r{progressBarString}");
+                    string progressBarString = Logging.GetDISMLikeProgressBar(percentage);
+
+                    Logging.Log(progressBarString, returnLine: false);
                 }
 
                 // File names in cab files are all lower case
@@ -92,7 +93,7 @@ namespace MobilePackageGen
                 }
 
                 // For specific wow sub architecures, we want to fetch the files from the right place on the file system
-                string architecture = cbs.Package.Update?.Component?.AssemblyIdentity?.ProcessorArchitecture;
+                string architecture = cbs.Package.Update?.Component?.AssemblyIdentity?.ProcessorArchitecture!;
 
                 if (normalized.StartsWith(@"windows\system32") && architecture?.Contains("arm64.arm") == true)
                 {
@@ -114,7 +115,7 @@ namespace MobilePackageGen
                     normalized = Path.Combine(winsxs_manifests_path, normalized.Split("\\")[^1]);
                 }
 
-                CabinetFileInfo cabinetFileInfo = null;
+                CabinetFileInfo? cabinetFileInfo = null;
 
                 // If we end in bin, and the package is marked binary partition, this is a partition on one of the device disks, retrieve it
                 if (normalized.EndsWith(".bin") && cbs.Package.BinaryPartition.ToLower() == "true")
@@ -213,7 +214,7 @@ namespace MobilePackageGen
                 }
                 else
                 {
-                    Console.WriteLine($"\rError: File not found! {normalized}\n");
+                    Logging.Log($"\rError: File not found! {normalized}\n", LoggingLevel.Error);
                     //throw new FileNotFoundException(normalized);
                 }
             }
@@ -223,9 +224,9 @@ namespace MobilePackageGen
 
         public static void BuildCBS(List<IDisk> disks, string destination_path)
         {
-            Console.WriteLine();
-            Console.WriteLine("Found partitions with recognized file system:");
-            Console.WriteLine();
+            Logging.Log();
+            Logging.Log("Found partitions with recognized file system:");
+            Logging.Log();
 
             foreach (IDisk disk in disks)
             {
@@ -233,18 +234,18 @@ namespace MobilePackageGen
                 {
                     if (partition.FileSystem != null)
                     {
-                        Console.WriteLine($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} KnownFS");
+                        Logging.Log($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} KnownFS");
                     }
                     else if (partition.Type == new Guid("E75CAF8F-F680-4CEE-AFA3-B001E56EFC2D"))
                     {
-                        Console.WriteLine($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} StoragePool");
+                        Logging.Log($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} StoragePool");
                     }
                 }
             }
 
-            Console.WriteLine();
-            Console.WriteLine("Found partitions with unrecognized file system:");
-            Console.WriteLine();
+            Logging.Log();
+            Logging.Log("Found partitions with unrecognized file system:");
+            Logging.Log();
 
             foreach (IDisk disk in disks)
             {
@@ -252,24 +253,24 @@ namespace MobilePackageGen
                 {
                     if (partition.FileSystem == null && partition.Type != new Guid("E75CAF8F-F680-4CEE-AFA3-B001E56EFC2D"))
                     {
-                        Console.WriteLine($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} UnknownFS");
+                        Logging.Log($"{partition.Name} {partition.ID} {partition.Type} {partition.Size} UnknownFS");
                     }
                 }
             }
 
-            Console.WriteLine();
-            Console.WriteLine("Building CBS Cabinet Files...");
-            Console.WriteLine();
+            Logging.Log();
+            Logging.Log("Building CBS Cabinet Files...");
+            Logging.Log();
 
             BuildCabinets(disks, destination_path);
 
-            Console.WriteLine();
-            Console.WriteLine("Cleaning up...");
-            Console.WriteLine();
+            Logging.Log();
+            Logging.Log("Cleaning up...");
+            Logging.Log();
 
             TempManager.CleanupTempFiles();
 
-            Console.WriteLine("The operation completed successfully.");
+            Logging.Log("The operation completed successfully.");
         }
 
         private static List<IPartition> GetPartitionsWithServicing(List<IDisk> disks)
@@ -291,9 +292,9 @@ namespace MobilePackageGen
                                 fileSystemsWithServicing.Add(partition);
                             }
                         }
-                        catch
+                        catch (Exception ex)
                         {
-
+                            Logging.Log($"Error: Looking up file system servicing failed! {ex.Message}", LoggingLevel.Error);
                         }
                     }
                 }
@@ -310,7 +311,7 @@ namespace MobilePackageGen
 
             foreach (IPartition partition in partitionsWithCbsServicing)
             {
-                IFileSystem fileSystem = partition.FileSystem;
+                IFileSystem fileSystem = partition.FileSystem!;
 
                 IEnumerable<string> manifestFiles = fileSystem.GetFiles(@"Windows\servicing\Packages", "*.mum", SearchOption.TopDirectoryOnly);
 
@@ -330,7 +331,7 @@ namespace MobilePackageGen
 
             foreach (IPartition partition in partitionsWithCbsServicing)
             {
-                IFileSystem fileSystem = partition.FileSystem;
+                IFileSystem fileSystem = partition.FileSystem!;
 
                 IEnumerable<string> manifestFiles = fileSystem.GetFiles(@"Windows\servicing\Packages", "*.mum", SearchOption.TopDirectoryOnly);
 
@@ -340,7 +341,7 @@ namespace MobilePackageGen
                     {
                         Stream stream = fileSystem.OpenFile(manifestFile, FileMode.Open, FileAccess.Read);
                         XmlSerializer serializer = new(typeof(XmlMum.Assembly));
-                        XmlMum.Assembly cbs = (XmlMum.Assembly)serializer.Deserialize(stream);
+                        XmlMum.Assembly cbs = (XmlMum.Assembly)serializer.Deserialize(stream)!;
 
                         string packageName = $"{cbs.AssemblyIdentity.Name.Replace($"_{cbs.AssemblyIdentity.Language}", "", StringComparison.InvariantCultureIgnoreCase)}";
 
@@ -358,14 +359,14 @@ namespace MobilePackageGen
                         }
 
                         string componentStatus = $"Creating package {i + 1} of {packagesCount} - {cabFileName}";
-                        if (componentStatus.Length > Console.BufferWidth - 1)
+                        if (componentStatus.Length > Console.BufferWidth - 24 - 1)
                         {
-                            componentStatus = $"{componentStatus[..(Console.BufferWidth - 4)]}...";
+                            componentStatus = $"{componentStatus[..(Console.BufferWidth - 24 - 4)]}...";
                         }
 
-                        Console.WriteLine(componentStatus);
-                        string progressBarString = GetDISMLikeProgressBar(0);
-                        Console.Write($"\r{progressBarString}");
+                        Logging.Log(componentStatus);
+                        string progressBarString = Logging.GetDISMLikeProgressBar(0);
+                        Logging.Log(progressBarString, returnLine: false);
 
                         string fileStatus = "";
 
@@ -378,32 +379,50 @@ namespace MobilePackageGen
                             string oldFileName = "";
 
                             CabInfo cab = new(cabFile);
-                            cab.PackFiles(null, fileMappings.Select(x => x.GetFileTuple()).ToArray(), fileMappings.Select(x => x.FileName).ToArray(), CompressionLevel.Min, (object _, ArchiveProgressEventArgs archiveProgressEventArgs) =>
+                            cab.PackFiles(null, fileMappings.Select(x => x.GetFileTuple()).ToArray(), fileMappings.Select(x => x.FileName).ToArray(), CompressionLevel.Min, (object? _, ArchiveProgressEventArgs archiveProgressEventArgs) =>
                             {
+                                string fileNameParsed;
+                                if (string.IsNullOrEmpty(archiveProgressEventArgs.CurrentFileName))
+                                {
+                                    fileNameParsed = $"Unknown ({archiveProgressEventArgs.CurrentFileNumber})";
+                                }
+                                else
+                                {
+                                    fileNameParsed = archiveProgressEventArgs.CurrentFileName;
+                                }
+
                                 uint percentage = (uint)Math.Floor((double)archiveProgressEventArgs.CurrentFileNumber * 50 / archiveProgressEventArgs.TotalFiles) + 50;
 
                                 if (percentage != oldPercentage)
                                 {
                                     oldPercentage = percentage;
-                                    string progressBarString = GetDISMLikeProgressBar(percentage);
-                                    Console.Write($"\r{progressBarString}");
+                                    string progressBarString = Logging.GetDISMLikeProgressBar(percentage);
+
+                                    Logging.Log(progressBarString, returnLine: false);
                                 }
 
-                                if (archiveProgressEventArgs.CurrentFileName != oldFileName)
+                                if (fileNameParsed != oldFileName)
                                 {
-                                    Console.Write($"\n{new string(' ', fileStatus.Length)}\n{GetDISMLikeProgressBar(0)}");
+                                    Logging.Log();
+                                    Logging.Log(new string(' ', fileStatus.Length));
+                                    Logging.Log(Logging.GetDISMLikeProgressBar(0), returnLine: false);
+
                                     Console.SetCursorPosition(0, Console.CursorTop - 2);
 
-                                    oldFileName = archiveProgressEventArgs.CurrentFileName;
+                                    oldFileName = fileNameParsed;
+
                                     oldFilePercentage = uint.MaxValue;
 
-                                    fileStatus = $"Adding file {archiveProgressEventArgs.CurrentFileNumber + 1} of {archiveProgressEventArgs.TotalFiles} - {archiveProgressEventArgs.CurrentFileName}";
-                                    if (fileStatus.Length > Console.BufferWidth - 1)
+                                    fileStatus = $"Adding file {archiveProgressEventArgs.CurrentFileNumber + 1} of {archiveProgressEventArgs.TotalFiles} - {fileNameParsed}";
+                                    if (fileStatus.Length > Console.BufferWidth - 24 - 1)
                                     {
-                                        fileStatus = $"{fileStatus[..(Console.BufferWidth - 4)]}...";
+                                        fileStatus = $"{fileStatus[..(Console.BufferWidth - 24 - 4)]}...";
                                     }
 
-                                    Console.Write($"\n{fileStatus}\n{GetDISMLikeProgressBar(0)}");
+                                    Logging.Log();
+                                    Logging.Log(fileStatus);
+                                    Logging.Log(Logging.GetDISMLikeProgressBar(0), returnLine: false);
+
                                     Console.SetCursorPosition(0, Console.CursorTop - 2);
                                 }
 
@@ -412,8 +431,11 @@ namespace MobilePackageGen
                                 if (filePercentage != oldFilePercentage)
                                 {
                                     oldFilePercentage = filePercentage;
-                                    string progressBarString = GetDISMLikeProgressBar(filePercentage);
-                                    Console.Write($"\n\n{progressBarString}");
+                                    string progressBarString = Logging.GetDISMLikeProgressBar(filePercentage);
+
+                                    Logging.Log();
+                                    Logging.Log();
+                                    Logging.Log(progressBarString, returnLine: false);
 
                                     Console.SetCursorPosition(0, Console.CursorTop - 2);
                                 }
@@ -428,30 +450,36 @@ namespace MobilePackageGen
                         if (i != packagesCount - 1)
                         {
                             Console.SetCursorPosition(0, Console.CursorTop - 1);
-                            Console.WriteLine($"{new string(' ', componentStatus.Length)}\n{GetDISMLikeProgressBar(100)}");
+
+                            Logging.Log(new string(' ', componentStatus.Length));
+                            Logging.Log(Logging.GetDISMLikeProgressBar(100));
 
                             if (string.IsNullOrEmpty(fileStatus))
                             {
-                                Console.WriteLine($"{new string(' ', fileStatus.Length)}\n{new string(' ', 60)}");
+                                Logging.Log(new string(' ', fileStatus.Length));
+                                Logging.Log(new string(' ', 60));
                             }
                             else
                             {
-                                Console.WriteLine($"{new string(' ', fileStatus.Length)}\n{GetDISMLikeProgressBar(100)}");
+                                Logging.Log(new string(' ', fileStatus.Length));
+                                Logging.Log(Logging.GetDISMLikeProgressBar(100));
                             }
 
                             Console.SetCursorPosition(0, Console.CursorTop - 4);
                         }
                         else
                         {
-                            Console.WriteLine($"\r{GetDISMLikeProgressBar(100)}");
+                            Logging.Log($"\r{Logging.GetDISMLikeProgressBar(100)}");
 
                             if (string.IsNullOrEmpty(fileStatus))
                             {
-                                Console.WriteLine($"\n{new string(' ', 60)}");
+                                Logging.Log();
+                                Logging.Log(new string(' ', 60));
                             }
                             else
                             {
-                                Console.WriteLine($"\n{GetDISMLikeProgressBar(100)}");
+                                Logging.Log();
+                                Logging.Log(Logging.GetDISMLikeProgressBar(100));
                             }
                         }
 
@@ -459,36 +487,11 @@ namespace MobilePackageGen
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Error: CAB creation failed! {ex.Message}");
+                        Logging.Log($"Error: CAB creation failed! {ex.Message}", LoggingLevel.Error);
                         //throw;
                     }
                 }
             }
-        }
-
-        private static string GetDISMLikeProgressBar(uint percentage)
-        {
-            if (percentage > 100)
-            {
-                percentage = 100;
-            }
-
-            int eqsLength = (int)Math.Floor((double)percentage * 55u / 100u);
-
-            string bases = $"{new string('=', eqsLength)}{new string(' ', 55 - eqsLength)}";
-
-            bases = bases.Insert(28, percentage + "%");
-
-            if (percentage == 100)
-            {
-                bases = bases[1..];
-            }
-            else if (percentage < 10)
-            {
-                bases = bases.Insert(28, " ");
-            }
-
-            return $"[{bases}]";
         }
     }
 }

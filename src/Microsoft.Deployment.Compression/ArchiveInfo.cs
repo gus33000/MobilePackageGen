@@ -253,9 +253,9 @@ namespace Microsoft.Deployment.Compression
             }
 
             UnpackFiles(
-                new string[] { fileName },
+                [fileName],
                 null,
-                new string[] { destFileName });
+                [destFileName]);
         }
 
         /// <summary>
@@ -570,7 +570,7 @@ namespace Microsoft.Deployment.Compression
         }
 
         public void PackFiles(
-            string sourceDirectory,
+            string? sourceDirectory,
             IList<(Stream, FileAttributes, DateTime)> sourceFileNames,
             IList<string> fileNames,
             CompressionLevel compLevel,

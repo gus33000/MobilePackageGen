@@ -15,14 +15,14 @@ namespace MobilePackageGen.Adapters.FullFlashUpdate
 
         public Disk(string ffuPath)
         {
-            Console.WriteLine();
+            Logging.Log();
 
-            Console.WriteLine($"{Path.GetFileName(ffuPath)} {new FileInfo(ffuPath).Length} FullFlashUpdate");
+            Logging.Log($"{Path.GetFileName(ffuPath)} {new FileInfo(ffuPath).Length} FullFlashUpdate");
 
             List<PartitionInfo> partitionInfos = GetPartitions(ffuPath);
             Partitions = GetPartitionStructures(partitionInfos);
 
-            Console.WriteLine();
+            Logging.Log();
         }
 
         public Disk(List<IPartition> Partitions)
@@ -53,7 +53,7 @@ namespace MobilePackageGen.Adapters.FullFlashUpdate
 
                 string FriendlyDevicePath = DevicePathUtils.FormatDevicePath(store.DevicePath);
 
-                Console.WriteLine($"- {i}: {FriendlyDevicePath} {store.Length} FullFlashUpdateStore");
+                Logging.Log($"- {i}: {FriendlyDevicePath} {store.Length} FullFlashUpdateStore");
 
                 long diskCapacity = store.Length;
                 VirtualDisk virtualDisk = new DiscUtils.Raw.Disk(store, Ownership.None, Geometry.FromCapacity(diskCapacity, store.SectorSize));

@@ -37,9 +37,9 @@ namespace MobilePackageGen.Adapters
                     // Handle UpdateOS as well if found
                     if (fileSystem.FileExists("PROGRAMS\\UpdateOS\\UpdateOS.wim"))
                     {
-                        Console.WriteLine();
+                        Logging.Log();
 
-                        Console.WriteLine($"UpdateOS.wim {fileSystem.GetFileLength("PROGRAMS\\UpdateOS\\UpdateOS.wim")} WindowsImageFile");
+                        Logging.Log($"UpdateOS.wim {fileSystem.GetFileLength("PROGRAMS\\UpdateOS\\UpdateOS.wim")} WindowsImageFile");
 
                         List<IPartition> partitions = [];
 
@@ -50,21 +50,21 @@ namespace MobilePackageGen.Adapters
                         {
                             IFileSystem wimFileSystem = wimFile.GetImage(i);
 
-                            Console.WriteLine($"- {i} WindowsImageIndex");
+                            Logging.Log($"- {i} WindowsImageIndex");
 
                             IPartition wimPartition = new FileSystemPartition(wimStream, wimFileSystem, $"{partition.Name}-UpdateOS-{i}", Guid.Empty, Guid.Empty);
                             partitions.Add(wimPartition);
                         }
 
-                        Console.WriteLine();
+                        Logging.Log();
 
                         Wim.Disk updateOSDisk = new(partitions);
                         return updateOSDisk;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-
+                    Logging.Log($"Error: Looking up UpdateOS on file system failed! {ex.Message}", LoggingLevel.Error);
                 }
             }
 
@@ -85,9 +85,9 @@ namespace MobilePackageGen.Adapters
 
                     if (partitionInfo.GuidType == new Guid("E75CAF8F-F680-4CEE-AFA3-B001E56EFC2D"))
                     {
-                        Console.WriteLine();
+                        Logging.Log();
 
-                        Console.WriteLine($"{((GuidPartitionInfo)partitionInfo).Name} {((GuidPartitionInfo)partitionInfo).Identity} {((GuidPartitionInfo)partitionInfo).GuidType} {((GuidPartitionInfo)partitionInfo).SectorCount * virtualDisk.Geometry!.Value.BytesPerSector} StoragePool");
+                        Logging.Log($"{((GuidPartitionInfo)partitionInfo).Name} {((GuidPartitionInfo)partitionInfo).Identity} {((GuidPartitionInfo)partitionInfo).GuidType} {((GuidPartitionInfo)partitionInfo).SectorCount * virtualDisk.Geometry!.Value.BytesPerSector} StoragePool");
 
                         Stream storageSpacePartitionStream = partitionInfo.Open();
 
@@ -97,10 +97,10 @@ namespace MobilePackageGen.Adapters
 
                         foreach (KeyValuePair<int, string> disk in disks.OrderBy(x => x.Key))
                         {
-                            Console.WriteLine($"- {disk.Key}: {disk.Value} StorageSpace");
+                            Logging.Log($"- {disk.Key}: {disk.Value} StorageSpace");
                         }
 
-                        Console.WriteLine();
+                        Logging.Log();
 
                         foreach (KeyValuePair<int, string> disk in disks)
                         {

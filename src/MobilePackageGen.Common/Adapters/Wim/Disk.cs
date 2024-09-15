@@ -12,13 +12,13 @@ namespace MobilePackageGen.Adapters.Wim
 
         public Disk(string wimPath)
         {
-            Console.WriteLine();
+            Logging.Log();
 
-            Console.WriteLine($"{Path.GetFileName(wimPath)} {new FileInfo(wimPath).Length} WindowsImageFile");
+            Logging.Log($"{Path.GetFileName(wimPath)} {new FileInfo(wimPath).Length} WindowsImageFile");
 
             Partitions = GetPartitionStructures(wimPath);
 
-            Console.WriteLine();
+            Logging.Log();
         }
 
         public Disk(List<IPartition> Partitions)
@@ -37,13 +37,13 @@ namespace MobilePackageGen.Adapters.Wim
             {
                 IFileSystem wimFileSystem = wimFile.GetImage(i);
 
-                Console.WriteLine($"- {i} WindowsImageIndex");
+                Logging.Log($"- {i} WindowsImageIndex");
 
                 IPartition wimPartition = new FileSystemPartition(wimStream, wimFileSystem, $"{Path.GetFileNameWithoutExtension(path)}-{i}", Guid.Empty, Guid.Empty);
                 partitions.Add(wimPartition);
             }
 
-            Console.WriteLine();
+            Logging.Log();
 
             return partitions;
         }

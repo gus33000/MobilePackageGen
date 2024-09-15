@@ -67,8 +67,9 @@ namespace MobilePackageGen.Adapters
                     return new DiscUtils.Ntfs.NtfsFileSystem(partitionStream);
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Logging.Log($"Error: Looking up file system using DiscUtils failed! {ex.Message}", LoggingLevel.Error);
             }
 
             try
@@ -86,9 +87,9 @@ namespace MobilePackageGen.Adapters
                     return new ArchiveBridge(partitionStream, SevenZipFormat.Fat);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-
+                Logging.Log($"Error: Looking up file system using 7z failed! {ex.Message}", LoggingLevel.Error);
             }
 
             return null;

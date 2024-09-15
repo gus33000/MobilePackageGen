@@ -9,11 +9,11 @@
 
         public Disk(string path)
         {
-            Console.WriteLine();
+            Logging.Log();
 
             Partitions = GetPartitionStructures(path);
 
-            Console.WriteLine();
+            Logging.Log();
         }
 
         public Disk(List<IPartition> Partitions)

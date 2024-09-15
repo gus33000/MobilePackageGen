@@ -14,7 +14,7 @@ namespace Microsoft.Deployment.Compression
         : IPackStreamContext, IUnpackStreamContext
     {
         private readonly IList<string> archiveFiles;
-        private readonly string directory;
+        private readonly string? directory;
         private readonly IDictionary<string, (Stream, FileAttributes, DateTime)> files;
         private bool extractOnlyNewerFiles;
         private bool enableOffsetOpen;
@@ -54,9 +54,9 @@ namespace Microsoft.Deployment.Compression
         /// </remarks>
         public ArchiveFileStreamContext2(
             string archiveFile,
-            string directory,
+            string? directory,
             IDictionary<string, (Stream, FileAttributes, DateTime)> files)
-            : this(new string[] { archiveFile }, directory, files)
+            : this([archiveFile], directory, files)
         {
             if (archiveFile == null)
             {
@@ -91,7 +91,7 @@ namespace Microsoft.Deployment.Compression
         /// </remarks>
         public ArchiveFileStreamContext2(
             IList<string> archiveFiles,
-            string directory,
+            string? directory,
             IDictionary<string, (Stream, FileAttributes, DateTime)> files)
         {
             if (archiveFiles == null || archiveFiles.Count == 0)
