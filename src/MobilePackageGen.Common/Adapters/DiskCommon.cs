@@ -106,7 +106,46 @@ namespace MobilePackageGen.Adapters
                         {
                             Space space = pool.OpenDisk(disk.Key);
 
-                            DiscUtils.Raw.Disk duVirtualDisk = new(space, Ownership.None, Geometry.FromCapacity(space.Length, 4096));
+                            // Default is 4096
+                            int sectorSize = 4096;
+
+                            if (space.Length > 4096 * 2)
+                            {
+                                BinaryReader reader = new(space);
+
+                                space.Seek(512, SeekOrigin.Begin);
+                                byte[] header1 = reader.ReadBytes(8);
+
+                                space.Seek(4096, SeekOrigin.Begin);
+                                byte[] header2 = reader.ReadBytes(8);
+
+                                string header1str = System.Text.Encoding.ASCII.GetString(header1);
+                                string header2str = System.Text.Encoding.ASCII.GetString(header2);
+
+                                if (header1str == "EFI PART")
+                                {
+                                    sectorSize = 512;
+                                }
+                                else if (header2str == "EFI PART")
+                                {
+                                    sectorSize = 4096;
+                                }
+                                else if (space.Length % 512 == 0 && space.Length % 4096 != 0)
+                                {
+                                    sectorSize = 512;
+                                }
+
+                                space.Seek(0, SeekOrigin.Begin);
+                            }
+                            else
+                            {
+                                if (space.Length % 512 == 0 && space.Length % 4096 != 0)
+                                {
+                                    sectorSize = 512;
+                                }
+                            }
+
+                            DiscUtils.Raw.Disk duVirtualDisk = new(space, Ownership.None, Geometry.FromCapacity(space.Length, sectorSize));
                             PartitionTable msPartitionTable = duVirtualDisk.Partitions;
 
                             if (msPartitionTable != null)
