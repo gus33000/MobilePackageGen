@@ -1,5 +1,2 @@
 # Auto detect text files and perform LF normalization
 * text=auto
-
-# Delta file must be encoded as is
-src/Applications/CbsToReg/manifest.bin -text

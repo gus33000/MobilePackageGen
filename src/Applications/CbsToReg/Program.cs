@@ -10,8 +10,6 @@ namespace CbsToReg
 
         internal static void Main(string[] args)
         {
-            LibSxS.Delta.DeltaAPI.wcpBasePath = Path.Combine(Directory.GetCurrentDirectory(), "manifest.bin");
-
             Console.WriteLine(@"
 CBS to REG tool
 Version: 1.0.4.0
@@ -42,13 +40,16 @@ Version: 1.0.4.0
             }
             catch
             {
-                string manifestString = LibSxS.Delta.DeltaAPI.GetManifest(file);
+                stream = LibSxS.Delta.DeltaAPI.LoadManifest(File.OpenRead(file));
+
+                byte[] manifestBuffer = new byte[stream.Length];
+                stream.Read(manifestBuffer, 0, manifestBuffer.Length);
+                stream.Seek(0, SeekOrigin.Begin);
 
                 Console.WriteLine($"Exporting to {file}.expanded");
-                File.WriteAllText($"{file}.expanded", manifestString, Encoding.Unicode);
+                File.WriteAllBytes($"{file}.expanded", manifestBuffer);
 
-                StringReader stringReader = new(manifestString);
-                cbs = (Mum.Assembly)serializer.Deserialize(stringReader)!;
+                cbs = (Mum.Assembly)serializer.Deserialize(stream)!;
             }
 
             if (cbs.RegistryKeys != null && cbs.RegistryKeys.Count > 0)
@@ -70,7 +71,7 @@ Version: 1.0.4.0
                 string reg = regExporter.Build(SoftwareKeyName, SystemKeyName);
 
                 Console.WriteLine($"Exporting to {file}.reg");
-                File.WriteAllText($"{file}.reg", reg, Encoding.Unicode);
+                File.WriteAllText($"{file}.reg", reg, Encoding.UTF8);
             }
 
             stream?.Close();

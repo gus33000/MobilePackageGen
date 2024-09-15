@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace LibSxS.Delta
+﻿namespace LibSxS.Delta
 {
     public struct DeltaInput
     {
