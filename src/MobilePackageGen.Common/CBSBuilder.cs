@@ -18,8 +18,8 @@ namespace MobilePackageGen
 
             IFileSystem fileSystem = partition.FileSystem!;
 
-            string packages_path = @"Windows\servicing\Packages";
-            string winsxs_manifests_path = @"Windows\WinSxS\Manifests";
+            string WindowsServicingPackagesFolderPath = @"Windows\servicing\Packages";
+            string WindowsSideBySideManifestsFolderPath = @"Windows\WinSxS\Manifests";
 
             string packageName = GetCBSComponentName(cbs);
 
@@ -43,7 +43,7 @@ namespace MobilePackageGen
                 string fileName = packageFile.Name.ToLower();
 
                 // Prevent getting files from root of this program
-                if (fileName.StartsWith("\\"))
+                if (fileName.StartsWith('\\'))
                 {
                     fileName = fileName[1..];
                 }
@@ -51,7 +51,7 @@ namespace MobilePackageGen
                 // If a manifest file is without any path, it must be retrieved from the manifest directory
                 if (!fileName.Contains('\\') && fileName.EndsWith(".manifest"))
                 {
-                    fileName = Path.Combine(winsxs_manifests_path, fileName);
+                    fileName = Path.Combine(WindowsSideBySideManifestsFolderPath, fileName);
                 }
 
                 // We now replace macros with known values
@@ -65,7 +65,7 @@ namespace MobilePackageGen
                                                     .Replace("$(runtime.drivers)", @"windows\system32\drivers");
 
                 // Prevent getting files from root of this program
-                if (normalized.StartsWith("\\"))
+                if (normalized.StartsWith('\\'))
                 {
                     normalized = normalized[1..];
                 }
@@ -77,7 +77,7 @@ namespace MobilePackageGen
 
                     if (!normalized.Contains('\\'))
                     {
-                        normalized = Path.Combine(packages_path, normalized);
+                        normalized = Path.Combine(WindowsServicingPackagesFolderPath, normalized);
                     }
                 }
 
@@ -88,7 +88,7 @@ namespace MobilePackageGen
 
                     if (!normalized.Contains('\\'))
                     {
-                        normalized = Path.Combine(packages_path, normalized);
+                        normalized = Path.Combine(WindowsServicingPackagesFolderPath, normalized);
                     }
                 }
 
@@ -105,20 +105,20 @@ namespace MobilePackageGen
                 }
 
                 // Prevent getting files from root of this program
-                if (normalized.StartsWith("\\"))
+                if (normalized.StartsWith('\\'))
                 {
                     normalized = normalized[1..];
                 }
 
                 if (!fileSystem.Exists(normalized) && normalized.EndsWith(".manifest"))
                 {
-                    normalized = Path.Combine(winsxs_manifests_path, normalized.Split("\\")[^1]);
+                    normalized = Path.Combine(WindowsSideBySideManifestsFolderPath, normalized.Split('\\')[^1]);
                 }
 
                 CabinetFileInfo? cabinetFileInfo = null;
 
                 // If we end in bin, and the package is marked binary partition, this is a partition on one of the device disks, retrieve it
-                if (normalized.EndsWith(".bin") && cbs.Package.BinaryPartition.ToLower() == "true")
+                if (normalized.EndsWith(".bin") && cbs.Package.BinaryPartition.Equals("true", StringComparison.CurrentCultureIgnoreCase))
                 {
                     foreach (IDisk disk in disks)
                     {
@@ -155,7 +155,7 @@ namespace MobilePackageGen
 
                         foreach (string partitionNameWithLink in partitionNamesWithLinks)
                         {
-                            if (normalized.StartsWith(partitionNameWithLink + "\\", StringComparison.InvariantCultureIgnoreCase))
+                            if (normalized.StartsWith(partitionNameWithLink + '\\', StringComparison.InvariantCultureIgnoreCase))
                             {
                                 foreach (IDisk disk in disks)
                                 {

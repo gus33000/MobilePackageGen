@@ -22,8 +22,6 @@ namespace MobilePackageGen
 
             IFileSystem fileSystem = partition.FileSystem!;
 
-            string packageName = GetSPKGComponentName(dsm);
-
             int i = 0;
 
             uint oldPercentage = uint.MaxValue;
@@ -45,7 +43,7 @@ namespace MobilePackageGen
                 string normalized = fileName;
 
                 // Prevent getting files from root of this program
-                if (normalized.StartsWith("\\"))
+                if (normalized.StartsWith('\\'))
                 {
                     normalized = normalized[1..];
                 }
@@ -97,7 +95,7 @@ namespace MobilePackageGen
 
                         foreach (string partitionNameWithLink in partitionNamesWithLinks)
                         {
-                            if (normalized.StartsWith(partitionNameWithLink + "\\", StringComparison.InvariantCultureIgnoreCase))
+                            if (normalized.StartsWith(partitionNameWithLink + '\\', StringComparison.InvariantCultureIgnoreCase))
                             {
                                 foreach (IDisk disk in disks)
                                 {

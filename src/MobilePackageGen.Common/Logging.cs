@@ -25,7 +25,7 @@ namespace MobilePackageGen
     {
         private static readonly object lockObj = new();
 
-        private static ConsoleColor originalConsoleColor;
+        private static readonly ConsoleColor originalConsoleColor;
 
         static Logging()
         {
@@ -35,9 +35,7 @@ namespace MobilePackageGen
         public static void ShowProgress(long CurrentProgress,
                                         long TotalProgress,
                                         DateTime startTime,
-                                        bool DisplayRed,
-                                        string StatusTitle,
-                                        string StatusMessage)
+                                        bool DisplayRed)
         {
             uint ProgressPercentage = TotalProgress == 0 ? 100 : (uint)(CurrentProgress * 100 / TotalProgress);
 
@@ -129,9 +127,24 @@ namespace MobilePackageGen
                         break;
                 }
 
+                bool returnToLineDueToMessage = false;
+
+                if (message?.StartsWith('\r') == true)
+                {
+                    message = message[1..];
+                    returnToLineDueToMessage = true;
+                }
+
                 if (returnLine)
                 {
-                    Console.WriteLine($"{DateTime.Now:'['HH':'mm':'ss']'}[{msg}] {message}");
+                    if (returnToLineDueToMessage)
+                    {
+                        Console.WriteLine($"\r{DateTime.Now:'['HH':'mm':'ss']'}[{msg}] {message}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{DateTime.Now:'['HH':'mm':'ss']'}[{msg}] {message}");
+                    }
                 }
                 else
                 {
