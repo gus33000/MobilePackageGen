@@ -29,7 +29,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cabinet.Net", "src\Cabinet\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MobilePackageGen", "src\Applications\MobilePackageGen\MobilePackageGen.csproj", "{B31EF79C-D68D-463E-8C46-A0E2D8CD2BA0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Img2Ffu.Library.Compression.Windows", "..\Ffu2Vhdx\Img2Ffu\Img2Ffu.Library.Compression.Windows\Img2Ffu.Library.Compression.Windows.csproj", "{213206D7-B37F-4619-8E92-56BBEFFE18FF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Img2Ffu.Library.Compression.Windows", "thirdparty\Img2Ffu\Img2Ffu.Library.Compression.Windows\Img2Ffu.Library.Compression.Windows.csproj", "{213206D7-B37F-4619-8E92-56BBEFFE18FF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
