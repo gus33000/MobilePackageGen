@@ -2,6 +2,7 @@
 using Microsoft.Deployment.Compression.Cab;
 using Microsoft.Deployment.Compression;
 using System.Xml.Serialization;
+using System.Runtime.InteropServices;
 
 namespace MobilePackageGen
 {
@@ -351,68 +352,72 @@ namespace MobilePackageGen
                             uint oldFilePercentage = uint.MaxValue;
                             string oldFileName = "";
 
-                            CabInfo cab = new(cabFile);
-                            cab.PackFiles(null, fileMappings.Select(x => x.GetFileTuple()).ToArray(), fileMappings.Select(x => x.FileName).ToArray(), CompressionLevel.Min, (object? _, ArchiveProgressEventArgs archiveProgressEventArgs) =>
+                            // Cab Creation is only supported on Windows
+                            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                             {
-                                string fileNameParsed;
-                                if (string.IsNullOrEmpty(archiveProgressEventArgs.CurrentFileName))
+                                CabInfo cab = new(cabFile);
+                                cab.PackFiles(null, fileMappings.Select(x => x.GetFileTuple()).ToArray(), fileMappings.Select(x => x.FileName).ToArray(), CompressionLevel.Min, (object? _, ArchiveProgressEventArgs archiveProgressEventArgs) =>
                                 {
-                                    fileNameParsed = $"Unknown ({archiveProgressEventArgs.CurrentFileNumber})";
-                                }
-                                else
-                                {
-                                    fileNameParsed = archiveProgressEventArgs.CurrentFileName;
-                                }
-
-                                uint percentage = (uint)Math.Floor((double)archiveProgressEventArgs.CurrentFileNumber * 50 / archiveProgressEventArgs.TotalFiles) + 50;
-
-                                if (percentage != oldPercentage)
-                                {
-                                    oldPercentage = percentage;
-                                    string progressBarString = Logging.GetDISMLikeProgressBar(percentage);
-
-                                    Logging.Log(progressBarString, returnLine: false);
-                                }
-
-                                if (fileNameParsed != oldFileName)
-                                {
-                                    Logging.Log();
-                                    Logging.Log(new string(' ', fileStatus.Length));
-                                    Logging.Log(Logging.GetDISMLikeProgressBar(0), returnLine: false);
-
-                                    Console.SetCursorPosition(0, Console.CursorTop - 2);
-
-                                    oldFileName = fileNameParsed;
-
-                                    oldFilePercentage = uint.MaxValue;
-
-                                    fileStatus = $"Adding file {archiveProgressEventArgs.CurrentFileNumber + 1} of {archiveProgressEventArgs.TotalFiles} - {fileNameParsed}";
-                                    if (fileStatus.Length > Console.BufferWidth - 24 - 1)
+                                    string fileNameParsed;
+                                    if (string.IsNullOrEmpty(archiveProgressEventArgs.CurrentFileName))
                                     {
-                                        fileStatus = $"{fileStatus[..(Console.BufferWidth - 24 - 4)]}...";
+                                        fileNameParsed = $"Unknown ({archiveProgressEventArgs.CurrentFileNumber})";
+                                    }
+                                    else
+                                    {
+                                        fileNameParsed = archiveProgressEventArgs.CurrentFileName;
                                     }
 
-                                    Logging.Log();
-                                    Logging.Log(fileStatus);
-                                    Logging.Log(Logging.GetDISMLikeProgressBar(0), returnLine: false);
+                                    uint percentage = (uint)Math.Floor((double)archiveProgressEventArgs.CurrentFileNumber * 50 / archiveProgressEventArgs.TotalFiles) + 50;
 
-                                    Console.SetCursorPosition(0, Console.CursorTop - 2);
-                                }
+                                    if (percentage != oldPercentage)
+                                    {
+                                        oldPercentage = percentage;
+                                        string progressBarString = Logging.GetDISMLikeProgressBar(percentage);
 
-                                uint filePercentage = (uint)Math.Floor((double)archiveProgressEventArgs.CurrentFileBytesProcessed * 100 / archiveProgressEventArgs.CurrentFileTotalBytes);
+                                        Logging.Log(progressBarString, returnLine: false);
+                                    }
 
-                                if (filePercentage != oldFilePercentage)
-                                {
-                                    oldFilePercentage = filePercentage;
-                                    string progressBarString = Logging.GetDISMLikeProgressBar(filePercentage);
+                                    if (fileNameParsed != oldFileName)
+                                    {
+                                        Logging.Log();
+                                        Logging.Log(new string(' ', fileStatus.Length));
+                                        Logging.Log(Logging.GetDISMLikeProgressBar(0), returnLine: false);
 
-                                    Logging.Log();
-                                    Logging.Log();
-                                    Logging.Log(progressBarString, returnLine: false);
+                                        Console.SetCursorPosition(0, Console.CursorTop - 2);
 
-                                    Console.SetCursorPosition(0, Console.CursorTop - 2);
-                                }
-                            });
+                                        oldFileName = fileNameParsed;
+
+                                        oldFilePercentage = uint.MaxValue;
+
+                                        fileStatus = $"Adding file {archiveProgressEventArgs.CurrentFileNumber + 1} of {archiveProgressEventArgs.TotalFiles} - {fileNameParsed}";
+                                        if (fileStatus.Length > Console.BufferWidth - 24 - 1)
+                                        {
+                                            fileStatus = $"{fileStatus[..(Console.BufferWidth - 24 - 4)]}...";
+                                        }
+
+                                        Logging.Log();
+                                        Logging.Log(fileStatus);
+                                        Logging.Log(Logging.GetDISMLikeProgressBar(0), returnLine: false);
+
+                                        Console.SetCursorPosition(0, Console.CursorTop - 2);
+                                    }
+
+                                    uint filePercentage = (uint)Math.Floor((double)archiveProgressEventArgs.CurrentFileBytesProcessed * 100 / archiveProgressEventArgs.CurrentFileTotalBytes);
+
+                                    if (filePercentage != oldFilePercentage)
+                                    {
+                                        oldFilePercentage = filePercentage;
+                                        string progressBarString = Logging.GetDISMLikeProgressBar(filePercentage);
+
+                                        Logging.Log();
+                                        Logging.Log();
+                                        Logging.Log(progressBarString, returnLine: false);
+
+                                        Console.SetCursorPosition(0, Console.CursorTop - 2);
+                                    }
+                                });
+                            }
 
                             foreach (CabinetFileInfo fileMapping in fileMappings)
                             {

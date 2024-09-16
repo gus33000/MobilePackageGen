@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Runtime.InteropServices;
+using System.Text;
 using System.Xml.Serialization;
 
 namespace CbsToReg
@@ -40,6 +41,12 @@ Version: 1.0.5.0
             }
             catch
             {
+                // LibSxS is only supported on Windows
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    throw new NotImplementedException("The compression algorithm this data block uses is not currently implemented.");
+                }
+
                 stream = LibSxS.Delta.DeltaAPI.LoadManifest(File.OpenRead(file));
 
                 byte[] manifestBuffer = new byte[stream.Length];

@@ -1,4 +1,6 @@
-﻿namespace MobilePackageGen.Adapters.RealFileSystem
+﻿using System.Runtime.InteropServices;
+
+namespace MobilePackageGen.Adapters.RealFileSystem
 {
     public class Disk : IDisk
     {
@@ -25,8 +27,12 @@
         {
             List<IPartition> partitions = [];
 
-            DeferredStreamPartition partition = new(new RealFileSystemBridge(path), path.Replace(":", "").Replace(Path.DirectorySeparatorChar, '_'), Guid.Empty, Guid.Empty);
-            partitions.Add(partition);
+            // RawDisk is only supported on Windows
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                DeferredStreamPartition partition = new(new RealFileSystemBridge(path), path.Replace(":", "").Replace(Path.DirectorySeparatorChar, '_'), Guid.Empty, Guid.Empty);
+                partitions.Add(partition);
+            }
 
             return partitions;
         }

@@ -1,4 +1,6 @@
-﻿namespace Playground
+﻿using System.Runtime.InteropServices;
+
+namespace Playground
 {
     internal static class Program
     {
@@ -121,16 +123,20 @@
 
                 if (file.FileName.EndsWith(".manifest", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    try
+                    // LibSxS is only supported on Windows
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     {
-                        fileStream.Seek(0, SeekOrigin.Begin);
-                        Stream unpackedManifest = LibSxS.Delta.DeltaAPI.LoadManifest(fileStream);
+                        try
+                        {
+                            fileStream.Seek(0, SeekOrigin.Begin);
+                            Stream unpackedManifest = LibSxS.Delta.DeltaAPI.LoadManifest(fileStream);
 
-                        SHA256 = BitConverter.ToString(System.Security.Cryptography.SHA256.HashData(unpackedManifest)).Replace("-", "");
+                            SHA256 = BitConverter.ToString(System.Security.Cryptography.SHA256.HashData(unpackedManifest)).Replace("-", "");
 
-                        hashedExpandedPackage.Add(file.FileName, SHA256);
+                            hashedExpandedPackage.Add(file.FileName, SHA256);
+                        }
+                        catch { }
                     }
-                    catch { }
                 }
             }
 
@@ -317,27 +323,36 @@
                 {
                     if (cs.Key.EndsWith(".manifest", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        try
+                        // LibSxS is only supported on Windows
+                        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                         {
-                            string inputFile = Path.Combine(packageFolder, cs.Key);
-                            using FileStream fileStream = File.OpenRead(inputFile);
+                            try
+                            {
+                                string inputFile = Path.Combine(packageFolder, cs.Key);
+                                using FileStream fileStream = File.OpenRead(inputFile);
 
-                            Stream unpackedManifest = LibSxS.Delta.DeltaAPI.LoadManifest(fileStream);
+                                Stream unpackedManifest = LibSxS.Delta.DeltaAPI.LoadManifest(fileStream);
 
-                            string SHA256 = BitConverter.ToString(System.Security.Cryptography.SHA256.HashData(unpackedManifest)).Replace("-", "");
+                                string SHA256 = BitConverter.ToString(System.Security.Cryptography.SHA256.HashData(unpackedManifest)).Replace("-", "");
 
-                            if (!checksums.Contains(SHA256))
+                                if (!checksums.Contains(SHA256))
+                                {
+                                    Console.ForegroundColor = ConsoleColor.Red;
+                                    Console.WriteLine($"{cs.Key} is modified or not present in the catalog file.");
+                                }
+                                else
+                                {
+                                    Console.ForegroundColor = ConsoleColor.Yellow;
+                                    Console.WriteLine($"{cs.Key} expanded version is present in the catalog file but the one in the package is compressed.");
+                                }
+                            }
+                            catch
                             {
                                 Console.ForegroundColor = ConsoleColor.Red;
-                                Console.WriteLine($"{cs.Key} is modified or not present in the catalog file.");
-                            }
-                            else
-                            {
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                                Console.WriteLine($"{cs.Key} expanded version is present in the catalog file but the one in the package is compressed.");
+                                Console.WriteLine($"{cs.Key} is modified or not present in the catalog file and expanding it did not succeed.");
                             }
                         }
-                        catch
+                        else
                         {
                             Console.ForegroundColor = ConsoleColor.Red;
                             Console.WriteLine($"{cs.Key} is modified or not present in the catalog file and expanding it did not succeed.");

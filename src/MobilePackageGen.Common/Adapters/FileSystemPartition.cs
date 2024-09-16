@@ -1,6 +1,7 @@
 ﻿using Archives.DiscUtils;
 using DiscUtils;
 using SevenZipExtractor;
+using System.Runtime.InteropServices;
 
 namespace MobilePackageGen.Adapters
 {
@@ -72,24 +73,28 @@ namespace MobilePackageGen.Adapters
                 Logging.Log($"Error: Looking up file system using DiscUtils failed! {ex.Message}", LoggingLevel.Error);
             }
 
-            try
+            // Archive Bridge is Windows only for now
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                // DiscUtils fat implementation is a bit broken, on top of not supporting lfn (which we know how to fix)
-                // It also fails to find the last chunk on some known partitions (like PLAT)
-                // As a result, we use a bridge file system making use of 7z, it's slower, but it's the best we can do for now
-
-                partitionStream.Seek(0x36, SeekOrigin.Begin);
-                byte[] buf = new byte[3];
-                partitionStream.Read(buf, 0, 3);
-                if (buf[0] == 0x46 && buf[1] == 0x41 && buf[2] == 0x54)
+                try
                 {
-                    partitionStream.Seek(0, SeekOrigin.Begin);
-                    return new ArchiveBridge(partitionStream, SevenZipFormat.Fat);
+                    // DiscUtils fat implementation is a bit broken, on top of not supporting lfn (which we know how to fix)
+                    // It also fails to find the last chunk on some known partitions (like PLAT)
+                    // As a result, we use a bridge file system making use of 7z, it's slower, but it's the best we can do for now
+
+                    partitionStream.Seek(0x36, SeekOrigin.Begin);
+                    byte[] buf = new byte[3];
+                    partitionStream.Read(buf, 0, 3);
+                    if (buf[0] == 0x46 && buf[1] == 0x41 && buf[2] == 0x54)
+                    {
+                        partitionStream.Seek(0, SeekOrigin.Begin);
+                        return new ArchiveBridge(partitionStream, SevenZipFormat.Fat);
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                Logging.Log($"Error: Looking up file system using 7z failed! {ex.Message}", LoggingLevel.Error);
+                catch (Exception ex)
+                {
+                    Logging.Log($"Error: Looking up file system using 7z failed! {ex.Message}", LoggingLevel.Error);
+                }
             }
 
             return null;

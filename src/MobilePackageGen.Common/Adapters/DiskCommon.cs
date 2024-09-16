@@ -93,16 +93,18 @@ namespace MobilePackageGen.Adapters
 
                         Pool pool = new(storageSpacePartitionStream);
 
-                        Dictionary<int, string> disks = pool.GetDisks();
+                        Dictionary<long, string> disks = pool.GetDisks();
 
-                        foreach (KeyValuePair<int, string> disk in disks.OrderBy(x => x.Key))
+                        foreach (KeyValuePair<long, string> disk in disks.OrderBy(x => x.Key))
                         {
-                            Logging.Log($"- {disk.Key}: {disk.Value} StorageSpace");
+                            using Space space = pool.OpenDisk(disk.Key);
+
+                            Logging.Log($"- {disk.Key}: {disk.Value} ({space.Length}B / {space.Length / 1024 / 1024}MB / {space.Length / 1024 / 1024 / 1024}GB) StorageSpace");
                         }
 
                         Logging.Log();
 
-                        foreach (KeyValuePair<int, string> disk in disks)
+                        foreach (KeyValuePair<long, string> disk in disks)
                         {
                             Space space = pool.OpenDisk(disk.Key);
 
