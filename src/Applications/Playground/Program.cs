@@ -257,7 +257,11 @@
                 Console.WriteLine($"Invalid File count: {invalidCount}");
             }
 
-            Directory.Delete(tempDirectory, true);
+            try
+            {
+                Directory.Delete(tempDirectory, true);
+            }
+            catch { }
 
             return Valid;
         }
