@@ -12,7 +12,7 @@ namespace MobilePackageGen
         private static string GetSPKGComponentName(XmlDsm.Package dsm)
         {
             return $"{dsm.Identity.Owner}" +
-                $"{(string.IsNullOrEmpty(dsm.Identity.Component) ? "": $".{dsm.Identity.Component}")}" +
+                $"{(string.IsNullOrEmpty(dsm.Identity.Component) ? "" : $".{dsm.Identity.Component}")}" +
                 $"{(string.IsNullOrEmpty(dsm.Identity.SubComponent) ? "" : $".{dsm.Identity.SubComponent}")}" +
                 $"{(string.IsNullOrEmpty(dsm.Culture) == true ? "" : $"_Lang_{dsm.Culture}")}";
         }

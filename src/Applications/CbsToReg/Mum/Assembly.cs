@@ -27,7 +27,7 @@ namespace CbsToReg.Mum
     {
         public Assembly()
         {
-        
+
         }
 
         [XmlElement(ElementName = "assemblyIdentity", Namespace = "urn:schemas-microsoft-com:asm.v3")]

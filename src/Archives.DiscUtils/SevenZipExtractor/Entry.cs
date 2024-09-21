@@ -42,7 +42,7 @@
         /// Date and time of the last access of the file (entry)
         /// </summary>
         public DateTime LastAccessTime { get; internal set; }
-        
+
         /// <summary>
         /// CRC hash of the entry
         /// </summary>

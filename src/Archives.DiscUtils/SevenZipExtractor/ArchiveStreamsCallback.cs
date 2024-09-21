@@ -4,7 +4,7 @@
     {
         private readonly IList<Stream> streams;
 
-        public ArchiveStreamsCallback(IList<Stream> streams) 
+        public ArchiveStreamsCallback(IList<Stream> streams)
         {
             this.streams = streams;
         }
@@ -31,7 +31,7 @@
                 return 0;
             }
 
-            Stream stream = streams[(int) index];
+            Stream stream = streams[(int)index];
 
             if (stream == null)
             {
