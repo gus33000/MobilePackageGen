@@ -61,6 +61,34 @@ namespace MobilePackageGen.Adapters
                         Wim.Disk updateOSDisk = new(partitions);
                         return updateOSDisk;
                     }
+
+                    // Handle UpdateOS as well if found
+                    if (fileSystem.FileExists("UpdateOS.wim"))
+                    {
+                        Logging.Log();
+
+                        Logging.Log($"UpdateOS.wim {fileSystem.GetFileLength("UpdateOS.wim")} WindowsImageFile");
+
+                        List<IPartition> partitions = [];
+
+                        Stream wimStream = fileSystem.OpenFile("UpdateOS.wim", FileMode.Open, FileAccess.Read);
+                        WimFile wimFile = new(wimStream);
+
+                        for (int i = 0; i < wimFile.ImageCount; i++)
+                        {
+                            IFileSystem wimFileSystem = wimFile.GetImage(i);
+
+                            Logging.Log($"- {i} WindowsImageIndex");
+
+                            IPartition wimPartition = new FileSystemPartition(wimStream, wimFileSystem, $"{partition.Name.Replace("\0", "-")}-UpdateOS-{i}", Guid.Empty, Guid.Empty);
+                            partitions.Add(wimPartition);
+                        }
+
+                        Logging.Log();
+
+                        Wim.Disk updateOSDisk = new(partitions);
+                        return updateOSDisk;
+                    }
                 }
                 catch (Exception ex)
                 {

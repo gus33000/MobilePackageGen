@@ -2,7 +2,6 @@
 using DiscUtils.Streams;
 using DiscUtils;
 using Img2Ffu.Reader;
-using MobilePackageGen.Common;
 
 namespace MobilePackageGen.Adapters.FullFlashUpdate
 {

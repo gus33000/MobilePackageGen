@@ -112,11 +112,16 @@ namespace Archives.DiscUtils
 
         public IEnumerable<string> GetDirectories(string path, string searchPattern, SearchOption searchOption)
         {
-            Func<string, bool> re = Utilities.ConvertWildcardsToRegEx(searchPattern, true);
+            Func<string, bool>? re = null;
+
+            if (!string.IsNullOrEmpty(searchPattern))
+            {
+                re = Utilities.ConvertWildcardsToRegEx(searchPattern, true);
+            }
 
             using ArchiveFile archiveFile = new(stream, sevenZipFormat);
             IEnumerable<string> prereq = archiveFile.Entries
-                .Where(x => x.IsFolder && x.FileName.StartsWith(path, StringComparison.InvariantCultureIgnoreCase) && re(x.FileName))
+                .Where(x => x.IsFolder && x.FileName.StartsWith(path, StringComparison.InvariantCultureIgnoreCase) && (re == null || re(x.FileName)))
                 .Select(x => x.FileName);
             switch (searchOption)
             {
@@ -188,11 +193,16 @@ namespace Archives.DiscUtils
 
         public IEnumerable<string> GetFiles(string path, string searchPattern, SearchOption searchOption)
         {
-            Func<string, bool> re = Utilities.ConvertWildcardsToRegEx(searchPattern, true);
+            Func<string, bool>? re = null;
+
+            if (!string.IsNullOrEmpty(searchPattern))
+            {
+                re = Utilities.ConvertWildcardsToRegEx(searchPattern, true);
+            }
 
             using ArchiveFile archiveFile = new(stream, sevenZipFormat);
             IEnumerable<string> prereq = archiveFile.Entries
-                .Where(x => !x.IsFolder && x.FileName.StartsWith(path, StringComparison.InvariantCultureIgnoreCase) && re(x.FileName))
+                .Where(x => !x.IsFolder && x.FileName.StartsWith(path, StringComparison.InvariantCultureIgnoreCase) && (re == null || re(x.FileName)))
                 .Select(x => x.FileName);
             switch (searchOption)
             {
