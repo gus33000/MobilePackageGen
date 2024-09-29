@@ -266,12 +266,6 @@ namespace MobilePackageGen
                 }
             }
 
-            if (!found)
-            {
-                Console.WriteLine(cbsPackageIdentity);
-                throw new Exception("DEBUG");
-            }
-
             return (cabFileName, cabFile);
         }
     }

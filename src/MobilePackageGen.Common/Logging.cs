@@ -135,20 +135,36 @@ namespace MobilePackageGen
                     returnToLineDueToMessage = true;
                 }
 
+                DateTime dateTime = DateTime.Now;
+
+                message = message.Replace("\n", $"\n{dateTime:'['HH':'mm':'ss']'} ");
+
                 if (returnLine)
                 {
                     if (returnToLineDueToMessage)
                     {
-                        Console.WriteLine($"\r{DateTime.Now:'['HH':'mm':'ss']'}[{msg}] {message}");
+                        Console.WriteLine($"\r{dateTime:'['HH':'mm':'ss']'}[{msg}] {message}");
                     }
                     else
                     {
-                        Console.WriteLine($"{DateTime.Now:'['HH':'mm':'ss']'}[{msg}] {message}");
+                        int leftPos = Console.GetCursorPosition().Left;
+
+                        if (leftPos != 0)
+                        {
+                            Console.WriteLine();
+                        }
+
+                        Console.WriteLine($"{dateTime:'['HH':'mm':'ss']'}[{msg}] {message}");
+
+                        if (leftPos != 0)
+                        {
+                            Console.WriteLine(new string(' ', leftPos));
+                        }
                     }
                 }
                 else
                 {
-                    Console.Write($"\r{DateTime.Now:'['HH':'mm':'ss']'}[{msg}] {message}");
+                    Console.Write($"\r{dateTime:'['HH':'mm':'ss']'}[{msg}] {message}");
                 }
 
                 Console.ForegroundColor = originalConsoleColor;

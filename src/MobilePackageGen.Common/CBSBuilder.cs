@@ -474,6 +474,10 @@ namespace MobilePackageGen
                                 fileMapping.FileStream.Close();
                             }
                         }
+                        else
+                        {
+                            Logging.Log($"CAB already exists! Skipping. {cabFile}", LoggingLevel.Warning);
+                        }
 
                         if (i != packagesCount - 1)
                         {
