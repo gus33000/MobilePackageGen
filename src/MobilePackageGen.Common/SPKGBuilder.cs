@@ -15,7 +15,8 @@ namespace MobilePackageGen
             return $"{dsm.Identity.Owner}" +
                 $"{(string.IsNullOrEmpty(dsm.Identity.Component) ? "" : $".{dsm.Identity.Component}")}" +
                 $"{(string.IsNullOrEmpty(dsm.Identity.SubComponent) ? "" : $".{dsm.Identity.SubComponent}")}" +
-                $"{(string.IsNullOrEmpty(dsm.Culture) == true ? "" : $"_Lang_{dsm.Culture}")}";
+                $"{(string.IsNullOrEmpty(dsm.Culture) == true ? "" : $"_Lang_{dsm.Culture}")}" +
+                $"{(string.IsNullOrEmpty(dsm.Resolution) == true ? "" : $"_Res_{dsm.Resolution}")}";
         }
 
         private static List<CabinetFileInfo> GetCabinetFileInfoForDsmPackage(XmlDsm.Package dsm, IPartition partition, List<IDisk> disks)
