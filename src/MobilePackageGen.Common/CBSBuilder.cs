@@ -65,7 +65,8 @@ namespace MobilePackageGen
                                                         .Replace("$(runtime.system)", @"windows\system")
                                                         .Replace("$(runtime.system32)", @"windows\system32")
                                                         .Replace("$(runtime.wbem)", @"windows\system32\wbem")
-                                                        .Replace("$(runtime.drivers)", @"windows\system32\drivers");
+                                                        .Replace("$(runtime.drivers)", @"windows\system32\drivers")
+                                                        .Replace("$(runtime.programfiles)", "Program Files");
 
                     if (cbs.AssemblyIdentity.ProcessorArchitecture.Equals("arm64.arm"))
                     {
@@ -76,7 +77,21 @@ namespace MobilePackageGen
                                                         .Replace("$(runtime.system)", @"windows\system")
                                                         .Replace("$(runtime.system32)", @"windows\sysarm32")
                                                         .Replace("$(runtime.wbem)", @"windows\sysarm32\wbem")
-                                                        .Replace("$(runtime.drivers)", @"windows\sysarm32\drivers");
+                                                        .Replace("$(runtime.drivers)", @"windows\sysarm32\drivers")
+                                                        .Replace("$(runtime.programfiles)", "Program Files (Arm)");
+                    }
+
+                    if (cbs.AssemblyIdentity.ProcessorArchitecture.Equals("arm64.x86"))
+                    {
+                        normalized = fileName.Replace("$(runtime.bootdrive)", "")
+                                                        .Replace("$(runtime.systemroot)", "windows")
+                                                        .Replace("$(runtime.fonts)", @"windows\fonts")
+                                                        .Replace("$(runtime.inf)", @"windows\inf")
+                                                        .Replace("$(runtime.system)", @"windows\system")
+                                                        .Replace("$(runtime.system32)", @"windows\syswow64")
+                                                        .Replace("$(runtime.wbem)", @"windows\syswow64\wbem")
+                                                        .Replace("$(runtime.drivers)", @"windows\syswow64\drivers")
+                                                        .Replace("$(runtime.programfiles)", "Program Files (x86)");
                     }
 
                     // Prevent getting files from root of this program
