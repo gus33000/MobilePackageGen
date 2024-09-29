@@ -1,4 +1,4 @@
-﻿namespace MobilePackageGen.Common
+﻿namespace MobilePackageGen
 {
     internal class DevicePathUtils
     {
