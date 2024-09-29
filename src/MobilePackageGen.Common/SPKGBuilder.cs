@@ -27,6 +27,9 @@ namespace MobilePackageGen
 
             uint oldPercentage = uint.MaxValue;
 
+            bool hasSeenManifest = false;
+            bool hasSeenCatalog = false;
+
             foreach (XmlDsm.FileEntry packageFile in dsm.Files.FileEntry)
             {
                 uint percentage = (uint)Math.Floor((double)i++ * 50 / dsm.Files.FileEntry.Count);
@@ -54,6 +57,16 @@ namespace MobilePackageGen
                 CabinetFileInfo? cabinetFileInfo = null;
 
                 string fileType = packageFile.FileType ?? packageFile.Type ?? "";
+
+                if (!hasSeenManifest && fileType.Equals("Manifest", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    hasSeenManifest = true;
+                }
+
+                if (!hasSeenCatalog && fileType.Equals("Catalog", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    hasSeenCatalog = true;
+                }
 
                 // If we end in bin, and the package is marked binary partition, this is a partition on one of the device disks, retrieve it
                 if (normalized.EndsWith(".bin") && fileType.Contains("BinaryPartition", StringComparison.CurrentCultureIgnoreCase))
@@ -244,6 +257,45 @@ namespace MobilePackageGen
                 {
                     Logging.Log($"\rError: File not found! {normalized}\n", LoggingLevel.Error);
                     //throw new FileNotFoundException(normalized);
+                }
+            }
+
+            if (!hasSeenManifest && !hasSeenCatalog)
+            {
+                string packageName = GetSPKGComponentName(dsm);
+
+                string normalized = @$"Windows\Packages\DsmFiles\{packageName}.dsm.xml";
+
+                if (fileSystem.FileExists(normalized))
+                {
+                    fileMappings.Add(new CabinetFileInfo()
+                    {
+                        FileName = "man.dsm.xml",
+                        FileStream = fileSystem.OpenFile(normalized, FileMode.Open, FileAccess.Read),
+                        Attributes = FileAttributes.Normal,
+                        DateTime = fileSystem.GetLastWriteTime(normalized)
+                    });
+                }
+                else
+                {
+                    Logging.Log($"\rError: File not found! {normalized}\n", LoggingLevel.Error);
+                }
+
+                normalized = @$"Windows\System32\catroot\{{F750E6C3-38EE-11D1-85E5-00C04FC295EE}}\{packageName}.cat";
+
+                if (fileSystem.FileExists(normalized))
+                {
+                    fileMappings.Add(new CabinetFileInfo()
+                    {
+                        FileName = "content.cat",
+                        FileStream = fileSystem.OpenFile(normalized, FileMode.Open, FileAccess.Read),
+                        Attributes = FileAttributes.Normal,
+                        DateTime = fileSystem.GetLastWriteTime(normalized)
+                    });
+                }
+                else
+                {
+                    //Logging.Log($"\rError: File not found! {normalized}\n", LoggingLevel.Error);
                 }
             }
 

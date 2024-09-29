@@ -14,7 +14,7 @@ namespace MobilePackageGen
                 return fileSystem.GetFiles(path, searchPattern, searchOption);
             }
 
-            List<string> files = new();
+            List<string> files = [];
             HashSet<string> fileMap = [];
 
             // Build the whole file map
