@@ -2,7 +2,6 @@
 using Microsoft.Deployment.Compression;
 using Microsoft.Deployment.Compression.Cab;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using System.Xml.Serialization;
 
 namespace MobilePackageGen

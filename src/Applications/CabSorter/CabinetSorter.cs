@@ -1,6 +1,5 @@
 ﻿using DiscUtils;
 using MobilePackageGen;
-using System.Security.Cryptography;
 
 namespace CabSorter
 {
