@@ -21,10 +21,14 @@ namespace MobilePackageGen
                             {
                                 if (Path.GetFileName(ImageUpdateFile).Equals("UpdateHistory.xml", StringComparison.InvariantCultureIgnoreCase))
                                 {
-                                    using Stream UpdateHistoryStream = fileSystem.OpenFile(ImageUpdateFile, FileMode.Open, FileAccess.Read);
-                                    UpdateHistory.UpdateHistory UpdateHistory = UpdateHistoryStream.GetObjectFromXML<UpdateHistory.UpdateHistory>();
+                                    try
+                                    {
+                                        using Stream UpdateHistoryStream = fileSystem.OpenFile(ImageUpdateFile, FileMode.Open, FileAccess.Read);
+                                        UpdateHistory.UpdateHistory UpdateHistory = UpdateHistoryStream.GetObjectFromXML<UpdateHistory.UpdateHistory>();
 
-                                    return UpdateHistory;
+                                        return UpdateHistory;
+                                    }
+                                    catch { }
                                 }
                             }
                         }
