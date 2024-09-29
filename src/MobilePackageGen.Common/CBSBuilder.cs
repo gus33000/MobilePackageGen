@@ -374,7 +374,7 @@ namespace MobilePackageGen
                             cabFile = Path.Combine(outputPath, cabFile);
                         }
 
-                        string componentStatus = $"Creating package {i + 1} of {packagesCount} - {cabFileName}";
+                        string componentStatus = $"Creating package {i + 1} of {packagesCount} - {Path.GetFileName(cabFileName)}";
                         if (componentStatus.Length > Console.BufferWidth - 24 - 1)
                         {
                             componentStatus = $"{componentStatus[..(Console.BufferWidth - 24 - 4)]}...";
@@ -385,6 +385,27 @@ namespace MobilePackageGen
                         Logging.Log(progressBarString, returnLine: false);
 
                         string fileStatus = "";
+
+                        /*string newCabFile = cabFile;
+
+                        int fileIndex = 2;
+
+                        while (File.Exists(newCabFile))
+                        {
+                            string extension = Path.GetExtension(cabFile);
+                            if (!string.IsNullOrEmpty(extension))
+                            {
+                                newCabFile = $"{cabFile[..^extension.Length]} ({fileIndex}){extension}";
+                            }
+                            else
+                            {
+                                newCabFile = $"{cabFile} ({fileIndex})";
+                            }
+
+                            fileIndex++;
+                        }
+
+                        cabFile = newCabFile;*/
 
                         if (!File.Exists(cabFile))
                         {

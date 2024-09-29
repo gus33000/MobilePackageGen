@@ -440,7 +440,7 @@ namespace MobilePackageGen
                             cabFile = Path.Combine(outputPath, cabFile);
                         }
 
-                        string componentStatus = $"Creating package {i + 1} of {packagesCount} - {cabFileName}";
+                        string componentStatus = $"Creating package {i + 1} of {packagesCount} - {Path.GetFileName(cabFileName)}";
                         if (componentStatus.Length > Console.BufferWidth - 24 - 1)
                         {
                             componentStatus = $"{componentStatus[..(Console.BufferWidth - 24 - 4)]}...";
