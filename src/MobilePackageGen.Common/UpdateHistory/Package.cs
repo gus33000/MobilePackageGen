@@ -85,5 +85,25 @@ namespace MobilePackageGen.UpdateHistory
         {
             get; set;
         }
+        [XmlElement(ElementName = "Result", Namespace = "http://schemas.microsoft.com/embedded/2004/10/ImageUpdate")]
+        public string Result
+        {
+            get; set;
+        }
+        [XmlElement(ElementName = "Platform", Namespace = "http://schemas.microsoft.com/embedded/2004/10/ImageUpdate")]
+        public string Platform
+        {
+            get; set;
+        }
+        [XmlElement(ElementName = "Resolution", Namespace = "http://schemas.microsoft.com/embedded/2004/10/ImageUpdate")]
+        public string Resolution
+        {
+            get; set;
+        }
+
+        public override string ToString()
+        {
+            return Path.GetFileName(PackageFile);
+        }
     }
 }

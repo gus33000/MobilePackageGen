@@ -451,6 +451,27 @@ namespace MobilePackageGen
 
                         string fileStatus = "";
 
+                        /*string newCabFile = cabFile;
+
+                        int fileIndex = 2;
+
+                        while (File.Exists(newCabFile))
+                        {
+                            string extension = Path.GetExtension(cabFile);
+                            if (!string.IsNullOrEmpty(extension))
+                            {
+                                newCabFile = $"{cabFile[..^extension.Length]} ({fileIndex}){extension}";
+                            }
+                            else
+                            {
+                                newCabFile = $"{cabFile} ({fileIndex})";
+                            }
+
+                            fileIndex++;
+                        }
+
+                        cabFile = newCabFile;*/
+
                         if (!File.Exists(cabFile))
                         {
                             List<CabinetFileInfo> fileMappings = GetCabinetFileInfoForDsmPackage(dsm, partition, disks);
