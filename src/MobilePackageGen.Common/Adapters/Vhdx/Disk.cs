@@ -1,6 +1,4 @@
 ﻿using DiscUtils;
-using DiscUtils.Partitions;
-using DiscUtils.Streams;
 
 namespace MobilePackageGen.Adapters.Vhdx
 {
@@ -17,7 +15,7 @@ namespace MobilePackageGen.Adapters.Vhdx
 
             Logging.Log($"{Path.GetFileName(vhdx)} {new FileInfo(vhdx).Length} VirtualHardDisk");
 
-            (IEnumerable<PartitionInfo>, int, Stream) partitionInfos = GetPartitions(vhdx);
+            (IEnumerable<(GPT.GPT.Partition, Stream)>, int, Stream) partitionInfos = GetPartitions(vhdx);
             Partitions = GetPartitionStructures(partitionInfos.Item1, partitionInfos.Item2, partitionInfos.Item3);
 
             Logging.Log();
@@ -28,34 +26,20 @@ namespace MobilePackageGen.Adapters.Vhdx
             this.Partitions = Partitions;
         }
 
-        private static List<IPartition> GetPartitionStructures(IEnumerable<PartitionInfo> partitionInfos, int SectorSize, Stream _diskData)
+        private static List<IPartition> GetPartitionStructures(IEnumerable<(GPT.GPT.Partition, Stream)> partitionInfos, int SectorSize, Stream _diskData)
         {
             List<IPartition> partitions = [];
 
-            foreach (PartitionInfo partitionInfo in partitionInfos)
+            foreach ((GPT.GPT.Partition, Stream) partitionInfo in partitionInfos)
             {
-                SparseStream partitionStream = Open(partitionInfo, SectorSize, _diskData);
-                IPartition partition = new FileSystemPartition(partitionStream, ((GuidPartitionInfo)partitionInfo).Name, ((GuidPartitionInfo)partitionInfo).GuidType, ((GuidPartitionInfo)partitionInfo).Identity);
+                IPartition partition = new FileSystemPartition(partitionInfo.Item2, partitionInfo.Item1.Name, partitionInfo.Item1.PartitionTypeGuid, partitionInfo.Item1.PartitionGuid);
                 partitions.Add(partition);
             }
 
             return partitions;
         }
 
-        private static SparseStream Open(PartitionInfo entry, int SectorSize, Stream _diskData)
-        {
-            long start = entry.FirstSector * SectorSize;
-            long end = (entry.LastSector + 1) * SectorSize;
-
-            if (end >= _diskData.Length)
-            {
-                end = _diskData.Length;
-            }
-
-            return new SubStream(_diskData, start, end - start);
-        }
-
-        private static (IEnumerable<PartitionInfo>, int, Stream) GetPartitions(string vhdx)
+        private static (IEnumerable<(GPT.GPT.Partition, Stream)>, int, Stream) GetPartitions(string vhdx)
         {
             VirtualDisk virtualDisk;
             if (vhdx.EndsWith(".vhd", StringComparison.InvariantCultureIgnoreCase))

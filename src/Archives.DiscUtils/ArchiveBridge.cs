@@ -14,6 +14,8 @@ namespace Archives.DiscUtils
         {
             this.stream = stream;
             this.sevenZipFormat = sevenZipFormat;
+            using ArchiveFile archiveFile = new(stream, sevenZipFormat);
+            IList<Entry> _ = archiveFile.Entries; // Prefetch entries
         }
 
         public bool CanWrite

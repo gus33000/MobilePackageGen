@@ -1,5 +1,4 @@
 ﻿using DiscUtils;
-using DiscUtils.Partitions;
 using DiscUtils.Streams;
 using Img2Ffu.Reader;
 
@@ -18,11 +17,11 @@ namespace MobilePackageGen.Adapters.FullFlashUpdate
 
             Logging.Log($"{Path.GetFileName(ffuPath)} {new FileInfo(ffuPath).Length} FullFlashUpdate");
 
-            List<(IEnumerable<PartitionInfo>, int, Stream)> partitionInfos = GetPartitions(ffuPath);
+            List<(IEnumerable<(GPT.GPT.Partition, Stream)>, int, Stream)> partitionInfos = GetPartitions(ffuPath);
 
             List<IPartition> Partitions = [];
 
-            foreach ((IEnumerable<PartitionInfo>, int, Stream) partitionInfo in partitionInfos)
+            foreach ((IEnumerable<(GPT.GPT.Partition, Stream)>, int, Stream) partitionInfo in partitionInfos)
             {
                 Partitions.AddRange(GetPartitionStructures(partitionInfo.Item1, partitionInfo.Item2, partitionInfo.Item3));
             }
@@ -37,36 +36,22 @@ namespace MobilePackageGen.Adapters.FullFlashUpdate
             this.Partitions = Partitions;
         }
 
-        private static List<IPartition> GetPartitionStructures(IEnumerable<PartitionInfo> partitionInfos, int SectorSize, Stream _diskData)
+        private static List<IPartition> GetPartitionStructures(IEnumerable<(GPT.GPT.Partition, Stream)> partitionInfos, int SectorSize, Stream _diskData)
         {
             List<IPartition> partitions = [];
 
-            foreach (PartitionInfo partitionInfo in partitionInfos)
+            foreach ((GPT.GPT.Partition, Stream) partitionInfo in partitionInfos)
             {
-                SparseStream partitionStream = Open(partitionInfo, SectorSize, _diskData);
-                IPartition partition = new FileSystemPartition(partitionStream, ((GuidPartitionInfo)partitionInfo).Name, ((GuidPartitionInfo)partitionInfo).GuidType, ((GuidPartitionInfo)partitionInfo).Identity);
+                IPartition partition = new FileSystemPartition(partitionInfo.Item2, partitionInfo.Item1.Name, partitionInfo.Item1.PartitionTypeGuid, partitionInfo.Item1.PartitionGuid);
                 partitions.Add(partition);
             }
 
             return partitions;
         }
 
-        private static SparseStream Open(PartitionInfo entry, int SectorSize, Stream _diskData)
+        private static List<(IEnumerable<(GPT.GPT.Partition, Stream)>, int, Stream)> GetPartitions(string ffuPath)
         {
-            long start = entry.FirstSector * SectorSize;
-            long end = (entry.LastSector + 1) * SectorSize;
-
-            if (end >= _diskData.Length)
-            {
-                end = _diskData.Length;
-            }
-
-            return new SubStream(_diskData, start, end - start);
-        }
-
-        private static List<(IEnumerable<PartitionInfo>, int, Stream)> GetPartitions(string ffuPath)
-        {
-            List<(IEnumerable<PartitionInfo>, int, Stream)> partitions = [];
+            List<(IEnumerable<(GPT.GPT.Partition, Stream)>, int, Stream)> partitions = [];
             for (int i = 0; i < FullFlashUpdateReaderStream.GetStoreCount(ffuPath); i++)
             {
                 FullFlashUpdateReaderStream store = new(ffuPath, (ulong)i);

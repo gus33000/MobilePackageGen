@@ -59,13 +59,25 @@ namespace MobilePackageGen.Adapters
 
         private static IFileSystem? TryCreateFileSystem(Stream partitionStream)
         {
+            bool isFAT = false;
+            bool isNTFS = false;
+
             try
             {
                 partitionStream.Seek(0, SeekOrigin.Begin);
                 if (DiscUtils.Ntfs.NtfsFileSystem.Detect(partitionStream))
                 {
+                    isNTFS = true;
                     partitionStream.Seek(0, SeekOrigin.Begin);
                     return new DiscUtils.Ntfs.NtfsFileSystem(partitionStream);
+                }
+
+                partitionStream.Seek(0, SeekOrigin.Begin);
+                if (DiscUtils.Fat.FatFileSystem.Detect(partitionStream))
+                {
+                    isFAT = true;
+                    partitionStream.Seek(0, SeekOrigin.Begin);
+                    return new DiscUtils.Fat.FatFileSystem(partitionStream);
                 }
             }
             catch (Exception ex)
@@ -85,10 +97,16 @@ namespace MobilePackageGen.Adapters
                     partitionStream.Seek(0x36, SeekOrigin.Begin);
                     byte[] buf = new byte[3];
                     partitionStream.Read(buf, 0, 3);
-                    if (buf[0] == 0x46 && buf[1] == 0x41 && buf[2] == 0x54)
+                    if (buf[0] == 'F' && buf[1] == 'A' && buf[2] == 'T' || isFAT)
                     {
                         partitionStream.Seek(0, SeekOrigin.Begin);
                         return new ArchiveBridge(partitionStream, SevenZipFormat.Fat);
+                    }
+
+                    if (isNTFS)
+                    {
+                        partitionStream.Seek(0, SeekOrigin.Begin);
+                        return new ArchiveBridge(partitionStream, SevenZipFormat.Ntfs);
                     }
                 }
                 catch (Exception ex)

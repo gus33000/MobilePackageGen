@@ -1,5 +1,4 @@
 ﻿using DiscUtils;
-using DiscUtils.Partitions;
 using DiscUtils.Streams;
 
 namespace MobilePackageGen.Adapters.RawDisk
@@ -15,8 +14,8 @@ namespace MobilePackageGen.Adapters.RawDisk
         {
             Logging.Log();
 
-            List<PartitionInfo> partitionInfos = GetPartitions(diskStream);
-            Partitions = GetPartitionStructures(partitionInfos);
+            (IEnumerable<(GPT.GPT.Partition, Stream)>, int, Stream) partitionInfos = GetPartitions(diskStream);
+            Partitions = GetPartitionStructures(partitionInfos.Item1, partitionInfos.Item2, partitionInfos.Item3);
 
             Logging.Log();
         }
@@ -26,24 +25,23 @@ namespace MobilePackageGen.Adapters.RawDisk
             this.Partitions = Partitions;
         }
 
-        private static List<IPartition> GetPartitionStructures(List<PartitionInfo> partitionInfos)
+        private static List<IPartition> GetPartitionStructures(IEnumerable<(GPT.GPT.Partition, Stream)> partitionInfos, int SectorSize, Stream _diskData)
         {
             List<IPartition> partitions = [];
 
-            foreach (PartitionInfo partitionInfo in partitionInfos)
+            foreach ((GPT.GPT.Partition, Stream) partitionInfo in partitionInfos)
             {
-                SparseStream partitionStream = partitionInfo.Open();
-                IPartition partition = new FileSystemPartition(partitionStream, ((GuidPartitionInfo)partitionInfo).Name, ((GuidPartitionInfo)partitionInfo).GuidType, ((GuidPartitionInfo)partitionInfo).Identity);
+                IPartition partition = new FileSystemPartition(partitionInfo.Item2, partitionInfo.Item1.Name, partitionInfo.Item1.PartitionTypeGuid, partitionInfo.Item1.PartitionGuid);
                 partitions.Add(partition);
             }
 
             return partitions;
         }
 
-        private static List<PartitionInfo> GetPartitions(Stream diskStream)
+        private static (IEnumerable<(GPT.GPT.Partition, Stream)>, int, Stream) GetPartitions(Stream diskStream)
         {
             VirtualDisk virtualDisk = new DiscUtils.Raw.Disk(diskStream, Ownership.None);
-            return DiskCommon.GetPartitions(virtualDisk);
+            return (DiskCommon.GetPartitions(virtualDisk), virtualDisk.Geometry!.Value.BytesPerSector, virtualDisk.Content);
         }
     }
 }

@@ -24,12 +24,6 @@ namespace MobilePackageGen
                                     using Stream UpdateHistoryStream = fileSystem.OpenFile(ImageUpdateFile, FileMode.Open, FileAccess.Read);
                                     UpdateHistory.UpdateHistory UpdateHistory = UpdateHistoryStream.GetObjectFromXML<UpdateHistory.UpdateHistory>();
 
-                                    /*UpdateHistoryStream.Seek(0, SeekOrigin.Begin);
-                                    byte[] buffer = new byte[UpdateHistoryStream.Length];
-                                    UpdateHistoryStream.Read(buffer, 0, buffer.Length);
-                                    string UpdateHistoryStr = System.Text.Encoding.UTF8.GetString(buffer);
-                                    Console.WriteLine(UpdateHistoryStr);*/
-
                                     return UpdateHistory;
                                 }
                             }
@@ -148,8 +142,8 @@ namespace MobilePackageGen
                             (dsm.BuildType ?? "").Equals(Package.BuildType ?? "", StringComparison.InvariantCultureIgnoreCase) &&
                             (dsm.CpuType ?? "").Equals(Package.CpuType ?? "", StringComparison.InvariantCultureIgnoreCase) &&
                             (dsm.Partition ?? "").Equals(Package.Partition ?? "", StringComparison.InvariantCultureIgnoreCase) &&
-                            (dsm.IsRemoval ?? "").Equals(Package.IsRemoval ?? "", StringComparison.InvariantCultureIgnoreCase) &&
-                            (dsm.GroupingKey ?? "").Equals(Package.GroupingKey ?? "", StringComparison.InvariantCultureIgnoreCase) &&
+                            //(dsm.IsRemoval ?? "").Equals(Package.IsRemoval ?? "", StringComparison.InvariantCultureIgnoreCase) &&
+                            //(dsm.GroupingKey ?? "").Equals(Package.GroupingKey ?? "", StringComparison.InvariantCultureIgnoreCase) &&
                             (dsm.Culture ?? "").Equals(Package.Culture ?? "", StringComparison.InvariantCultureIgnoreCase) &&
                             //(dsm.Platform ?? "").Equals(Package.Platform ?? "", StringComparison.InvariantCultureIgnoreCase) &&
                             (dsm.Resolution ?? "").Equals(Package.Resolution ?? "", StringComparison.InvariantCultureIgnoreCase);
