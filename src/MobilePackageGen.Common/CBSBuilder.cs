@@ -67,6 +67,18 @@ namespace MobilePackageGen
                                                         .Replace("$(runtime.wbem)", @"windows\system32\wbem")
                                                         .Replace("$(runtime.drivers)", @"windows\system32\drivers");
 
+                    if (cbs.AssemblyIdentity.ProcessorArchitecture.Equals("arm64.arm"))
+                    {
+                        normalized = fileName.Replace("$(runtime.bootdrive)", "")
+                                                        .Replace("$(runtime.systemroot)", "windows")
+                                                        .Replace("$(runtime.fonts)", @"windows\fonts")
+                                                        .Replace("$(runtime.inf)", @"windows\inf")
+                                                        .Replace("$(runtime.system)", @"windows\system")
+                                                        .Replace("$(runtime.system32)", @"windows\sysarm32")
+                                                        .Replace("$(runtime.wbem)", @"windows\sysarm32\wbem")
+                                                        .Replace("$(runtime.drivers)", @"windows\sysarm32\drivers");
+                    }
+
                     // Prevent getting files from root of this program
                     if (normalized.StartsWith('\\'))
                     {
