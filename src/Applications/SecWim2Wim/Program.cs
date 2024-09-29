@@ -6,7 +6,7 @@
         {
             Console.WriteLine(@"
 Secure WIM to WIM tool
-Version: 1.0.5.0
+Version: 1.0.6.0
 ");
 
             if (args.Length < 2)
