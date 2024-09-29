@@ -158,14 +158,14 @@ namespace MobilePackageGen
                         {
                             string DestinationPath = Package.PackageFile;
 
-                            if (DestinationPath.StartsWith(@"\\?\"))
+                            /*if (DestinationPath.StartsWith(@"\\?\"))
                             {
                                 int indexOfPackages = DestinationPath.IndexOf("MSPackages");
                                 if (indexOfPackages > -1)
                                 {
                                     DestinationPath = DestinationPath[indexOfPackages..];
                                 }
-                            }
+                            }*/
 
                             if (DestinationPath.StartsWith(@"\\?\"))
                             {
@@ -231,14 +231,14 @@ namespace MobilePackageGen
                         {
                             string DestinationPath = Package.PackageFile;
 
-                            if (DestinationPath.StartsWith(@"\\?\"))
+                            /*if (DestinationPath.StartsWith(@"\\?\"))
                             {
                                 int indexOfPackages = DestinationPath.IndexOf("MSPackages");
                                 if (indexOfPackages > -1)
                                 {
                                     DestinationPath = DestinationPath[indexOfPackages..];
                                 }
-                            }
+                            }*/
 
                             if (DestinationPath.StartsWith(@"\\?\"))
                             {
