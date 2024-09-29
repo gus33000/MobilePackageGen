@@ -151,7 +151,7 @@ namespace MobilePackageGen
                             (dsm.IsRemoval ?? "").Equals(Package.IsRemoval ?? "", StringComparison.InvariantCultureIgnoreCase) &&
                             (dsm.GroupingKey ?? "").Equals(Package.GroupingKey ?? "", StringComparison.InvariantCultureIgnoreCase) &&
                             (dsm.Culture ?? "").Equals(Package.Culture ?? "", StringComparison.InvariantCultureIgnoreCase) &&
-                            (dsm.Platform ?? "").Equals(Package.Platform ?? "", StringComparison.InvariantCultureIgnoreCase) &&
+                            //(dsm.Platform ?? "").Equals(Package.Platform ?? "", StringComparison.InvariantCultureIgnoreCase) &&
                             (dsm.Resolution ?? "").Equals(Package.Resolution ?? "", StringComparison.InvariantCultureIgnoreCase);
 
                         if (matches)
