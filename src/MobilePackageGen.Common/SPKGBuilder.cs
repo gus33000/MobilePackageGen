@@ -52,7 +52,25 @@ namespace MobilePackageGen
                     normalized = normalized[1..];
                 }
 
-                normalized = normalized.Replace(@"\.\", @"\");
+                List<string> normalizedParts = [];
+
+                foreach (string part in normalized.Split('\\'))
+                {
+                    if (part == ".")
+                    {
+                        continue;
+                    }
+
+                    if (part == "..")
+                    {
+                        normalizedParts.RemoveAt(normalizedParts.Count - 1);
+                        continue;
+                    }
+
+                    normalizedParts.Add(part);
+                }
+
+                normalized = string.Join("\\", normalizedParts);
 
                 CabinetFileInfo? cabinetFileInfo = null;
 
