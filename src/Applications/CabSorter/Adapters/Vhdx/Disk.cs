@@ -17,8 +17,8 @@ namespace MobilePackageGen.Adapters.Vhdx
 
             Logging.Log($"{Path.GetFileName(vhdx)} {new FileInfo(vhdx).Length} VirtualHardDisk");
 
-            List<PartitionInfo> partitionInfos = GetPartitions(vhdx);
-            Partitions = GetPartitionStructures(partitionInfos);
+            (IEnumerable<PartitionInfo>, int, Stream) partitionInfos = GetPartitions(vhdx);
+            Partitions = GetPartitionStructures(partitionInfos.Item1, partitionInfos.Item2, partitionInfos.Item3);
 
             Logging.Log();
         }
@@ -28,13 +28,13 @@ namespace MobilePackageGen.Adapters.Vhdx
             this.Partitions = Partitions;
         }
 
-        private static List<IPartition> GetPartitionStructures(List<PartitionInfo> partitionInfos)
+        private static List<IPartition> GetPartitionStructures(IEnumerable<PartitionInfo> partitionInfos, int SectorSize, Stream _diskData)
         {
             List<IPartition> partitions = [];
 
             foreach (PartitionInfo partitionInfo in partitionInfos)
             {
-                SparseStream partitionStream = partitionInfo.Open();
+                SparseStream partitionStream = Open(partitionInfo, SectorSize, _diskData);
                 IPartition partition = new FileSystemPartition(partitionStream, ((GuidPartitionInfo)partitionInfo).Name, ((GuidPartitionInfo)partitionInfo).GuidType, ((GuidPartitionInfo)partitionInfo).Identity);
                 partitions.Add(partition);
             }
@@ -42,10 +42,21 @@ namespace MobilePackageGen.Adapters.Vhdx
             return partitions;
         }
 
-        private static List<PartitionInfo> GetPartitions(string vhdx)
+        private static SparseStream Open(PartitionInfo entry, int SectorSize, Stream _diskData)
         {
-            List<PartitionInfo> partitions = [];
+            long start = entry.FirstSector * SectorSize;
+            long end = (entry.LastSector + 1) * SectorSize;
 
+            if (end >= _diskData.Length)
+            {
+                end = _diskData.Length;
+            }
+
+            return new SubStream(_diskData, start, end - start);
+        }
+
+        private static (IEnumerable<PartitionInfo>, int, Stream) GetPartitions(string vhdx)
+        {
             VirtualDisk virtualDisk;
             if (vhdx.EndsWith(".vhd", StringComparison.InvariantCultureIgnoreCase))
             {
@@ -56,7 +67,7 @@ namespace MobilePackageGen.Adapters.Vhdx
                 virtualDisk = new DiscUtils.Vhdx.Disk(vhdx, FileAccess.Read);
             }
 
-            return DiskCommon.GetPartitions(virtualDisk);
+            return (DiskCommon.GetPartitions(virtualDisk), virtualDisk.Geometry!.Value.BytesPerSector, virtualDisk.Content);
         }
     }
 }
