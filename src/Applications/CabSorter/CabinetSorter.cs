@@ -1,5 +1,6 @@
 ﻿using DiscUtils;
 using MobilePackageGen;
+using System.Security.Cryptography;
 
 namespace CabSorter
 {
@@ -13,8 +14,6 @@ namespace CabSorter
                 {
                     if (!string.IsNullOrEmpty(Package.PackageIdentity))
                     {
-                        string MatchingCabName = $"{string.Join("~", Package.PackageIdentity.Split("~")[..^1])}~.cab";
-
                         string DestinationPath = Package.PackageFile;
 
                         if (DestinationPath.StartsWith(@"\\?\"))
@@ -38,6 +37,8 @@ namespace CabSorter
 
                         bool found = false;
                         string foundFilePath = "";
+
+                        string MatchingCabName = $"{string.Join("~", Package.PackageIdentity.Split("~")[..^1])}~.cab";
 
                         foreach (string file in Directory.GetFiles(destination_path, "*.cab", SearchOption.AllDirectories).ToArray())
                         {
@@ -81,8 +82,75 @@ namespace CabSorter
 
                         if (!found)
                         {
-                            //Console.WriteLine("PLEASE FILE A BUG REPORT NOW");
-                            //Console.WriteLine(MatchingCabName);
+                            Console.WriteLine("PLEASE FILE A BUG REPORT NOW");
+                            Console.WriteLine(MatchingCabName);
+                        }
+                        else
+                        {
+                            //Console.WriteLine("File: " + foundFilePath);
+                            //Console.WriteLine("New Name: " + Path.Combine(destination_path, DestinationPath));
+
+                            string newFile = Path.Combine(destination_path, DestinationPath);
+
+                            if (newFile.Equals(foundFilePath, StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                // Already fine, abort
+                                break;
+                            }
+
+                            if (!Directory.Exists(Path.GetDirectoryName(newFile)))
+                            {
+                                Directory.CreateDirectory(Path.GetDirectoryName(newFile));
+                            }
+
+                            File.Move(foundFilePath, newFile);
+                        }
+                    }
+                    else
+                    {
+                        string DestinationPath = Package.PackageFile;
+
+                        if (DestinationPath.StartsWith(@"\\?\"))
+                        {
+                            int indexOfPackages = DestinationPath.IndexOf("MSPackages");
+                            if (indexOfPackages > -1)
+                            {
+                                DestinationPath = DestinationPath[indexOfPackages..];
+                            }
+                        }
+
+                        if (DestinationPath.StartsWith(@"\\?\"))
+                        {
+                            DestinationPath = DestinationPath[4..];
+                        }
+
+                        if (DestinationPath[1] == ':')
+                        {
+                            DestinationPath = Path.Combine($"Drive{DestinationPath[0]}", DestinationPath[3..]);
+                        }
+
+                        bool found = false;
+                        string foundFilePath = "";
+
+                        string MatchingCabName = $"{Package.Identity.Owner}" +
+                        $"{(string.IsNullOrEmpty(Package.Identity.Component) ? "" : $".{Package.Identity.Component}")}" +
+                        $"{(string.IsNullOrEmpty(Package.Identity.SubComponent) ? "" : $".{Package.Identity.SubComponent}")}" +
+                        $"{(string.IsNullOrEmpty(Package.Culture) == true ? "" : $"_Lang_{Package.Culture}")}.spkg";
+
+                        foreach (string file in Directory.GetFiles(destination_path, "*.spkg", SearchOption.AllDirectories).ToArray())
+                        {
+                            if (Path.GetFileName(file).Equals(MatchingCabName, StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                found = true;
+                                foundFilePath = file;
+                                break;
+                            }
+                        }
+
+                        if (!found)
+                        {
+                            Console.WriteLine("PLEASE FILE A BUG REPORT NOW");
+                            Console.WriteLine(MatchingCabName);
                         }
                         else
                         {
@@ -119,24 +187,6 @@ namespace CabSorter
 
                     if (fileSystem != null)
                     {
-                        if (fileSystem.FileExists(@"Windows\System32\config\SYSTEM"))
-                        {
-                            using Stream SOFTWAREHIVEStream = fileSystem.OpenFile(@"Windows\System32\config\SYSTEM", FileMode.Open, FileAccess.Read);
-
-                            /*using DiscUtils.Registry.RegistryHive hive = new(SOFTWAREHIVEStream, DiscUtils.Streams.Ownership.Dispose);
-
-                            DiscUtils.Registry.RegistryKey OEMInformationKey = hive.Root.OpenSubKey(@"Microsoft\Windows\CurrentVersion\OEMInformation");
-                            if (OEMInformationKey != null)
-                            {
-                                Console.WriteLine("YO");
-                            }*/
-
-                            using (Stream outputFile = File.Create(Path.Combine(destination_path, $"{partition.Name}-SYSTEM")))
-                            {
-                                SOFTWAREHIVEStream.CopyTo(outputFile);
-                            }
-                        }
-
                         if (fileSystem.FileExists(@"Windows\ImageUpdate\OEMInput.xml"))
                         {
                             string destOemInput = Path.Combine(destination_path, "OEMInput.xml");
@@ -203,13 +253,6 @@ namespace CabSorter
                         }
                     }
                 }
-            }
-
-
-            if (File.ReadAllText(Path.Combine(destination_path, "OEMInput.xml")).Contains("xml</MachineInfoFile>"))
-            {
-                //using FileStream file = File.Open(Path.Combine(DevicePart, "Windows\\System32\\config\\SYSTEM"), FileMode.Open, FileAccess.ReadWrite);
-                //using DiscUtils.Registry.RegistryHive hive = new(file, DiscUtils.Streams.Ownership.Dispose);
             }
 
             Logging.Log();

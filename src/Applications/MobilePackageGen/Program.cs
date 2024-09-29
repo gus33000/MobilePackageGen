@@ -68,9 +68,13 @@ Version: 1.0.5.0
 
             DiskCommon.PrintDiskInfo(disks);
 
-            CBSBuilder.BuildCBS(disks, outputFolder);
+            BuildMetadataHandler.GetOEMInput(disks, outputFolder);
+            UpdateHistory.UpdateHistory? updateHistory = BuildMetadataHandler.GetUpdateHistory(disks);
+            BuildMetadataHandler.GetAdditionalContent(disks);
 
-            SPKGBuilder.BuildSPKG(disks, outputFolder);
+            CBSBuilder.BuildCBS(disks, outputFolder, updateHistory);
+
+            SPKGBuilder.BuildSPKG(disks, outputFolder, updateHistory);
 
             Console.WriteLine("The operation completed successfully.");
         }

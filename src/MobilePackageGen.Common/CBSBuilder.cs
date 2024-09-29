@@ -2,6 +2,7 @@
 using Microsoft.Deployment.Compression;
 using Microsoft.Deployment.Compression.Cab;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Xml.Serialization;
 
 namespace MobilePackageGen
@@ -262,13 +263,13 @@ namespace MobilePackageGen
             return fileMappings;
         }
 
-        public static void BuildCBS(List<IDisk> disks, string destination_path)
+        public static void BuildCBS(List<IDisk> disks, string destination_path, UpdateHistory.UpdateHistory? updateHistory)
         {
             Logging.Log();
             Logging.Log("Building CBS Cabinet Files...");
             Logging.Log();
 
-            BuildCabinets(disks, destination_path);
+            BuildCabinets(disks, destination_path, updateHistory);
 
             Logging.Log();
             Logging.Log("Cleaning up...");
@@ -325,7 +326,7 @@ namespace MobilePackageGen
             return count;
         }
 
-        private static void BuildCabinets(List<IDisk> disks, string outputPath)
+        private static void BuildCabinets(List<IDisk> disks, string outputPath, UpdateHistory.UpdateHistory? updateHistory)
         {
             int packagesCount = GetPackageCount(disks);
 
@@ -347,23 +348,32 @@ namespace MobilePackageGen
                         XmlSerializer serializer = new(typeof(XmlMum.Assembly));
                         XmlMum.Assembly cbs = (XmlMum.Assembly)serializer.Deserialize(stream)!;
 
-                        string packageName = $"{cbs.AssemblyIdentity.Name.Replace($"_{cbs.AssemblyIdentity.Language}", "", StringComparison.InvariantCultureIgnoreCase)}";
+                        (string cabFileName, string cabFile) = BuildMetadataHandler.GetPackageNamingForCBS(cbs, updateHistory);
 
-                        if (!packageName.Contains("InboxCompDB"))
+                        if (string.IsNullOrEmpty(cabFileName) && string.IsNullOrEmpty(cabFile))
                         {
-                            packageName = $"{packageName}~{cbs.AssemblyIdentity.PublicKeyToken.Replace("628844477771337a", "31bf3856ad364e35", StringComparison.InvariantCultureIgnoreCase)}~{cbs.AssemblyIdentity.ProcessorArchitecture}~{(cbs.AssemblyIdentity.Language == "neutral" ? "" : cbs.AssemblyIdentity.Language)}~";
+                            string packageName = $"{cbs.AssemblyIdentity.Name.Replace($"_{cbs.AssemblyIdentity.Language}", "", StringComparison.InvariantCultureIgnoreCase)}";
+
+                            if (!packageName.Contains("InboxCompDB"))
+                            {
+                                packageName = $"{packageName}~{cbs.AssemblyIdentity.PublicKeyToken.Replace("628844477771337a", "31bf3856ad364e35", StringComparison.InvariantCultureIgnoreCase)}~{cbs.AssemblyIdentity.ProcessorArchitecture}~{(cbs.AssemblyIdentity.Language == "neutral" ? "" : cbs.AssemblyIdentity.Language)}~";
+                            }
+
+                            string partitionName = partition.Name.Replace("\0", "-");
+
+                            if (!string.IsNullOrEmpty(cbs.Package.TargetPartition))
+                            {
+                                partitionName = cbs.Package.TargetPartition;
+                            }
+
+                            cabFileName = Path.Combine(partitionName, packageName);
+
+                            cabFile = Path.Combine(outputPath, $"{cabFileName}.cab");
                         }
-
-                        string partitionName = partition.Name.Replace("\0", "-");
-
-                        if (!string.IsNullOrEmpty(cbs.Package.TargetPartition))
+                        else
                         {
-                            partitionName = cbs.Package.TargetPartition;
+                            cabFile = Path.Combine(outputPath, cabFile);
                         }
-
-                        string cabFileName = Path.Combine(partitionName, packageName);
-
-                        string cabFile = Path.Combine(outputPath, $"{cabFileName}.cab");
 
                         string componentStatus = $"Creating package {i + 1} of {packagesCount} - {cabFileName}";
                         if (componentStatus.Length > Console.BufferWidth - 24 - 1)

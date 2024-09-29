@@ -2,6 +2,7 @@
 using Microsoft.Deployment.Compression;
 using Microsoft.Deployment.Compression.Cab;
 using MobilePackageGen.GZip;
+using System.Data;
 using System.Runtime.InteropServices;
 using System.Xml.Serialization;
 
@@ -320,13 +321,13 @@ namespace MobilePackageGen
             return fileMappings;
         }
 
-        public static void BuildSPKG(List<IDisk> disks, string destination_path)
+        public static void BuildSPKG(List<IDisk> disks, string destination_path, UpdateHistory.UpdateHistory? updateHistory)
         {
             Logging.Log();
             Logging.Log("Building SPKG Cabinet Files...");
             Logging.Log();
 
-            BuildCabinets(disks, destination_path);
+            BuildCabinets(disks, destination_path, updateHistory);
 
             Logging.Log();
             Logging.Log("Cleaning up...");
@@ -383,7 +384,7 @@ namespace MobilePackageGen
             return count;
         }
 
-        private static void BuildCabinets(List<IDisk> disks, string outputPath)
+        private static void BuildCabinets(List<IDisk> disks, string outputPath, UpdateHistory.UpdateHistory? updateHistory)
         {
             int packagesCount = GetPackageCount(disks);
 
@@ -416,18 +417,27 @@ namespace MobilePackageGen
                             dsm = (XmlDsm.Package)serializer.Deserialize(stream)!;
                         }
 
-                        string packageName = GetSPKGComponentName(dsm);
+                        (string cabFileName, string cabFile) = BuildMetadataHandler.GetPackageNamingForSPKG(dsm, updateHistory);
 
-                        string partitionName = partition.Name.Replace("\0", "-");
-
-                        if (!string.IsNullOrEmpty(dsm.Partition))
+                        if (string.IsNullOrEmpty(cabFileName) && string.IsNullOrEmpty(cabFile))
                         {
-                            partitionName = dsm.Partition.Replace("\0", "-");
+                            string partitionName = partition.Name.Replace("\0", "-");
+
+                            if (!string.IsNullOrEmpty(dsm.Partition))
+                            {
+                                partitionName = dsm.Partition.Replace("\0", "-");
+                            }
+
+                            string packageName = GetSPKGComponentName(dsm);
+
+                            cabFileName = Path.Combine(partitionName, packageName);
+
+                            cabFile = Path.Combine(outputPath, $"{cabFileName}.spkg");
                         }
-
-                        string cabFileName = Path.Combine(partitionName, packageName);
-
-                        string cabFile = Path.Combine(outputPath, $"{cabFileName}.spkg");
+                        else
+                        {
+                            cabFile = Path.Combine(outputPath, cabFile);
+                        }
 
                         string componentStatus = $"Creating package {i + 1} of {packagesCount} - {cabFileName}";
                         if (componentStatus.Length > Console.BufferWidth - 24 - 1)
