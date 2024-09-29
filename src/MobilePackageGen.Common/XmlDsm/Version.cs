@@ -6,12 +6,24 @@ namespace MobilePackageGen.XmlDsm
     public class Version
     {
         [XmlAttribute(AttributeName = "Major")]
-        public string Major { get; set; }
+        public string Major
+        {
+            get; set;
+        }
         [XmlAttribute(AttributeName = "Minor")]
-        public string Minor { get; set; }
+        public string Minor
+        {
+            get; set;
+        }
         [XmlAttribute(AttributeName = "QFE")]
-        public string QFE { get; set; }
+        public string QFE
+        {
+            get; set;
+        }
         [XmlAttribute(AttributeName = "Build")]
-        public string Build { get; set; }
+        public string Build
+        {
+            get; set;
+        }
     }
 }

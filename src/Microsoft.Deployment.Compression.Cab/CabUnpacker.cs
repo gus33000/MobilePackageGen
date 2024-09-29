@@ -1,8 +1,8 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the Microsoft Reciprocal License. See LICENSE.TXT file in the project root for full license information.
 
-using System.Text;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Microsoft.Deployment.Compression.Cab
 {

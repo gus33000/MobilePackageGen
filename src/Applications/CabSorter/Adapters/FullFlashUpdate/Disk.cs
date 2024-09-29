@@ -1,6 +1,6 @@
-﻿using DiscUtils.Partitions;
+﻿using DiscUtils;
+using DiscUtils.Partitions;
 using DiscUtils.Streams;
-using DiscUtils;
 using Img2Ffu.Reader;
 
 namespace MobilePackageGen.Adapters.FullFlashUpdate

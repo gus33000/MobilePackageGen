@@ -1,8 +1,8 @@
-﻿using DiscUtils.Partitions;
+﻿using DiscUtils;
+using DiscUtils.Partitions;
 using DiscUtils.Streams;
-using DiscUtils;
-using StorageSpace;
 using DiscUtils.Wim;
+using StorageSpace;
 
 namespace MobilePackageGen.Adapters
 {

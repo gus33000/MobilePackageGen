@@ -1,9 +1,9 @@
-﻿using System.Xml.Serialization;
-using Microsoft.Deployment.Compression.Cab;
-using DiscUtils;
+﻿using DiscUtils;
 using Microsoft.Deployment.Compression;
+using Microsoft.Deployment.Compression.Cab;
 using MobilePackageGen.GZip;
 using System.Runtime.InteropServices;
+using System.Xml.Serialization;
 
 namespace MobilePackageGen
 {

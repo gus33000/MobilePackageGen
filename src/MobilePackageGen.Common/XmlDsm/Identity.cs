@@ -6,12 +6,24 @@ namespace MobilePackageGen.XmlDsm
     public class Identity
     {
         [XmlElement(ElementName = "Owner", Namespace = "http://schemas.microsoft.com/embedded/2004/10/ImageUpdate")]
-        public string Owner { get; set; }
+        public string Owner
+        {
+            get; set;
+        }
         [XmlElement(ElementName = "Component", Namespace = "http://schemas.microsoft.com/embedded/2004/10/ImageUpdate")]
-        public string Component { get; set; }
+        public string Component
+        {
+            get; set;
+        }
         [XmlElement(ElementName = "SubComponent", Namespace = "http://schemas.microsoft.com/embedded/2004/10/ImageUpdate")]
-        public string SubComponent { get; set; }
+        public string SubComponent
+        {
+            get; set;
+        }
         [XmlElement(ElementName = "Version", Namespace = "http://schemas.microsoft.com/embedded/2004/10/ImageUpdate")]
-        public Version Version { get; set; }
+        public Version Version
+        {
+            get; set;
+        }
     }
 }
