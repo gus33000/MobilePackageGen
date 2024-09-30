@@ -1,6 +1,4 @@
-﻿using MobilePackageGen.Adapters;
-
-namespace MobilePackageGen
+﻿namespace MobilePackageGen
 {
     internal class Program
     {
@@ -20,53 +18,13 @@ Version: 1.0.6.0
             string[] inputArgs = args[..^1];
             string outputFolder = args[^1];
 
-            Console.WriteLine("Getting Disks...");
+            IEnumerable<IDisk> disks = DiskLoader.LoadDisks(inputArgs);
 
-            List<IDisk> disks = [];
-
-            foreach (string inputArg in inputArgs)
-            {
-                if (Directory.Exists(inputArg))
-                {
-                    if (Directory.Exists(Path.Combine(inputArg, @"Windows\Servicing\Packages")) || Directory.Exists(Path.Combine(inputArg, @"Windows\Packages\DsmFiles")))
-                    {
-                        disks.Add(new Adapters.RealFileSystem.Disk(inputArg));
-                    }
-                    else
-                    {
-                        string[] files = Directory.EnumerateFiles(inputArg).ToArray();
-
-                        foreach (string file in files)
-                        {
-                            IDisk? disk = LoadFile(file);
-                            if (disk != null)
-                            {
-                                disks.Add(disk);
-                            }
-                        }
-                    }
-                }
-                else if (File.Exists(inputArg))
-                {
-                    IDisk? disk = LoadFile(inputArg);
-                    if (disk != null)
-                    {
-                        disks.Add(disk);
-                    }
-                }
-            }
-
-            if (disks.Count == 0)
+            if (disks.Count() == 0)
             {
                 PrintHelp();
                 return;
             }
-
-            Console.WriteLine("Getting Update OS Disks...");
-
-            disks.AddRange(DiskCommon.GetUpdateOSDisks(disks));
-
-            DiskCommon.PrintDiskInfo(disks);
 
             BuildMetadataHandler.GetOEMInput(disks, outputFolder);
             UpdateHistory.UpdateHistory? updateHistory = BuildMetadataHandler.GetUpdateHistory(disks);
@@ -77,42 +35,6 @@ Version: 1.0.6.0
             SPKGBuilder.BuildSPKG(disks, outputFolder, updateHistory);
 
             Console.WriteLine("The operation completed successfully.");
-        }
-
-        private static IDisk? LoadFile(string file)
-        {
-            string extension = Path.GetExtension(file);
-            switch (extension.ToLowerInvariant())
-            {
-                case ".wim":
-                    {
-                        return new Adapters.Wim.Disk(file);
-                    }
-                case ".ffu":
-                    {
-                        return new Adapters.FullFlashUpdate.Disk(file);
-                    }
-                case ".vhd":
-                    {
-                        return new Adapters.Vhdx.Disk(file);
-                    }
-                case ".vhdx":
-                    {
-                        return new Adapters.Vhdx.Disk(file);
-                    }
-                case ".img":
-                    {
-                        return new Adapters.RawDisk.Disk(File.OpenRead(file));
-                    }
-                case ".bin":
-                    {
-                        return new Adapters.RawDisk.Disk(File.OpenRead(file));
-                    }
-                default:
-                    {
-                        return null;
-                    }
-            }
         }
 
         private static void PrintHelp()

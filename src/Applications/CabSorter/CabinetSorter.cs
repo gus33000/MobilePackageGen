@@ -176,7 +176,7 @@ namespace CabSorter
             }
         }
 
-        public static void SortCabinets(List<IDisk> disks, string destination_path)
+        public static void SortCabinets(IEnumerable<IDisk> disks, string destination_path)
         {
             foreach (IDisk disk in disks)
             {

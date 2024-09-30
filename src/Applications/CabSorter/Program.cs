@@ -21,94 +21,17 @@ Version: 1.0.6.0
             string[] inputArgs = args[..^1];
             string outputFolder = args[^1];
 
-            Console.WriteLine("Getting Disks...");
+            IEnumerable<IDisk> disks = DiskLoader.LoadDisks(inputArgs);
 
-            List<IDisk> disks = [];
-
-            foreach (string inputArg in inputArgs)
-            {
-                if (Directory.Exists(inputArg))
-                {
-                    if (Directory.Exists(Path.Combine(inputArg, @"Windows\Servicing\Packages")) || Directory.Exists(Path.Combine(inputArg, @"Windows\Packages\DsmFiles")))
-                    {
-                        disks.Add(new MobilePackageGen.Adapters.RealFileSystem.Disk(inputArg));
-                    }
-                    else
-                    {
-                        string[] files = Directory.EnumerateFiles(inputArg).ToArray();
-
-                        foreach (string file in files)
-                        {
-                            IDisk? disk = LoadFile(file);
-                            if (disk != null)
-                            {
-                                disks.Add(disk);
-                            }
-                        }
-                    }
-                }
-                else if (File.Exists(inputArg))
-                {
-                    IDisk? disk = LoadFile(inputArg);
-                    if (disk != null)
-                    {
-                        disks.Add(disk);
-                    }
-                }
-            }
-
-            if (disks.Count == 0)
+            if (disks.Count() == 0)
             {
                 PrintHelp();
                 return;
             }
 
-
-            Console.WriteLine("Getting Update OS Disks...");
-
-            disks.AddRange(DiskCommon.GetUpdateOSDisks(disks));
-
-            DiskCommon.PrintDiskInfo(disks);
-
             CabinetSorter.SortCabinets(disks, outputFolder);
 
             Console.WriteLine("The operation completed successfully.");
-        }
-
-        private static IDisk? LoadFile(string file)
-        {
-            string extension = Path.GetExtension(file);
-            switch (extension.ToLowerInvariant())
-            {
-                case ".wim":
-                    {
-                        return new MobilePackageGen.Adapters.Wim.Disk(file);
-                    }
-                case ".ffu":
-                    {
-                        return new MobilePackageGen.Adapters.FullFlashUpdate.Disk(file);
-                    }
-                case ".vhd":
-                    {
-                        return new MobilePackageGen.Adapters.Vhdx.Disk(file);
-                    }
-                case ".vhdx":
-                    {
-                        return new MobilePackageGen.Adapters.Vhdx.Disk(file);
-                    }
-                case ".img":
-                    {
-                        return new MobilePackageGen.Adapters.RawDisk.Disk(File.OpenRead(file));
-                    }
-                case ".bin":
-                    {
-                        return new MobilePackageGen.Adapters.RawDisk.Disk(File.OpenRead(file));
-                    }
-                default:
-                    {
-                        return null;
-                    }
-            }
         }
 
         private static void PrintHelp()

@@ -13,7 +13,7 @@ namespace MobilePackageGen
             return $"{cbs.AssemblyIdentity.Name}~{cbs.AssemblyIdentity.PublicKeyToken}~{cbs.AssemblyIdentity.ProcessorArchitecture}~{(cbs.AssemblyIdentity.Language == "neutral" ? "" : cbs.AssemblyIdentity.Language)}~{cbs.AssemblyIdentity.Version}";
         }
 
-        private static List<CabinetFileInfo> GetCabinetFileInfoForCbsPackage(XmlMum.Assembly cbs, IPartition partition, List<IDisk> disks)
+        private static IEnumerable<CabinetFileInfo> GetCabinetFileInfoForCbsPackage(XmlMum.Assembly cbs, IPartition partition, IEnumerable<IDisk> disks)
         {
             List<CabinetFileInfo> fileMappings = [];
 
@@ -262,7 +262,7 @@ namespace MobilePackageGen
             return fileMappings;
         }
 
-        public static void BuildCBS(List<IDisk> disks, string destination_path, UpdateHistory.UpdateHistory? updateHistory)
+        public static void BuildCBS(IEnumerable<IDisk> disks, string destination_path, UpdateHistory.UpdateHistory? updateHistory)
         {
             Logging.Log();
             Logging.Log("Building CBS Cabinet Files...");
@@ -277,7 +277,7 @@ namespace MobilePackageGen
             TempManager.CleanupTempFiles();
         }
 
-        private static List<IPartition> GetPartitionsWithServicing(List<IDisk> disks)
+        private static IEnumerable<IPartition> GetPartitionsWithServicing(IEnumerable<IDisk> disks)
         {
             List<IPartition> fileSystemsWithServicing = [];
 
@@ -307,11 +307,11 @@ namespace MobilePackageGen
             return fileSystemsWithServicing;
         }
 
-        private static int GetPackageCount(List<IDisk> disks)
+        private static int GetPackageCount(IEnumerable<IDisk> disks)
         {
             int count = 0;
 
-            List<IPartition> partitionsWithCbsServicing = GetPartitionsWithServicing(disks);
+            IEnumerable<IPartition> partitionsWithCbsServicing = GetPartitionsWithServicing(disks);
 
             foreach (IPartition partition in partitionsWithCbsServicing)
             {
@@ -325,11 +325,11 @@ namespace MobilePackageGen
             return count;
         }
 
-        private static void BuildCabinets(List<IDisk> disks, string outputPath, UpdateHistory.UpdateHistory? updateHistory)
+        private static void BuildCabinets(IEnumerable<IDisk> disks, string outputPath, UpdateHistory.UpdateHistory? updateHistory)
         {
             int packagesCount = GetPackageCount(disks);
 
-            List<IPartition> partitionsWithCbsServicing = GetPartitionsWithServicing(disks);
+            IEnumerable<IPartition> partitionsWithCbsServicing = GetPartitionsWithServicing(disks);
 
             int i = 0;
 
@@ -409,7 +409,7 @@ namespace MobilePackageGen
 
                         if (!File.Exists(cabFile))
                         {
-                            List<CabinetFileInfo> fileMappings = GetCabinetFileInfoForCbsPackage(cbs, partition, disks);
+                            IEnumerable<CabinetFileInfo> fileMappings = GetCabinetFileInfoForCbsPackage(cbs, partition, disks);
 
                             uint oldPercentage = uint.MaxValue;
                             uint oldFilePercentage = uint.MaxValue;
@@ -418,7 +418,7 @@ namespace MobilePackageGen
                             // Cab Creation is only supported on Windows
                             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                             {
-                                if (fileMappings.Count > 0)
+                                if (fileMappings.Count() > 0)
                                 {
                                     if (Path.GetDirectoryName(cabFile) is string directory && !Directory.Exists(directory))
                                     {

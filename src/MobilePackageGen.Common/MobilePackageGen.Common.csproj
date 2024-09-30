@@ -9,20 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="RawDiskLib" Version="0.2.1" />
-    <PackageReference Include="LTRData.DiscUtils.Vhd" Version="1.0.47" />
-    <PackageReference Include="LTRData.DiscUtils.Vhdx" Version="1.0.47" />
-    <PackageReference Include="LTRData.DiscUtils.Wim" Version="1.0.47" />
-    <PackageReference Include="System.Net.Http" Version="4.3.4" />
-    <PackageReference Include="System.Private.Uri" Version="4.3.2" />
-    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Archives.DiscUtils\Archives.DiscUtils.csproj" />
     <ProjectReference Include="..\Microsoft.Deployment.Compression.Cab\Microsoft.Deployment.Compression.Cab.csproj" />
-    <ProjectReference Include="..\..\thirdparty\Img2Ffu\Img2Ffu.Library\Img2Ffu.Library.csproj" />
-    <ProjectReference Include="..\..\thirdparty\StorageSpace\StorageSpace\StorageSpace.csproj" />
     <ProjectReference Include="..\MobilePackageGen.Adapters\MobilePackageGen.Adapters.csproj" />
   </ItemGroup>
 

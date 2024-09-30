@@ -4,7 +4,7 @@ namespace MobilePackageGen
 {
     public static class BuildMetadataHandler
     {
-        public static UpdateHistory.UpdateHistory? GetUpdateHistory(List<IDisk> disks)
+        public static UpdateHistory.UpdateHistory? GetUpdateHistory(IEnumerable<IDisk> disks)
         {
             foreach (IDisk disk in disks)
             {
@@ -54,7 +54,7 @@ namespace MobilePackageGen
             return null;
         }
 
-        public static void GetOEMInput(List<IDisk> disks, string destination_path)
+        public static void GetOEMInput(IEnumerable<IDisk> disks, string destination_path)
         {
             foreach (IDisk disk in disks)
             {
@@ -94,7 +94,7 @@ namespace MobilePackageGen
             }
         }
 
-        public static void GetAdditionalContent(List<IDisk> disks)
+        public static void GetAdditionalContent(IEnumerable<IDisk> disks)
         {
             foreach (IDisk disk in disks)
             {
