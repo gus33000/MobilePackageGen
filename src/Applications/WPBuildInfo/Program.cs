@@ -1,14 +1,13 @@
 ﻿using MobilePackageGen;
-using MobilePackageGen.Adapters;
 
-namespace CabSorter
+namespace WPBuildInfo
 {
     internal class Program
     {
-        private static void Main(string[] args)
+        static void Main(string[] args)
         {
             Console.WriteLine(@"
-Cabinet Sorter Tool
+Windows Phone Build Info Tool
 Version: 1.0.6.0
 ");
 
@@ -29,7 +28,7 @@ Version: 1.0.6.0
                 return;
             }
 
-            CabinetSorter.SortCabinets(disks, outputFolder);
+
 
             Console.WriteLine("The operation completed successfully.");
         }

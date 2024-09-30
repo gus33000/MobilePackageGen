@@ -20,7 +20,7 @@ Version: 1.0.6.0
 
             IEnumerable<IDisk> disks = DiskLoader.LoadDisks(inputArgs);
 
-            if (disks.Count() == 0)
+            if (!disks.Any())
             {
                 PrintHelp();
                 return;
