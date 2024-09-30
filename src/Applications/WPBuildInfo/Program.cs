@@ -1,4 +1,6 @@
-﻿using MobilePackageGen;
+﻿using DiscUtils;
+using MobilePackageGen;
+using System.Xml.Serialization;
 
 namespace WPBuildInfo
 {
@@ -11,16 +13,13 @@ Windows Phone Build Info Tool
 Version: 1.0.6.0
 ");
 
-            if (args.Length < 2)
+            if (args.Length < 1)
             {
                 PrintHelp();
                 return;
             }
 
-            string[] inputArgs = args[..^1];
-            string outputFolder = args[^1];
-
-            IEnumerable<IDisk> disks = DiskLoader.LoadDisks(inputArgs);
+            IEnumerable<IDisk> disks = DiskLoader.LoadDisks(args);
 
             if (!disks.Any())
             {
@@ -28,9 +27,54 @@ Version: 1.0.6.0
                 return;
             }
 
+            Logging.Log();
 
+            foreach (IDisk disk in disks)
+            {
+                foreach (IPartition partition in disk.Partitions)
+                {
+                    if (partition.FileSystem is IFileSystem fileSystem)
+                    {
+                        try
+                        {
+                            if (fileSystem.FileExists(@"Windows\System32\buildinfo.xml"))
+                            {
+                                using DiscUtils.Streams.SparseStream xmlstrm = fileSystem.OpenFile(@"Windows\System32\buildinfo.xml", FileMode.Open, FileAccess.Read);
+
+                                BuildInfo.Buildinformation target = GetBuildInfoXml(xmlstrm);
+
+                                string buildString = $"{target.Majorversion}.{target.Minorversion}.{target.Qfelevel}.XXX.{target.Releaselabel}({target.Builder}).{target.Buildtime}";
+
+                                Logging.Log($"WP ({partition.Name}): {buildString}");
+
+                                if (!string.IsNullOrEmpty(target.Ntrazzlebuildnumber))
+                                {
+                                    string ntVersionString = $"{target.Ntrazzlemajorversion}.{target.Ntrazzleminorversion}.{target.Ntrazzlebuildnumber}.{target.Ntrazzlerevisionnumber} ({target.Releaselabel.ToLower()}.{target.Buildtime[2..]})";
+
+                                    Logging.Log($"NT ({partition.Name}): {ntVersionString}");
+                                }
+                            }
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+                }
+            }
 
             Console.WriteLine("The operation completed successfully.");
+        }
+
+        public static BuildInfo.Buildinformation GetBuildInfoXml(Stream stream)
+        {
+            stream.Seek(0, SeekOrigin.Begin);
+
+            XmlSerializer serializer = new(typeof(BuildInfo.Buildinformation));
+
+            BuildInfo.Buildinformation package = (BuildInfo.Buildinformation)serializer.Deserialize(stream)!;
+
+            return package;
         }
 
         private static void PrintHelp()

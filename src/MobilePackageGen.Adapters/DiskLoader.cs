@@ -6,7 +6,7 @@ namespace MobilePackageGen
     {
         public static IEnumerable<IDisk> LoadDisks(string[] inputArgs)
         {
-            Console.WriteLine("Getting Disks...");
+            Logging.Log("Getting Disks...");
 
             List<IDisk> disks = [];
 
@@ -47,7 +47,7 @@ namespace MobilePackageGen
                 return disks;
             }
 
-            Console.WriteLine("Getting Update OS Disks...");
+            Logging.Log("Getting Update OS Disks...");
 
             disks.AddRange(DiskCommon.GetUpdateOSDisks(disks));
 
