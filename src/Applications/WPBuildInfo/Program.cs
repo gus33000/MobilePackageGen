@@ -142,7 +142,7 @@ Version: 1.0.6.0
                                             dsm = (MobilePackageGen.XmlDsm.Package)serializer.Deserialize(stream)!;
                                         }
 
-                                        Logging.Log($"{partition.Name},{GetSPKGComponentName(dsm)},{dsm.Identity.Version.Major}.{dsm.Identity.Version.Minor}.{dsm.Identity.Version.Build}.{dsm.Identity.Version.QFE}");
+                                        Logging.Log($"{partition.Name},{GetSPKGComponentName(dsm)},{dsm.Identity.Version.Major}.{dsm.Identity.Version.Minor}.{dsm.Identity.Version.QFE}.{dsm.Identity.Version.Build}");
                                     }
                                     catch
                                     {
