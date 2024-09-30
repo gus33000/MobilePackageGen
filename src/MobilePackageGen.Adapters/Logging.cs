@@ -21,7 +21,7 @@
  */
 namespace MobilePackageGen
 {
-    internal static class Logging
+    public static class Logging
     {
         private static readonly object lockObj = new();
 

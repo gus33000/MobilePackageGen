@@ -20,10 +20,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Archives.DiscUtils\Archives.DiscUtils.csproj" />
-    <ProjectReference Include="..\Microsoft.Deployment.Compression.Cab\Microsoft.Deployment.Compression.Cab.csproj" />
     <ProjectReference Include="..\..\thirdparty\Img2Ffu\Img2Ffu.Library\Img2Ffu.Library.csproj" />
     <ProjectReference Include="..\..\thirdparty\StorageSpace\StorageSpace\StorageSpace.csproj" />
-    <ProjectReference Include="..\MobilePackageGen.Adapters\MobilePackageGen.Adapters.csproj" />
   </ItemGroup>
 
 </Project>
