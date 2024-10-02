@@ -66,8 +66,8 @@ namespace MobilePackageGen
                                                         .Replace("$(runtime.system32)", @"windows\system32")
                                                         .Replace("$(runtime.wbem)", @"windows\system32\wbem")
                                                         .Replace("$(runtime.drivers)", @"windows\system32\drivers")
-                                                        .Replace("$(runtime.programfiles)", "Program Files");
-                                                        .Replace("$(runtime.programdata)", "ProgramData");
+                                                        .Replace("$(runtime.programfiles)", "Program Files")
+                                                        .Replace("$(runtime.programdata)", "ProgramData")
                                                         .Replace("$(runtime.startmenu)", @"ProgramData\Microsoft\Windows\Start Menu");
 
                     if (cbs.AssemblyIdentity.ProcessorArchitecture.Equals("arm64.arm"))
