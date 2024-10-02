@@ -80,7 +80,9 @@ namespace MobilePackageGen
                                                         .Replace("$(runtime.system32)", @"windows\sysarm32")
                                                         .Replace("$(runtime.wbem)", @"windows\sysarm32\wbem")
                                                         .Replace("$(runtime.drivers)", @"windows\sysarm32\drivers")
-                                                        .Replace("$(runtime.programfiles)", "Program Files (Arm)");
+                                                        .Replace("$(runtime.programfiles)", "Program Files (Arm)")
+                                                        .Replace("$(runtime.programdata)", "ProgramData")
+                                                        .Replace("$(runtime.startmenu)", @"ProgramData\Microsoft\Windows\Start Menu");
                     }
 
                     if (cbs.AssemblyIdentity.ProcessorArchitecture.Equals("arm64.x86"))
@@ -93,7 +95,9 @@ namespace MobilePackageGen
                                                         .Replace("$(runtime.system32)", @"windows\syswow64")
                                                         .Replace("$(runtime.wbem)", @"windows\syswow64\wbem")
                                                         .Replace("$(runtime.drivers)", @"windows\syswow64\drivers")
-                                                        .Replace("$(runtime.programfiles)", "Program Files (x86)");
+                                                        .Replace("$(runtime.programfiles)", "Program Files (x86)")
+                                                        .Replace("$(runtime.programdata)", "ProgramData")
+                                                        .Replace("$(runtime.startmenu)", @"ProgramData\Microsoft\Windows\Start Menu");
                     }
 
                     // Prevent getting files from root of this program
