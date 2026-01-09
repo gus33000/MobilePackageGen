@@ -82,6 +82,11 @@ namespace CbsCatVerifier
 
             List<string> checksums = CatalogManager.ReadCatalogFile(Path.Combine(tempDirectory, "update.cat")).Where(x => x.Length == 64).ToList();
 
+            if (checksums.Count == 0)
+            {
+                checksums = CatalogManager.ReadCatalogFile(Path.Combine(tempDirectory, "content.cat")).Where(x => x.Length == 64).ToList();
+            }
+            
             /*Console.WriteLine($"Checksums from catalog file: (SHA256) ({checksums.Count})");
             Console.WriteLine();
 
@@ -109,7 +114,7 @@ namespace CbsCatVerifier
                     Console.Write($"\r{GetDISMLikeProgressBar(newPercentage)}");
                 }
 
-                if (file.FileName.Equals("update.cat", StringComparison.InvariantCultureIgnoreCase))
+                if (file.FileName.Equals("update.cat", StringComparison.InvariantCultureIgnoreCase)|| file.FileName.Equals("content.cat", StringComparison.InvariantCultureIgnoreCase))
                 {
                     continue;
                 }
@@ -278,6 +283,12 @@ namespace CbsCatVerifier
 
             List<string> checksums = CatalogManager.ReadCatalogFile(inputCat).Where(x => x.Length == 64).ToList();
 
+            if (checksums.Count == 0)
+            {
+                inputCat = Path.Combine(packageFolder, "content.cat");
+                checksums = CatalogManager.ReadCatalogFile(inputCat).Where(x => x.Length == 64).ToList();
+            }
+            
             Console.WriteLine($"Checksums from catalog file: (SHA256) ({checksums.Count})");
             Console.WriteLine();
 
@@ -292,7 +303,7 @@ namespace CbsCatVerifier
             {
                 string friendlyFileName = file.Replace(packageFolder + Path.DirectorySeparatorChar, "", StringComparison.InvariantCultureIgnoreCase);
 
-                if (friendlyFileName.Equals("update.cat", StringComparison.InvariantCultureIgnoreCase))
+                if (friendlyFileName.Equals("update.cat", StringComparison.InvariantCultureIgnoreCase) || friendlyFileName.Equals("content.cat", StringComparison.InvariantCultureIgnoreCase))
                 {
                     continue;
                 }
